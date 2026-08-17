@@ -63,6 +63,7 @@ NEW_HDR = """  <div class="hdr-right">
     <button class="syncchip" id="syncchip" data-s="local" type="button">
       <span class="sdot"></span><span class="stxt">Local only</span></button>
     <button class="btn" id="refresh" type="button">Refresh</button>
+    <button class="btn" id="density" type="button">Compact</button>
     <button class="btn" id="theme" type="button">Dark</button>
     <button class="btn" id="csv" type="button">Export CSV</button>
     <button class="btn primary hideinapp" id="install" type="button" style="display:none">Install app</button>
@@ -101,6 +102,55 @@ OLD_F2 = '<select id="ftype2"><option value="">All page types</option></select>'
 NEW_F2 = OLD_F2 + '\n    <select id="fann2"><option value="">Any of my notes</option></select>'
 assert OLD_F2 in head
 head = head.replace(OLD_F2, NEW_F2, 1)
+
+
+# ------------------------------------------------------ density + tiers ----
+OLD_TIER = """<select id="ftier2"><option value="">All tiers</option><option value="transactional">Transactional</option>
+      <option value="core">Core</option><option value="fanout">Fan-out</option><option value="utility">Site / utility</option></select>"""
+NEW_TIER = """<select id="ftier2"><option value="">All tiers</option><option value="transactional">Transactional</option>
+      <option value="core">Pillar</option><option value="fanout">Fan-out</option><option value="utility">Site / utility</option>
+      <option value="redirect">Redirect</option></select>"""
+assert OLD_TIER in head
+head = head.replace(OLD_TIER, NEW_TIER, 1)
+
+# The old flag chip-row is gone: those flags are labels now, and the "Any of my
+# notes" select filters by them alongside status. Removing it also takes a dense
+# band of colour off the top of the topic map.
+i = head.index('<div class="chipfilter" id="fflags">')
+j = head.index('</div>', head.index('</div>', i) - 0)
+# walk to the matching close: the block contains only <button> children
+j = head.index('    </div>', i) + len('    </div>')
+head = head[:i] + ('<div class="maphint">Drag any page onto another cluster column, or onto a '
+                   '<b>Transactional</b> / <b>Pillar</b> / <b>Fan-out</b> band, to re-classify it. '
+                   'Your moves stick through every data refresh.</div>') + head[j:]
+
+# ---------------------------------------------------- de-sheet the copy ----
+REPL = [
+  ('Marked \u201cReview\u201d in your sheet <span class="cnt" id="n-rev">',
+   'Marked \u201cReview\u201d <span class="cnt" id="n-rev">'),
+  ('Yellow-highlighted topics, ordered by keyword count \u2014 the ones with volume are worth doing first.',
+   'Imported once from your keyword workbook, ordered by keyword count \u2014 the ones with volume are worth doing first. '
+   'Review is an ordinary label now: switch it off on a page, rename it, or remove it from the library.'),
+  ("Pink-highlighted or struck-through. Check keyword counts before deleting \u2014 redirect, don't drop.",
+   "Also imported from the workbook. Check keyword counts before deleting \u2014 redirect, don't drop."),
+  ('Live pages not in your sheet <span class="cnt" id="n-un">',
+   'Never tracked in the original workbook <span class="cnt" id="n-un">'),
+  ("Ranked by keyword count. The top of this list is untracked content that's already earning traffic.",
+   "Ranked by keyword count. The top of this list is content that was never in the workbook and is already earning traffic."),
+  ('Where my tier disagrees with yours <span class="cnt" id="n-mm">',
+   'Pages you\u2019ve moved <span class="cnt" id="n-mm">'),
+  ('Marked \u201cTO BE CREATED\u201d in your sheet.', 'Marked \u201cTO BE CREATED\u201d in the workbook.'),
+]
+for a, b in REPL:
+    assert a in head, a[:50]
+    head = head.replace(a, b, 1)
+
+OLD_WORKBAN = ('Imported from your keyword workbook \u2014 the <b>Review</b> / <b>Remove</b> / <b>Calculator</b>')
+assert OLD_WORKBAN in head
+head = head.replace(
+  OLD_WORKBAN,
+  'A one-time import from your keyword workbook \u2014 the <b>Review</b> / <b>Remove</b> / <b>Calculator</b>', 1)
+
 
 # ------------------------------------------------- inject new section -------
 # sections go inside .wrap, just before the footer; overlays go after </div>.

@@ -173,8 +173,51 @@ const remote5 = JSON.parse(repoFile.content);
 ok('deleted comment stays deleted', !remote5.pages[pathB].comments.some(c => c.id === delId),
    remote5.pages[pathB].comments.length + ' left');
 
+/* placement + label overrides merge per field across devices */
+await a.evaluate(() => closeDrawer());
+const shared = await a.evaluate(() => {
+  const p = P.find(x => x.tier === 'fanout' && x.cat === 'DST');
+  openDrawer(p.path); return p.path;
+});
+await a.waitForSelector('#drawer.on');
+await a.selectOption('#dcluster', 'Opportunity Zones');
+await a.waitForTimeout(3200);
+ok('device A cluster move pushed',
+   JSON.parse(repoFile.content).pages[shared]?.cluster === 'Opportunity Zones',
+   JSON.stringify(JSON.parse(repoFile.content).pages[shared]?.cluster));
+
+/* B, which has just pulled, changes the TIER of the same page */
+await b.reload({ waitUntil: 'networkidle' });
+await b.waitForSelector('#boot.off', { state: 'attached' });
+await b.waitForTimeout(1800);
+await b.evaluate(t => openDrawer(t), shared);
+await b.waitForSelector('#drawer.on');
+await b.selectOption('#dtier', 'transactional');
+await b.waitForTimeout(3200);
+const both = JSON.parse(repoFile.content).pages[shared];
+ok('cluster from A and tier from B both survive',
+   both.cluster === 'Opportunity Zones' && both.tier === 'transactional',
+   `${both.cluster} / ${both.tier}`);
+
+/* A switches a build label off; B renames a label. Neither should clobber. */
+await a.evaluate(t => openDrawer(t), shared);
+await a.waitForSelector('#drawer.on');
+const anyAuto = await a.locator('#dlabels button', { has: a.locator('.auto') }).count();
+if (anyAuto) { await a.locator('#dlabels button', { has: a.locator('.auto') }).first().click(); }
+await a.waitForTimeout(3200);
+await b.evaluate(() => { const l = ANN.labels.find(x => x.id === 'rewrite'); l.name = 'Rewrite (B)'; l.u = new Date().toISOString(); touchLibrary(); });
+await b.waitForTimeout(3200);
+const fin = JSON.parse(repoFile.content);
+ok('label switch-off and library rename both survive',
+   (!anyAuto || (fin.pages[shared].offFlags || []).length === 1) &&
+   fin.labels.some(l => l.name === 'Rewrite (B)'),
+   `offFlags=${JSON.stringify(fin.pages[shared].offFlags)} renamed=${fin.labels.some(l => l.name === 'Rewrite (B)')}`);
+ok('placement not lost by the label round-trip',
+   fin.pages[shared].cluster === 'Opportunity Zones' && fin.pages[shared].tier === 'transactional',
+   `${fin.pages[shared].cluster} / ${fin.pages[shared].tier}`);
+await a.evaluate(() => closeDrawer());
+
 /* disconnect leaves local data intact */
-await a.click('#dclose');
 await a.click('#syncchip'); await a.click('#sydisconnect'); await a.waitForTimeout(500);
 ok('disconnect returns to local', (await a.locator('#syncchip').getAttribute('data-s')) === 'local');
 await a.locator('nav.tabs button[data-tab="notes"]').click();

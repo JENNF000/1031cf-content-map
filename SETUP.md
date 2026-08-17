@@ -1,5 +1,25 @@
 # Setting this up — about 15 minutes, no command line
 
+> ## Already done steps 1–4? Read this instead.
+>
+> To update to this version, unzip the new file and re-upload **everything except
+> `annotations.json`** to your repository:
+>
+> 1. Open your repo on GitHub → **Add file** → **Upload files**.
+> 2. Drag in the new `index.html`, `app.js`, `sw.js`, `README.md`, `SETUP.md`, and
+>    the `build` folder. GitHub replaces the old versions and leaves everything
+>    else alone.
+> 3. Commit. Then open the app — it will show *"A new version of the app is
+>    ready"* with a **Reload** button. Click it.
+>
+> **Never re-upload `annotations.json`.** That's the file that holds your labels
+> and comments. It isn't in this zip for exactly that reason.
+>
+> Anything you already labelled is kept — the app upgrades your notes in place.
+> Then carry on at **step 5** below to turn on sync.
+
+---
+
 You'll do four things: put the files on GitHub, turn on hosting, install the app,
 and connect sync so your notes follow you between devices.
 
@@ -119,18 +139,39 @@ of notes.
 
 ## Using it
 
-**To label or comment on a page:** click the small **✎** button on any page — in
-the topic map cells, the All-pages table, the consolidation groups, or your
-workflow lists. A panel slides in from the right with that page's metrics, a
-status, labels, a target keyword field, and a comment thread.
+**To label or comment on a page:** hover any page on the topic map and click the
+small **✎** that appears in its corner. It's also on every row of the All-pages
+table, the consolidation groups, and your workflow lists. A panel slides in from
+the right with that page's metrics, its placement, a status, labels, a target
+keyword field, and a comment thread.
+
+**To move a page:** drag it. Drop it on another cluster column to re-cluster it,
+or on a **Transactional** / **Pillar** / **Fan-out** band to re-tier it. Empty
+bands appear while you're dragging, so there's always somewhere to drop. On a
+phone — or if you'd rather not drag — use the **Placement** dropdowns in the
+panel. Either way the move sticks through every data refresh, a moved page is
+marked with a purple edge, and the panel offers **Reset to build default**.
 
 **Statuses** are single-choice: To do, In progress, Drafted, Published,
 Monitoring, Blocked, Won't do.
 
-**Labels** are multi-select and start with an SEO/AEO set — Rewrite, Refresh
-content, Consolidate, Title/meta, Add schema, AEO: direct answer, AEO: FAQ block,
-Internal links, E-E-A-T/author, Needs 301, Keep as-is, Priority. Type into
-**New label** to add your own; it joins the library and is available everywhere.
+**Labels** are one library — the ones the build works out for itself (Review,
+Remove, Consolidate, Slug fix, Underperformer, Untracked, No keywords, 301
+redirect) sit alongside the SEO/AEO set (Rewrite, Refresh content, Title/meta,
+Add schema, AEO: direct answer, AEO: FAQ block, Internal links, E-E-A-T/author,
+Needs 301, Keep as-is, Priority). Build-applied ones are marked **auto** and draw
+as outlines; the ones you apply yourself draw solid, so you can tell at a glance
+which is which.
+
+Everything is editable. **Manage** (in the panel, or **Manage labels** on the My
+notes tab) lets you rename any label, change its colour, or remove it entirely —
+including the automatic ones. Removing takes it off every page and it stops
+appearing anywhere; **Restore default labels** brings them back. Switching an
+*auto* label off on a single page is remembered, so the next refresh can't turn
+it back on.
+
+**Compact** in the header strips the chips off the topic map when you want to see
+structure rather than detail.
 
 **Target keyword / prompt** is deliberately separate from the keyword the page
 currently ranks for — it's what you *intend* it to win, including AEO prompts.

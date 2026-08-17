@@ -131,7 +131,7 @@ ok('export contains notes', Object.keys(exp.pages).length === 2);
 // --- CSV export includes note columns
 const [dl2] = await Promise.all([page.waitForEvent('download'), page.click('#csv')]);
 const csv = fs.readFileSync(await dl2.path(), 'utf8');
-ok('CSV has note columns', csv.split('\n')[0].includes('note_status') && csv.includes('In progress'));
+ok('CSV has note columns', csv.split('\n')[0].includes('status') && csv.split('\n')[0].includes('moved_by_you') && csv.includes('In progress'));
 
 // --- other tabs render
 for (const t of ['attn', 'work', 'redir', 'slug', 'all', 'cov', 'src']) {

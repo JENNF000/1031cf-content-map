@@ -21,6 +21,26 @@ An installable web app (PWA) for tracking and organising every organic page on
 | `robots.txt` | Asks crawlers to stay away. This site is served from a public URL — see *Privacy* below. |
 | `build/` | Tooling. Not needed to use the app. |
 
+## What "yours" covers
+
+Four things live in `annotations.json` and survive every data refresh:
+
+- **Status** — one of To do / In progress / Drafted / Published / Monitoring /
+  Blocked / Won't do.
+- **Labels** — one library holding both the build-computed ones (Review,
+  Consolidate, Slug fix, Underperformer, Untracked, No keywords, 301 redirect)
+  and your own. Every entry can be renamed, recoloured or removed. Switching a
+  build-computed label off on a single page is recorded in that page's
+  `offFlags`, so the next refresh can't quietly turn it back on.
+- **Placement** — the cluster and tier you dragged a page into. `data.json` keeps
+  the build's classification untouched; `cluster` and `tier` in your annotations
+  override it, and the whole app reads `effCat()` / `effTier()` rather than the
+  raw fields.
+- **Comments** and a **target keyword**.
+
+Tier names in the interface are Transactional / **Pillar** / Fan-out. The
+underlying id for Pillar is still `core`, so no data migration was needed.
+
 ## The two halves, and why they never collide
 
 `data.json` is **machine-owned**. It is regenerated from scratch each refresh out
@@ -63,7 +83,7 @@ Only needed when the interface changes, not when the data does.
 
 ```bash
 python3 build/assemble.py     # writes index.html, app.js, sw.js, manifest, icons
-cd build && node test.mjs && node test-sync.mjs && node test-orphan.mjs
+cd build && node test.mjs && node test-v2.mjs && node test-sync.mjs && node test-orphan.mjs
 ```
 
 Sources live in `build/src/`: `store.js` (local store, annotation model, GitHub
@@ -78,9 +98,13 @@ rebuild automatically invalidates the old shell and the app offers a reload.
 The app stores everything in IndexedDB first, so it works with no network and no
 account. Connecting a GitHub token additionally mirrors `annotations.json` here.
 
-- **Merge is field-level.** Status, labels and target keyword each carry their own
-  timestamp. Adding a comment on your laptop cannot wipe a status you set on your
-  phone.
+- **Merge is field-level.** Status, labels, target keyword, cluster, tier and
+  `offFlags` each carry their own timestamp. Adding a comment on your laptop
+  cannot wipe a status you set on your phone, and re-clustering on one device
+  doesn't undo a re-tiering on the other.
+- **The label library merges per entry**, each resolving on its own `u` stamp, so
+  a rename propagates. Removals are recorded in `hidden[]` so a deleted label
+  doesn't reappear from the other device.
 - **Comments are unioned by id**, with tombstones — a deleted comment stays
   deleted and is never resurrected by a merge from another device.
 - **Conflicts retry.** A stale-SHA `409` re-reads, re-merges and pushes again.

@@ -446,6 +446,144 @@ footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--grid);color:v
 .notecard.gonecard{border-style:dashed;border-color:color-mix(in srgb,var(--critical) 35%,var(--grid))}
 .notecard.gonecard .nt{color:var(--ink-2)}
 
+/* =====================================================================
+   v2 — clearer tier bands, drag-to-reclassify, one kind of chip
+   ===================================================================== */
+
+/* ---- topic map: columns and tier bands ---- */
+.maphint{font-size:12px;color:var(--ink-2);line-height:1.6;flex-basis:100%;
+  background:var(--surface);border:1px solid var(--grid);border-radius:8px;padding:8px 12px}
+.maphint b{font-weight:650;color:var(--ink)}
+
+.matrix{gap:14px;padding-bottom:18px}
+.col{flex:0 0 300px;background:var(--plane);border:1px solid var(--grid);border-radius:12px;
+  overflow:visible;padding-bottom:6px}
+.col-h{padding:12px 14px 11px;border-bottom:1px solid var(--grid);background:var(--surface);
+  border-radius:12px 12px 0 0;position:relative}
+.col-h .nm{font-weight:650;font-size:13.5px;letter-spacing:-.01em}
+.col-h .mt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px}
+.col-h .dhint{display:none;font-size:11px;font-weight:600;color:var(--blue);margin-top:5px}
+body.dragging .col-h .dhint{display:block}
+
+.tiergroup{margin:10px 8px 0;border-radius:9px;background:var(--surface);
+  border:1px solid var(--grid);overflow:hidden;position:relative}
+.tiergroup.empty{display:none}
+body.dragging .tiergroup.empty{display:block}
+
+.tierlab{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;
+  padding:7px 11px 7px 13px;display:flex;align-items:center;justify-content:space-between;gap:6px;
+  color:var(--ink-2);background:var(--surface-2);border-bottom:1px solid var(--grid);
+  position:relative}
+.tierlab::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--t-fan)}
+.tierlab .tcount{font-weight:600;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+  background:var(--plane);border:1px solid var(--grid);border-radius:999px;padding:0 6px;line-height:16px}
+.tiergroup.transactional .tierlab{color:#0d7a55;background:color-mix(in srgb,var(--t-trans) 9%,var(--surface))}
+.tiergroup.transactional .tierlab::before{background:var(--t-trans)}
+.tiergroup.core .tierlab{color:var(--blue-600);background:color-mix(in srgb,var(--t-core) 9%,var(--surface))}
+.tiergroup.core .tierlab::before{background:var(--t-core)}
+.tiergroup.fanout .tierlab::before{background:var(--t-fan)}
+.tiergroup.redirect .tierlab::before{background:var(--good)}
+.tiergroup.redirect,.tiergroup.utility{opacity:.72}
+:root[data-theme="dark"] .tiergroup.transactional .tierlab{color:#4fd1a5}
+
+/* ---- cells ---- */
+.cell{display:block;padding:9px 12px 10px;border-top:1px solid var(--grid);position:relative}
+.cell:first-of-type{border-top:0}
+.cell:hover{background:var(--surface-2);text-decoration:none}
+.cell .ttl{font-size:12.5px;line-height:1.4;display:flex;gap:8px;align-items:baseline;
+  padding-right:22px}
+.cell .kw{font-size:11px}
+.bar{height:2px;margin-top:6px;opacity:.75}
+.cell .meta{margin-top:7px;gap:4px}
+.cell.moved{box-shadow:inset 2px 0 0 var(--ann-purple)}
+
+/* the ✎ sits out of the way until you want it */
+.cell .notebtn{position:absolute;top:7px;right:8px;border-color:transparent;background:transparent;
+  opacity:0;transition:opacity .12s;padding:1px 5px}
+.cell:hover .notebtn,.cell .notebtn.has{opacity:1}
+.cell .notebtn.has{border-color:var(--blue-200)}
+
+body[data-density="compact"] .cell{padding:6px 12px 7px}
+body[data-density="compact"] .cell .bar{margin-top:4px}
+
+/* ---- drag & drop ---- */
+.cell[draggable="true"]{cursor:grab}
+.cell.dragsrc{opacity:.35}
+body.dragging .cell{pointer-events:none}
+body.dragging .tiergroup,body.dragging .col-h{transition:box-shadow .12s,background .12s}
+.tiergroup.dropok,.col-h.dropok{box-shadow:0 0 0 2px var(--blue) inset;background:var(--blue-100)}
+.tiergroup.dropok .tierlab{background:transparent}
+.dropzone{padding:14px 12px;font-size:11.5px;color:var(--muted);font-style:italic;text-align:center}
+
+/* ---- one chip style everywhere ---- */
+.apill.st{font-weight:650}
+.movedot{color:var(--ann-purple);font-weight:700}
+
+/* ---- placement controls in the drawer ---- */
+.prow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.prow label{flex:0 0 58px;font-size:11px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted)}
+.prow select{flex:1;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--grid);
+  border-radius:7px;background:var(--plane);color:var(--ink)}
+.prow select:disabled{opacity:.55}
+.phint{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:2px}
+.linkbtn{border:0;background:none;color:var(--blue);font:inherit;font-size:11.5px;font-weight:650;
+  cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+.linkbtn:hover{color:var(--blue-600)}
+.slab .linkbtn{float:right;text-transform:none;letter-spacing:0}
+
+/* "auto" marker on build-applied labels */
+.auto{font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid currentColor;border-radius:3px;padding:0 3px;margin-left:5px;opacity:.6;
+  vertical-align:1px}
+
+/* ---- label manager ---- */
+.lablist{max-height:46vh;overflow-y:auto;margin:0 -4px;padding:0 4px}
+.labrow{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--grid)}
+.labrow:last-child{border-bottom:0}
+.labrow .swatch{width:18px;height:18px;border-radius:5px;border:1px solid var(--ring);cursor:pointer;
+  flex:none;padding:0}
+.labrow .swatch[data-c="amber"]{background:var(--ann-amber)}
+.labrow .swatch[data-c="green"]{background:var(--ann-green)}
+.labrow .swatch[data-c="blue"]{background:var(--ann-blue)}
+.labrow .swatch[data-c="red"]{background:var(--ann-red)}
+.labrow .swatch[data-c="purple"]{background:var(--ann-purple)}
+.labrow .swatch[data-c="teal"]{background:var(--ann-teal)}
+.labrow .swatch[data-c="slate"]{background:var(--ann-slate)}
+.labrow .swatch[data-c="pink"]{background:var(--ann-pink)}
+.labrow input[type="text"]{flex:1;font:inherit;font-size:13px;padding:5px 8px;border:1px solid transparent;
+  border-radius:6px;background:transparent;color:var(--ink);min-width:0}
+.labrow input[type="text"]:hover{border-color:var(--grid)}
+.labrow input[type="text"]:focus{outline:none;border-color:var(--blue);background:var(--plane)}
+.labrow .use{font-size:11px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.labrow .del{border:1px solid var(--grid);background:var(--surface);color:var(--ink-2);border-radius:6px;
+  font:inherit;font-size:11px;padding:3px 8px;cursor:pointer;flex:none}
+.labrow .del:hover{border-color:var(--critical);color:var(--critical)}
+
+/* ---- toast with an action ---- */
+.toast{display:flex;align-items:center;gap:12px}
+.toast .tact{border:0;background:none;color:var(--blue-200);font:inherit;font-size:12.5px;font-weight:700;
+  cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;flex:none}
+.toast .tact:hover{color:#fff}
+
+@media (max-width:720px){
+  .col{flex:0 0 min(300px,88vw)}
+  .maphint{font-size:11.5px}
+  .labrow{flex-wrap:wrap}
+  .labrow .use{order:4;flex:1}
+}
+
+/* build-applied labels sit back; the ones you applied yourself come forward */
+.apill.auto-l{background:transparent}
+.apill:not(.auto-l):not(.st){font-weight:700}
+
+/* modal fixes */
+.modal .mbox{position:relative}
+.rowbtns{display:flex;gap:7px;margin-top:8px;align-items:center}
+.modal .rowbtns input[type="text"]{flex:1;min-width:0}
+.modal .rowbtns .btn{flex:none}
+.lablist{border-top:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:2px 4px}
+
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 .wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 
@@ -464,6 +602,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     <button class="syncchip" id="syncchip" data-s="local" type="button">
       <span class="sdot"></span><span class="stxt">Local only</span></button>
     <button class="btn" id="refresh" type="button">Refresh</button>
+    <button class="btn" id="density" type="button">Compact</button>
     <button class="btn" id="theme" type="button">Dark</button>
     <button class="btn" id="csv" type="button">Export CSV</button>
     <button class="btn primary hideinapp" id="install" type="button" style="display:none">Install app</button>
@@ -499,17 +638,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     <input type="search" id="q" placeholder="Search slug, topic, or keyword…">
     <select id="fcat"><option value="">All topic clusters</option></select>
     <select id="fann"><option value="">Any of my notes</option></select>
-    <div class="chipfilter" id="fflags">
-      <button data-f="" aria-pressed="true">All pages</button>
-      <button data-f="review" aria-pressed="false"><span class="sw" style="background:#efdf7a"></span>Your “Review”</button>
-      <button data-f="remove" aria-pressed="false"><span class="sw" style="background:#e8adad"></span>Your “Remove”</button>
-      <button data-f="untracked" aria-pressed="false"><span class="sw" style="background:var(--muted)"></span>Not in your sheet</button>
-      <button data-f="consolidate" aria-pressed="false"><span class="sw" style="background:var(--critical)"></span>Consolidate</button>
-      <button data-f="slug" aria-pressed="false"><span class="sw" style="background:var(--warning)"></span>Slug fix</button>
-      <button data-f="underperform" aria-pressed="false"><span class="sw" style="background:var(--serious)"></span>Underperformer</button>
-      <button data-f="tiermismatch" aria-pressed="false"><span class="sw" style="background:var(--blue)"></span>Tier disagreement</button>
-      <button data-f="nokw" aria-pressed="false"><span class="sw" style="background:var(--axis)"></span>No keywords</button>
-    </div>
+    <div class="maphint">Drag any page onto another cluster column, or onto a <b>Transactional</b> / <b>Pillar</b> / <b>Fan-out</b> band, to re-classify it. Your moves stick through every data refresh.</div>
   </div>
   <div class="matrix" id="matrix"></div>
 </section>
@@ -525,7 +654,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 
 <section id="tab-work" class="hide">
   <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
-    <span>◆</span><div>Imported from your keyword workbook — the <b>Review</b> / <b>Remove</b> / <b>Calculator</b>
+    <span>◆</span><div>A one-time import from your keyword workbook — the <b>Review</b> / <b>Remove</b> / <b>Calculator</b>
     highlights from <i>URL Organizing</i>, and the pipeline from <i>Editorial Calendar</i>. Where your calendar shows
     a consolidation already published, I've retired that flag on the Needs attention tab and switched the
     <b>keep</b> page to the one you actually published.</div>
@@ -538,19 +667,19 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     <div id="caltbl"></div>
   </div>
   <div class="grid2">
-    <div class="card"><h3>Marked “Review” in your sheet <span class="cnt" id="n-rev"></span></h3>
-      <div class="kv">Yellow-highlighted topics, ordered by keyword count — the ones with volume are worth doing first.</div>
+    <div class="card"><h3>Marked “Review” <span class="cnt" id="n-rev"></span></h3>
+      <div class="kv">Imported once from your keyword workbook, ordered by keyword count — the ones with volume are worth doing first. Review is an ordinary label now: switch it off on a page, rename it, or remove it from the library.</div>
       <ul class="urls" id="revlist"></ul></div>
     <div class="card"><h3>Marked “Remove” <span class="cnt" id="n-rem"></span></h3>
-      <div class="kv">Pink-highlighted or struck-through. Check keyword counts before deleting — redirect, don't drop.</div>
+      <div class="kv">Also imported from the workbook. Check keyword counts before deleting — redirect, don't drop.</div>
       <ul class="urls" id="remlist"></ul>
       <h3 style="margin-top:16px">Pages you flagged to create</h3>
-      <div class="kv">Marked “TO BE CREATED” in your sheet.</div>
+      <div class="kv">Marked “TO BE CREATED” in the workbook.</div>
       <ul class="urls" id="tbclist"></ul></div>
-    <div class="card"><h3>Live pages not in your sheet <span class="cnt" id="n-un"></span></h3>
-      <div class="kv">Ranked by keyword count. The top of this list is untracked content that's already earning traffic.</div>
+    <div class="card"><h3>Never tracked in the original workbook <span class="cnt" id="n-un"></span></h3>
+      <div class="kv">Ranked by keyword count. The top of this list is content that was never in the workbook and is already earning traffic.</div>
       <ul class="urls" id="unlist"></ul></div>
-    <div class="card"><h3>Where my tier disagrees with yours <span class="cnt" id="n-mm"></span></h3>
+    <div class="card"><h3>Pages you’ve moved <span class="cnt" id="n-mm"></span></h3>
       <div class="kv" id="mmnote"></div>
       <ul class="urls" id="mmlist"></ul></div>
   </div>
@@ -586,7 +715,8 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     <input type="search" id="q2" placeholder="Search…">
     <select id="fcat2"><option value="">All clusters</option></select>
     <select id="ftier2"><option value="">All tiers</option><option value="transactional">Transactional</option>
-      <option value="core">Core</option><option value="fanout">Fan-out</option><option value="utility">Site / utility</option></select>
+      <option value="core">Pillar</option><option value="fanout">Fan-out</option><option value="utility">Site / utility</option>
+      <option value="redirect">Redirect</option></select>
     <select id="ftype2"><option value="">All page types</option></select>
     <select id="fann2"><option value="">Any of my notes</option></select>
   </div>
@@ -655,9 +785,9 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 
 <section id="tab-notes" class="hide">
   <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
-    <span>✎</span><div>Everything you've labelled or commented on, in one place. Labels and comments are yours —
-    they're keyed to the URL, so a data refresh updates the metrics underneath them without ever touching what
-    you wrote. Click any card to reopen it.</div>
+    <span>✎</span><div>Everything you've labelled, moved or commented on, in one place. It's all keyed to the URL,
+    so a data refresh updates the metrics underneath without ever touching what you wrote. Click any card to
+    reopen it.</div>
   </div>
   <div class="tiles" id="notetiles"></div>
   <div class="notesbar">
@@ -670,6 +800,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
       <option value="traffic">Most traffic</option>
       <option value="path">URL A–Z</option>
     </select>
+    <button class="btn" id="annlabels">Manage labels</button>
     <button class="btn" id="annexport">Export notes</button>
     <button class="btn" id="annimport">Import</button>
     <input type="file" id="annfile" accept="application/json" style="display:none">
@@ -701,18 +832,25 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     </div>
 
     <div class="sect">
+      <span class="slab">Placement</span>
+      <div id="dplacement"></div>
+    </div>
+
+    <div class="sect">
       <span class="slab">Status</span>
       <div class="statgrid" id="dstatus"></div>
     </div>
 
     <div class="sect">
-      <span class="slab">Labels</span>
+      <span class="slab">Labels
+        <button class="linkbtn" id="dmanage" type="button">Manage</button></span>
       <div class="labgrid" id="dlabels"></div>
       <div class="rowbtns">
         <input type="text" id="dnewlabel" placeholder="New label…" style="flex:1">
         <button class="btn" id="daddlabel">Add</button>
       </div>
-      <div class="hint">New labels are added to your library and available on every page.</div>
+      <div class="hint">Labels marked <span class="auto">auto</span> were applied by the build. Switch one off
+        here and it stays off through every refresh.</div>
     </div>
 
     <div class="sect">
@@ -735,16 +873,39 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 
     <div class="sect">
       <button class="btn" id="dclear" style="color:var(--critical);border-color:color-mix(in srgb,var(--critical) 35%,var(--grid))">
-        Clear all notes for this page</button>
+        Clear everything for this page</button>
     </div>
   </div>
 </aside>
+
+<!-- ============ label manager ============ -->
+<div class="modal" id="labelmodal">
+  <div class="mbox">
+    <button class="dclose" id="labclose" aria-label="Close" style="position:absolute;top:14px;right:16px">✕</button>
+    <h2>Labels</h2>
+    <p class="msub">One library for everything. The ones marked <b>auto</b> are applied by the build —
+      Review and Remove come from your workbook, the rest are computed from the SEMrush and crawl data.
+      Rename any of them, change a colour, or remove one entirely. Removing takes it off every page.</p>
+
+    <div id="lablist" class="lablist"></div>
+
+    <div class="rowbtns" style="margin-top:14px">
+      <input type="text" id="labnew" placeholder="Add a label…" style="flex:1">
+      <button class="btn" id="labnewbtn">Add</button>
+    </div>
+    <div class="hint" id="labhidden" style="margin-top:12px"></div>
+
+    <div class="macts">
+      <button class="btn primary" id="labdone">Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- ============ sync settings modal ============ -->
 <div class="modal" id="syncmodal">
   <div class="mbox">
     <h2>Sync settings</h2>
-    <p class="msub">Your labels and comments are always saved on this device first. Connecting a GitHub repo
+    <p class="msub">Your labels, comments and moves are always saved on this device first. Connecting a GitHub repo
       also pushes them to <code>annotations.json</code>, so your phone and laptop stay in step — and so the weekly
       rebuild can read what you've marked.</p>
 
@@ -788,6 +949,6 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   <div id="bootmsg">Loading content map…</div>
 </div>
 
-<script src="app.js?v=6b595119e1"></script>
+<script src="app.js?v=ddc4d94fa1"></script>
 </body>
 </html>

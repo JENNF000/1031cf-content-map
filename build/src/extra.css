@@ -218,3 +218,141 @@
 /* a page whose notes outlived the page itself */
 .notecard.gonecard{border-style:dashed;border-color:color-mix(in srgb,var(--critical) 35%,var(--grid))}
 .notecard.gonecard .nt{color:var(--ink-2)}
+
+/* =====================================================================
+   v2 — clearer tier bands, drag-to-reclassify, one kind of chip
+   ===================================================================== */
+
+/* ---- topic map: columns and tier bands ---- */
+.maphint{font-size:12px;color:var(--ink-2);line-height:1.6;flex-basis:100%;
+  background:var(--surface);border:1px solid var(--grid);border-radius:8px;padding:8px 12px}
+.maphint b{font-weight:650;color:var(--ink)}
+
+.matrix{gap:14px;padding-bottom:18px}
+.col{flex:0 0 300px;background:var(--plane);border:1px solid var(--grid);border-radius:12px;
+  overflow:visible;padding-bottom:6px}
+.col-h{padding:12px 14px 11px;border-bottom:1px solid var(--grid);background:var(--surface);
+  border-radius:12px 12px 0 0;position:relative}
+.col-h .nm{font-weight:650;font-size:13.5px;letter-spacing:-.01em}
+.col-h .mt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:3px}
+.col-h .dhint{display:none;font-size:11px;font-weight:600;color:var(--blue);margin-top:5px}
+body.dragging .col-h .dhint{display:block}
+
+.tiergroup{margin:10px 8px 0;border-radius:9px;background:var(--surface);
+  border:1px solid var(--grid);overflow:hidden;position:relative}
+.tiergroup.empty{display:none}
+body.dragging .tiergroup.empty{display:block}
+
+.tierlab{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;
+  padding:7px 11px 7px 13px;display:flex;align-items:center;justify-content:space-between;gap:6px;
+  color:var(--ink-2);background:var(--surface-2);border-bottom:1px solid var(--grid);
+  position:relative}
+.tierlab::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--t-fan)}
+.tierlab .tcount{font-weight:600;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums;
+  background:var(--plane);border:1px solid var(--grid);border-radius:999px;padding:0 6px;line-height:16px}
+.tiergroup.transactional .tierlab{color:#0d7a55;background:color-mix(in srgb,var(--t-trans) 9%,var(--surface))}
+.tiergroup.transactional .tierlab::before{background:var(--t-trans)}
+.tiergroup.core .tierlab{color:var(--blue-600);background:color-mix(in srgb,var(--t-core) 9%,var(--surface))}
+.tiergroup.core .tierlab::before{background:var(--t-core)}
+.tiergroup.fanout .tierlab::before{background:var(--t-fan)}
+.tiergroup.redirect .tierlab::before{background:var(--good)}
+.tiergroup.redirect,.tiergroup.utility{opacity:.72}
+:root[data-theme="dark"] .tiergroup.transactional .tierlab{color:#4fd1a5}
+
+/* ---- cells ---- */
+.cell{display:block;padding:9px 12px 10px;border-top:1px solid var(--grid);position:relative}
+.cell:first-of-type{border-top:0}
+.cell:hover{background:var(--surface-2);text-decoration:none}
+.cell .ttl{font-size:12.5px;line-height:1.4;display:flex;gap:8px;align-items:baseline;
+  padding-right:22px}
+.cell .kw{font-size:11px}
+.bar{height:2px;margin-top:6px;opacity:.75}
+.cell .meta{margin-top:7px;gap:4px}
+.cell.moved{box-shadow:inset 2px 0 0 var(--ann-purple)}
+
+/* the ✎ sits out of the way until you want it */
+.cell .notebtn{position:absolute;top:7px;right:8px;border-color:transparent;background:transparent;
+  opacity:0;transition:opacity .12s;padding:1px 5px}
+.cell:hover .notebtn,.cell .notebtn.has{opacity:1}
+.cell .notebtn.has{border-color:var(--blue-200)}
+
+body[data-density="compact"] .cell{padding:6px 12px 7px}
+body[data-density="compact"] .cell .bar{margin-top:4px}
+
+/* ---- drag & drop ---- */
+.cell[draggable="true"]{cursor:grab}
+.cell.dragsrc{opacity:.35}
+body.dragging .cell{pointer-events:none}
+body.dragging .tiergroup,body.dragging .col-h{transition:box-shadow .12s,background .12s}
+.tiergroup.dropok,.col-h.dropok{box-shadow:0 0 0 2px var(--blue) inset;background:var(--blue-100)}
+.tiergroup.dropok .tierlab{background:transparent}
+.dropzone{padding:14px 12px;font-size:11.5px;color:var(--muted);font-style:italic;text-align:center}
+
+/* ---- one chip style everywhere ---- */
+.apill.st{font-weight:650}
+.movedot{color:var(--ann-purple);font-weight:700}
+
+/* ---- placement controls in the drawer ---- */
+.prow{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.prow label{flex:0 0 58px;font-size:11px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted)}
+.prow select{flex:1;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--grid);
+  border-radius:7px;background:var(--plane);color:var(--ink)}
+.prow select:disabled{opacity:.55}
+.phint{font-size:11.5px;color:var(--muted);line-height:1.6;margin-top:2px}
+.linkbtn{border:0;background:none;color:var(--blue);font:inherit;font-size:11.5px;font-weight:650;
+  cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px}
+.linkbtn:hover{color:var(--blue-600)}
+.slab .linkbtn{float:right;text-transform:none;letter-spacing:0}
+
+/* "auto" marker on build-applied labels */
+.auto{font-size:8.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  border:1px solid currentColor;border-radius:3px;padding:0 3px;margin-left:5px;opacity:.6;
+  vertical-align:1px}
+
+/* ---- label manager ---- */
+.lablist{max-height:46vh;overflow-y:auto;margin:0 -4px;padding:0 4px}
+.labrow{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--grid)}
+.labrow:last-child{border-bottom:0}
+.labrow .swatch{width:18px;height:18px;border-radius:5px;border:1px solid var(--ring);cursor:pointer;
+  flex:none;padding:0}
+.labrow .swatch[data-c="amber"]{background:var(--ann-amber)}
+.labrow .swatch[data-c="green"]{background:var(--ann-green)}
+.labrow .swatch[data-c="blue"]{background:var(--ann-blue)}
+.labrow .swatch[data-c="red"]{background:var(--ann-red)}
+.labrow .swatch[data-c="purple"]{background:var(--ann-purple)}
+.labrow .swatch[data-c="teal"]{background:var(--ann-teal)}
+.labrow .swatch[data-c="slate"]{background:var(--ann-slate)}
+.labrow .swatch[data-c="pink"]{background:var(--ann-pink)}
+.labrow input[type="text"]{flex:1;font:inherit;font-size:13px;padding:5px 8px;border:1px solid transparent;
+  border-radius:6px;background:transparent;color:var(--ink);min-width:0}
+.labrow input[type="text"]:hover{border-color:var(--grid)}
+.labrow input[type="text"]:focus{outline:none;border-color:var(--blue);background:var(--plane)}
+.labrow .use{font-size:11px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.labrow .del{border:1px solid var(--grid);background:var(--surface);color:var(--ink-2);border-radius:6px;
+  font:inherit;font-size:11px;padding:3px 8px;cursor:pointer;flex:none}
+.labrow .del:hover{border-color:var(--critical);color:var(--critical)}
+
+/* ---- toast with an action ---- */
+.toast{display:flex;align-items:center;gap:12px}
+.toast .tact{border:0;background:none;color:var(--blue-200);font:inherit;font-size:12.5px;font-weight:700;
+  cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;flex:none}
+.toast .tact:hover{color:#fff}
+
+@media (max-width:720px){
+  .col{flex:0 0 min(300px,88vw)}
+  .maphint{font-size:11.5px}
+  .labrow{flex-wrap:wrap}
+  .labrow .use{order:4;flex:1}
+}
+
+/* build-applied labels sit back; the ones you applied yourself come forward */
+.apill.auto-l{background:transparent}
+.apill:not(.auto-l):not(.st){font-weight:700}
+
+/* modal fixes */
+.modal .mbox{position:relative}
+.rowbtns{display:flex;gap:7px;margin-top:8px;align-items:center}
+.modal .rowbtns input[type="text"]{flex:1;min-width:0}
+.modal .rowbtns .btn{flex:none}
+.lablist{border-top:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:2px 4px}

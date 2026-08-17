@@ -1,18 +1,33 @@
 /* =====================================================================
-   Part 2: dashboard rendering. Same views as the original single-file
-   build, with the annotation layer woven in.
+   Part 2: dashboard rendering.
+
+   Two ideas run through this file:
+
+   1. "Effective" values. `data.json` says what cluster and tier a page was
+      classified into; your annotations may override either. Every view reads
+      effCat()/effTier(), never p.cat/p.tier directly, so a page you dragged
+      somewhere stays there through a data refresh.
+
+   2. One kind of chip. The flags the build computes (Review, Consolidate,
+      Slug fix …) and the labels you apply by hand are the same thing — entries
+      in one library, rendered the same way, editable and removable alike.
    ===================================================================== */
 
 const $ = s => document.querySelector(s);
 const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h !== undefined) n.innerHTML = h; return n; };
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const n0 = v => (v || 0).toLocaleString('en-US');
-const TIERS = [["transactional", "Transactional page"], ["core", "Core page"], ["fanout", "Fan-out pages"], ["utility", "Site / utility"], ["redirect", "Redirects (not live)"]];
-const FLAGLAB = {
-  review: "Review", remove: "Remove", consolidate: "Consolidate", slug: "Slug fix",
-  underperform: "Underperformer", tiermismatch: "Tier ≠ yours", untracked: "Untracked", nokw: "No keywords",
-  redirect: "301"
-};
+
+const TIERS = [
+  ["transactional", "Transactional"],
+  ["core", "Pillar"],
+  ["fanout", "Fan-out"],
+  ["utility", "Site / utility"],
+  ["redirect", "Redirect"],
+];
+const TIERNAME = Object.fromEntries(TIERS);
+/* the three tiers you can move a page between */
+const MOVABLE_TIERS = ["transactional", "core", "fanout"];
 
 let DATA = null, P = [], S = {}, CAL = [], byPath = {};
 
@@ -22,27 +37,59 @@ function bindData(d) {
   byPath = Object.fromEntries(P.map(p => [p.path, p]));
 }
 
-/* ---------- annotation helpers used by the views ---------- */
+/* ---------------------------------------------------------- effective ---- */
+const annOf = path => ANN.pages[path];
 const statusById = id => (ANN.statuses || []).find(s => s.id === id);
-const labelById  = id => (ANN.labels || []).find(l => l.id === id);
-const annOf      = path => ANN.pages[path];
+const labelById = id => (ANN.labels || []).find(l => l.id === id);
+const isHidden = id => (ANN.hidden || []).includes(id);
 
-function annBadges(path, max) {
-  const a = annOf(path); if (!a) return "";
+function effCat(p) {
+  const a = annOf(p.path);
+  const c = a && a.cluster;
+  return (c && DATA.cats.includes(c)) ? c : p.cat;
+}
+function effTier(p) {
+  const a = annOf(p.path);
+  if (p.tier === "redirect") return "redirect";     // redirects are not pages
+  const t = a && a.tier;
+  return (t && MOVABLE_TIERS.includes(t)) ? t : p.tier;
+}
+const isMoved = p => {
+  const a = annOf(p.path);
+  return !!(a && ((a.cluster && a.cluster !== p.cat) || (a.tier && a.tier !== p.tier)));
+};
+
+/* Label ids in effect on a page: build-computed flags you haven't switched off,
+   plus the ones you applied yourself. Hidden library entries drop out. */
+function effLabels(p) {
+  const a = annOf(p.path) || {};
+  const off = a.offFlags || [];
   const out = [];
-  if (a.status && a.status !== "none") {
-    const st = statusById(a.status);
-    if (st) out.push(`<span class="apill" data-c="${esc(st.color)}"><span class="adot"></span>${esc(st.name)}</span>`);
-  }
-  (a.labels || []).forEach(id => {
+  (p.flags || []).forEach(f => { if (!off.includes(f) && !isHidden(f) && !out.includes(f)) out.push(f); });
+  (a.labels || []).forEach(l => { if (!isHidden(l) && !out.includes(l)) out.push(l); });
+  return out;
+}
+const isDerivedOn = (p, id) => (p.flags || []).includes(id);
+
+function labelPills(p, max) {
+  const ids = effLabels(p);
+  const out = ids.map(id => {
     const l = labelById(id);
-    if (l) out.push(`<span class="apill" data-c="${esc(l.color)}">${esc(l.name)}</span>`);
-  });
-  if (max && out.length > max) {
-    const extra = out.length - max;
-    return out.slice(0, max).join("") + `<span class="apill" data-c="slate">+${extra}</span>`;
-  }
+    if (!l) return "";
+    /* build-applied labels read lighter than the ones you put there yourself */
+    const auto = isDerivedOn(p, id) ? " auto-l" : "";
+    return `<span class="apill${auto}" data-c="${esc(l.color || 'slate')}">${esc(l.name)}</span>`;
+  }).filter(Boolean);
+  if (max && out.length > max) return out.slice(0, max).join("") + `<span class="apill" data-c="slate">+${out.length - max}</span>`;
   return out.join("");
+}
+
+function statusPill(path) {
+  const a = annOf(path);
+  if (!a || !a.status) return "";
+  const st = statusById(a.status);
+  if (!st) return "";
+  return `<span class="apill st" data-c="${esc(st.color)}"><span class="adot"></span>${esc(st.name)}</span>`;
 }
 
 function noteBtnHTML(path) {
@@ -53,15 +100,23 @@ function noteBtnHTML(path) {
     title="Labels and comments">✎${n ? " " + n : ""}</button>`;
 }
 
+/* Tier counts have to be recomputed — you may have re-tiered pages yourself. */
+function liveStats() {
+  const live = P.filter(p => effTier(p) !== "redirect");
+  const c = { transactional: 0, core: 0, fanout: 0, utility: 0 };
+  live.forEach(p => { const t = effTier(p); if (c[t] !== undefined) c[t]++; });
+  return c;
+}
+
 /* ---------- header / tiles ---------- */
 function renderHeader() {
   $("#topbanner").innerHTML = `<span>⚠</span><div style="flex:1"><div class="btext"><b>Read before using:</b> URLs, keyword counts, positions and
-    search volumes are live SEMrush + sitemap data. Your <b>Review / Remove</b> statuses and editorial-calendar
-    pipeline are imported from your keyword workbook — ${n0(S.review)} Review, ${n0(S.remove)} Remove, and
-    ${S.resolved_groups + S.partial_groups} consolidation groups you've already worked.
+    search volumes are live SEMrush + sitemap data, refreshed weekly. Everything you add — statuses, labels,
+    comments, and any page you move between clusters or tiers — is yours and is keyed to the URL, so a refresh
+    updates the numbers underneath without touching your work.
     <br><b>Correction (2026-08-03):</b> an earlier build claimed your published consolidations were missing their
     301s. That was wrong. Re-tested properly in Chrome: ${n0(S.redirects)} of ${n0(S.crawled)} crawled URLs return a
-    server-level HTTP redirect — including both DST URLs and the California one — and are now excluded from every
+    server-level HTTP redirect — including both DST URLs and the California one — and are excluded from every
     count here. One genuine gap survived the re-check; see <b>Your workflow</b>.
     <br>Page titles are slug-derived and publish dates aren't captured. See <b>Data sources</b> for the
     field-by-field breakdown.</div>
@@ -75,13 +130,12 @@ function renderHeader() {
   $("#c-all").textContent = "(" + S.total + ")";
   $("#c-work").textContent = "(" + (S.review + S.remove) + ")";
 
+  const c = liveStats();
   const TILES = [
-    ["Live pages", n0(S.total), `${S.transactional} transactional · ${S.core} core · ${S.fanout} fan-out`],
+    ["Live pages", n0(S.total), `${c.transactional} transactional · ${c.core} pillar · ${c.fanout} fan-out`],
     ["Verified redirects", n0(S.redirects), `of ${n0(S.crawled)} URLs crawled — excluded from all counts`],
     ["Ranking keywords", n0(S.keywords), `across ${S.ranking} pages with at least one ranking`],
     ["Est. monthly organic visits", n0(S.traffic), "SEMrush estimate, US database"],
-    ["Marked “Review” by you", n0(S.review), `plus ${S.remove} marked Remove`],
-    ["Not in your sheet", n0(S.untracked), `${S.tracked} of ${S.total} pages are tracked`],
   ];
   const tw = $("#tiles"); tw.innerHTML = "";
   TILES.forEach(([l, v, nt]) => {
@@ -98,7 +152,7 @@ function renderFilters() {
     [...new Set(P.map(p => p.type))].sort().forEach(t => $("#ftype2").append(el("option", null, esc(t))));
 }
 
-let F = { q: "", cat: "", flag: "", ann: "" };
+let F = { q: "", cat: "", ann: "" };
 
 function matchAnn(p) {
   if (!F.ann) return true;
@@ -106,14 +160,14 @@ function matchAnn(p) {
   if (F.ann === "__any") return !!a && !annIsEmpty(a);
   if (F.ann === "__none") return !a || annIsEmpty(a);
   if (F.ann === "__comment") return !!a && (a.comments || []).length > 0;
+  if (F.ann === "__moved") return isMoved(p);
   if (F.ann.startsWith("s:")) return !!a && a.status === F.ann.slice(2);
-  if (F.ann.startsWith("l:")) return !!a && (a.labels || []).includes(F.ann.slice(2));
+  if (F.ann.startsWith("l:")) return effLabels(p).includes(F.ann.slice(2));
   return true;
 }
 
 function match(p) {
-  if (F.cat && p.cat !== F.cat) return false;
-  if (F.flag && !p.flags.includes(F.flag)) return false;
+  if (F.cat && effCat(p) !== F.cat) return false;
   if (!matchAnn(p)) return false;
   if (F.q) {
     const q = F.q.toLowerCase();
@@ -121,7 +175,7 @@ function match(p) {
     const inNotes = a && ((a.target || "").toLowerCase().includes(q) ||
       (a.comments || []).some(c => (c.text || "").toLowerCase().includes(q)));
     if (!(p.path.toLowerCase().includes(q) || p.label.toLowerCase().includes(q) ||
-      (p.pkw || "").toLowerCase().includes(q) || p.cat.toLowerCase().includes(q) || inNotes)) return false;
+      (p.pkw || "").toLowerCase().includes(q) || effCat(p).toLowerCase().includes(q) || inNotes)) return false;
   }
   return true;
 }
@@ -141,50 +195,151 @@ function bindTip(node, html) {
 
 function tipFor(p) {
   const a = annOf(p.path);
-  return `<b>${esc(p.label)}</b><br><span style="opacity:.7">${esc(p.path)}</span><br><br>
+  const moved = isMoved(p);
+  return `<b>${esc(p.label)}</b><br><span style="opacity:.7">${esc(p.path)}</span><br>
+    <span style="opacity:.7">${esc(p.type)}</span><br><br>
     Keywords: <b>${n0(p.kw)}</b> · Est. traffic: <b>${n0(p.traffic)}</b><br>
     ${p.pkw ? `Top keyword: <b>${esc(p.pkw)}</b><br>Volume ${n0(p.vol)}/mo · position ${p.pos}<br>` : ''}
     ${p.trans || p.comm ? `Intent: ${p.trans} transactional / ${p.comm} commercial / ${p.info} informational<br>` : ''}
-    ${p.sheet_topic ? `<br>Your sheet: “${esc(p.sheet_topic)}” under <b>${esc(p.sheet_cluster)}</b>${p.sheet_status ? ` · marked <b>${esc(p.sheet_status)}</b>` : ''}` : '<br>Not in your tracking sheet'}
-    ${p.kw_check ? `<br>Your sheet cyan-flagged this keyword count` : ''}
-    ${p.tier_mismatch ? `<br>⇄ Your sheet has this as <b>${esc(p.tier_mismatch)}</b>, I inferred <b>${esc(p.tier)}</b>` : ''}
-    ${p.groups.length ? `<br>⚠ Competes on: ${p.groups.map(esc).join('; ')}` : ''}
+    ${moved ? `<br>↔ Moved by you to <b>${esc(effCat(p))} · ${esc(TIERNAME[effTier(p)])}</b><br>
+       <span style="opacity:.7">was ${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)}</span>` : ''}
+    ${p.groups && p.groups.length ? `<br>⚠ Competes on: ${p.groups.map(esc).join('; ')}` : ''}
     ${p.slug_suggest ? `<br>✎ Suggested slug: <b>${esc(p.slug_suggest)}</b>` : ''}
-    ${a && !annIsEmpty(a) ? `<br><br><span style="opacity:.7">Your notes:</span> ${annBadges(p.path, 4) || '—'}${(a.comments || []).length ? `<br>${(a.comments || []).length} comment${(a.comments || []).length > 1 ? 's' : ''}` : ''}` : ''}`;
+    ${a && a.target ? `<br>◎ Your target: <b>${esc(a.target)}</b>` : ''}
+    ${a && (a.comments || []).length ? `<br>💬 ${(a.comments || []).length} comment${(a.comments || []).length > 1 ? 's' : ''}` : ''}`;
 }
 
 /* ---------- matrix ---------- */
 function renderMatrix() {
   const m = $("#matrix"); m.innerHTML = "";
   const maxkw = Math.max(...P.map(p => p.kw), 1);
+  const dense = document.body.dataset.density === "compact";
+
   DATA.cats.forEach(cat => {
-    const inCat = P.filter(p => p.cat === cat && match(p));
-    const all = P.filter(p => p.cat === cat);
+    const all = P.filter(p => effCat(p) === cat);
+    const inCat = all.filter(p => match(p));
     const col = el("div", "col");
+    col.dataset.cluster = cat;
+
     const h = el("div", "col-h");
-    h.append(el("div", "nm", esc(cat)),
-      el("div", "mt", `${all.length} pages · ${n0(all.reduce((a, b) => a + b.kw, 0))} keywords`));
+    h.dataset.drop = "cluster";
+    h.innerHTML = `<div class="nm">${esc(cat)}</div>
+      <div class="mt">${all.length} page${all.length === 1 ? "" : "s"} · ${n0(all.reduce((a, b) => a + b.kw, 0))} keywords</div>
+      <div class="dhint">drop to move here</div>`;
     col.append(h);
-    let any = false;
+
+    let shown = 0;
     TIERS.forEach(([tk, tl]) => {
-      const rows = inCat.filter(p => p.tier === tk).sort((a, b) => b.kw - a.kw || a.label.localeCompare(b.label));
-      if (!rows.length) return;
-      any = true;
-      col.append(el("div", "tierlab " + tk, `${esc(tl)} <span style="color:var(--muted);font-weight:400">${rows.length}</span>`));
+      const rows = inCat.filter(p => effTier(p) === tk)
+        .sort((a, b) => b.kw - a.kw || a.label.localeCompare(b.label));
+      const movable = MOVABLE_TIERS.includes(tk);
+      if (!rows.length && !movable) return;         // never show empty utility/redirect
+
+      const g = el("div", "tiergroup " + tk);
+      if (movable) { g.dataset.drop = "tier"; g.dataset.tier = tk; }
+      if (!rows.length) g.classList.add("empty");
+
+      g.append(el("div", "tierlab " + tk,
+        `<span class="tname">${esc(tl)}</span><span class="tcount">${rows.length}</span>`));
+
       rows.forEach(p => {
-        const a = el("a", "cell" + (p.tier === "redirect" ? " isredir" : "")); a.href = p.url; a.target = "_blank"; a.rel = "noopener";
-        const pills = p.flags.map(f => `<span class="pill ${f}">${FLAGLAB[f]}</span>`).join("");
+        shown++;
+        const a = el("a", "cell" + (tk === "redirect" ? " isredir" : "") + (isMoved(p) ? " moved" : ""));
+        a.href = p.url; a.target = "_blank"; a.rel = "noopener";
+        a.dataset.path = p.path;
+        if (tk !== "redirect") a.draggable = true;
+        const chips = dense ? "" : `${statusPill(p.path)}${labelPills(p, 3)}`;
         a.innerHTML = `<div class="ttl"><span class="txt">${esc(p.label)}</span>
             <span class="kw${p.kw ? '' : ' zero'}">${p.kw ? n0(p.kw) : '—'}</span></div>
           <div class="bar${p.kw ? '' : ' empty'}" style="width:${p.kw ? Math.max(3, Math.round(100 * Math.sqrt(p.kw) / Math.sqrt(maxkw))) : 100}%"></div>
-          <div class="meta">${noteBtnHTML(p.path)}<span class="typ">${esc(p.type)}</span>${pills}${annBadges(p.path, 3)}</div>`;
+          ${chips ? `<div class="meta">${chips}</div>` : ""}
+          ${noteBtnHTML(p.path)}`;
         bindTip(a, tipFor(p));
-        col.append(a);
+        g.append(a);
       });
+
+      if (!rows.length) g.append(el("div", "dropzone", "Drop a page here"));
+      col.append(g);
     });
-    if (!any) col.append(el("div", "empty-col", "No pages match the current filter."));
+
+    if (!shown) col.append(el("div", "empty-col", "No pages match the current filter."));
     m.append(col);
   });
+
+  wireDrag();
+}
+
+/* ---------- drag to re-classify ---------- */
+let dragPath = null;
+
+function wireDrag() {
+  document.querySelectorAll(".matrix .cell[draggable]").forEach(c => {
+    c.addEventListener("dragstart", e => {
+      dragPath = c.dataset.path;
+      e.dataTransfer.effectAllowed = "move";
+      try { e.dataTransfer.setData("text/plain", dragPath); } catch (_) {}
+      document.body.classList.add("dragging");
+      c.classList.add("dragsrc");
+    });
+    c.addEventListener("dragend", () => {
+      document.body.classList.remove("dragging");
+      c.classList.remove("dragsrc");
+      document.querySelectorAll(".dropok").forEach(n => n.classList.remove("dropok"));
+      dragPath = null;
+    });
+  });
+
+  document.querySelectorAll(".matrix [data-drop]").forEach(z => {
+    z.addEventListener("dragover", e => {
+      if (!dragPath) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+      z.classList.add("dropok");
+    });
+    z.addEventListener("dragleave", () => z.classList.remove("dropok"));
+    z.addEventListener("drop", e => {
+      e.preventDefault();
+      z.classList.remove("dropok");
+      const path = dragPath || (e.dataTransfer && e.dataTransfer.getData("text/plain"));
+      if (!path) return;
+      const col = z.closest(".col");
+      movePage(path, col && col.dataset.cluster, z.dataset.drop === "tier" ? z.dataset.tier : null);
+    });
+  });
+}
+
+/* Apply a manual move. `tier` null means "cluster only, keep the tier". */
+function movePage(path, cluster, tier) {
+  const p = byPath[path];
+  if (!p) return;
+  const a = pageAnn(path, true);
+  let changed = false;
+
+  if (cluster && cluster !== effCat(p)) {
+    a.cluster = cluster === p.cat ? "" : cluster;
+    touch(path, "cluster");
+    changed = true;
+  }
+  if (tier && tier !== effTier(p)) {
+    a.tier = tier === p.tier ? "" : tier;
+    touch(path, "tier");
+    changed = true;
+  }
+  if (!changed) return;
+
+  refreshViews();
+  const back = isMoved(p) ? "" : " (back to where the build had it)";
+  toast(`${p.label} → ${effCat(p)} · ${TIERNAME[effTier(p)]}${back}`, false, {
+    label: "Undo",
+    run: () => { resetMove(path); refreshViews(); },
+  });
+}
+
+function resetMove(path) {
+  const a = pageAnn(path, true);
+  a.cluster = ""; touch(path, "cluster");
+  const b = pageAnn(path, true);
+  b.tier = ""; touch(path, "tier");
 }
 
 /* ---------- groups ---------- */
@@ -208,15 +363,14 @@ function renderGroups() {
     c.append(el("p", null, esc(gr.note)));
     const ul = el("ul", "urls");
     gr.urls.forEach(u => {
-      const p = byPath[u] || { kw: 0, pos: null, sheet_status: null };
+      const p = byPath[u];
       const gone = w && w.merged.includes(u);
       const li = el("li", (u === gr.keep ? "keep" : "") + (gone ? " gone" : ""));
       li.innerHTML = `${u === gr.keep ? '<span class="kp">keep</span>' : ''}
         ${gone ? `<span class="kp" style="color:var(--good-text)">${(gr.redirected || []).includes(u) ? '301' : 'merged'}</span>` : ''}
         <a class="u" href="https://www.1031crowdfunding.com${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>
-        ${p.sheet_status ? `<span class="pill ${p.sheet_status}">${FLAGLAB[p.sheet_status] || p.sheet_status}</span>` : ''}
-        ${byPath[u] ? noteBtnHTML(u) : ''}${annBadges(u, 2)}
-        <span class="n">${p.kw ? n0(p.kw) + ' kw' : '0 kw'}${p.pos ? ' · #' + p.pos : ''}</span>`;
+        ${p ? statusPill(u) + labelPills(p, 2) + noteBtnHTML(u) : ''}
+        <span class="n">${p && p.kw ? n0(p.kw) + ' kw' : '0 kw'}${p && p.pos ? ' · #' + p.pos : ''}</span>`;
       ul.append(li);
     });
     c.append(ul); g.append(c);
@@ -227,7 +381,7 @@ function renderGroups() {
 function liFor(p, extra) {
   const li = el("li");
   li.innerHTML = `<a class="u" href="${p.url}" target="_blank" rel="noopener">${esc(p.path)}</a>
-    ${extra || ''}${noteBtnHTML(p.path)}${annBadges(p.path, 2)}<span class="n">${p.kw ? n0(p.kw) + ' kw' : '0 kw'}${p.pos ? ' · #' + p.pos : ''}</span>`;
+    ${extra || ''}${statusPill(p.path)}${noteBtnHTML(p.path)}<span class="n">${p.kw ? n0(p.kw) + ' kw' : '0 kw'}${p.pos ? ' · #' + p.pos : ''}</span>`;
   bindTip(li, tipFor(p));
   return li;
 }
@@ -240,7 +394,7 @@ function renderRedir() {
   $("#redirintro").innerHTML = `<b>${m.length} of ${n0(S.crawled)} crawled URLs are redirects, not pages.</b>
     They carry ${n0(S.redirect_kw)} SEMrush keywords between them, and every one of them appeared in the
     sitemap crawl — which is why earlier builds counted them as live content. They are now excluded from the
-    live page count, the cluster columns, and every flag.<br><br>
+    live page count, the cluster columns, and every label.<br><br>
     <b>Method:</b> ${esc(RD.method || '')}`;
   const al = $("#anomlist"); al.innerHTML = "";
   (RD.anomalies || []).forEach(a => {
@@ -251,13 +405,13 @@ function renderRedir() {
   t.innerHTML = `<thead><tr><th>Old URL</th><th>Redirects to</th><th>Cluster</th>
     <th class="num">Kw on old URL</th><th class="num">Pos</th></tr></thead><tbody></tbody>`;
   const tb = t.querySelector("tbody");
-  m.map(([u, d]) => ({ u, d, p: byPath[u] || { kw: 0, pos: null, cat: '' } }))
-    .sort((a, b) => b.p.kw - a.p.kw)
+  m.map(([u, d]) => ({ u, d, p: byPath[u] }))
+    .sort((a, b) => ((b.p && b.p.kw) || 0) - ((a.p && a.p.kw) || 0))
     .forEach(({ u, d, p }) => {
       const tr = el("tr");
       tr.innerHTML = `<td class="mono"><a href="https://www.1031crowdfunding.com${esc(u)}" target="_blank" rel="noopener" class="old">${esc(u)}</a></td>
-       <td class="mono new">${esc(d)}</td><td>${esc(p.cat || '—')}</td>
-       <td class="num">${p.kw ? n0(p.kw) : '—'}</td><td class="num">${p.pos ?? '—'}</td>`;
+       <td class="mono new">${esc(d)}</td><td>${esc(p ? effCat(p) : '—')}</td>
+       <td class="num">${p && p.kw ? n0(p.kw) : '—'}</td><td class="num">${(p && p.pos) ?? '—'}</td>`;
       tb.append(tr);
     });
 }
@@ -267,10 +421,11 @@ function renderWork() {
   const pub = CAL.filter(c => c.status === "Published").length, out = CAL.length - pub;
   [["Redirects verified", n0(S.redirects), `${S.resolved_by_redirect} groups closed by work you already did`],
   ["Your pipeline", CAL.length, `${pub} published · ${out} in outline`],
-  ["Marked Review", n0(S.review), "yellow in URL Organizing"],
-  ["Marked Remove", n0(S.remove), "pink or struck through"],
-  ["Tier disagreements", n0(S.mismatch), `${n0(S.promoted)} more are the education-center rule, not conflicts`],
-  ["Sheet coverage", Math.round(100 * S.tracked / S.total) + "%", `${n0(S.untracked)} live pages untracked`],
+  ["Marked Review", n0(S.review), "imported from your workbook"],
+  ["Marked Remove", n0(S.remove), "imported from your workbook"],
+  ["Pages you've moved", n0(P.filter(isMoved).length), "manually re-clustered or re-tiered"],
+  ["Pages you've marked", n0(Object.keys(ANN.pages).filter(k => !annIsEmpty(ANN.pages[k])).length),
+    "status, labels or comments"],
   ].forEach(([l, v, nt]) => {
     const t = el("div", "tile");
     t.append(el("div", "lab", esc(l)), el("div", "val", v), el("div", "note", esc(nt))); wt.append(t);
@@ -281,11 +436,6 @@ function renderWork() {
   box.append(el("h3", null, `Redirect check — verified in Chrome
     <span class="sevtag resolved">${n0(S.redirects)} redirects confirmed</span>`));
   box.append(el("div", "kv", `Every URL in the inventory tested ${esc(RD.verified || '')} · ${S.resolved_by_redirect} consolidation groups partly or fully closed by redirects you already shipped`));
-  box.append(el("p", null, `An earlier build of this dashboard claimed your published consolidations were missing
-    their 301s. That was wrong and has been retracted — the method behind it couldn't see status codes at all.
-    Re-tested properly: ${n0(S.redirects)} of the ${n0(S.crawled)} crawled URLs return a server-level HTTP
-    redirect, including both DST URLs and the California one. Those are now excluded from every count on this
-    dashboard. See the Redirects tab for the full map.`));
   const stillOpen = (RD.confirmed_live || []).filter(u => byPath[u]);
   if (stillOpen.length) {
     const d = el("div", "workbar partial"); d.style.borderColor = "var(--serious)";
@@ -296,8 +446,7 @@ function renderWork() {
       <b>${k401 ? n0(k401.kw) : '?'} keywords${k401 && k401.pos ? ' at #' + k401.pos : ''}</b> while the newer
       <span style="font-family:ui-monospace,monospace">/how-to-use-401k-to-invest-in-real-estate/</span>
       has ${n401 ? n0(n401.kw) : '?'}. Two live pages, near-identical titles.<br><br>
-      <b>Next:</b> 301 the old URL to the new one to move those keywords across. This is the only one of the
-      three I originally flagged that holds up.`;
+      <b>Next:</b> 301 the old URL to the new one to move those keywords across.`;
     box.append(d);
   }
   rg.append(box);
@@ -311,23 +460,22 @@ function renderWork() {
       <td class="mono" style="color:var(--muted)">${c.orig.length ? c.orig.map(esc).join("<br>") : '—'}</td></tr>`).join("")}</tbody>`;
   $("#caltbl").innerHTML = ""; $("#caltbl").append(ct);
 
-  const rev = P.filter(p => p.sheet_status === "review").sort((a, b) => b.kw - a.kw);
-  const rem = P.filter(p => p.sheet_status === "remove").sort((a, b) => b.kw - a.kw);
-  const mm = P.filter(p => p.tier_mismatch).sort((a, b) => b.kw - a.kw);
-  const un = P.filter(p => p.flags.includes("untracked")).sort((a, b) => b.kw - a.kw).slice(0, 40);
+  const rev = P.filter(p => effLabels(p).includes("review")).sort((a, b) => b.kw - a.kw);
+  const rem = P.filter(p => effLabels(p).includes("remove")).sort((a, b) => b.kw - a.kw);
+  const mv = P.filter(isMoved).sort((a, b) => b.kw - a.kw);
+  const un = P.filter(p => effLabels(p).includes("untracked")).sort((a, b) => b.kw - a.kw).slice(0, 40);
   $("#n-rev").textContent = "(" + rev.length + ")"; $("#n-rem").textContent = "(" + rem.length + ")";
-  $("#n-mm").textContent = "(" + mm.length + ")"; $("#n-un").textContent = "(top 40 of " + S.untracked + ")";
-  $("#mmnote").innerHTML = mm.length
-    ? `Only counts the actionable direction — you marked it a Transactional or Main Page and my rule demoted it
-       to fan-out. Your call wins; tell me and I'll pin it.`
-    : `None left. Your REIT Main Page pick has been adopted. The other ${n0(S.promoted)} differences are
-       education-center hubs your sheet lists as sub-pages — that's the confirmed
-       “<code>/education-center/</code> = core” rule, not a conflict.`;
+  $("#n-mm").textContent = "(" + mv.length + ")"; $("#n-un").textContent = "(top 40 of " + S.untracked + ")";
+  $("#mmnote").innerHTML = mv.length
+    ? `Pages you dragged into a different cluster or tier. These stick through every data refresh.
+       Open one and use <b>Reset to build default</b> to undo.`
+    : `Nothing moved yet. Drag any page on the <b>Topic map</b> into another cluster column or tier band and it
+       will be listed here.`;
   const fill = (sel, arr, ex) => { const u = $(sel); u.innerHTML = ""; arr.forEach(p => u.append(liFor(p, ex ? ex(p) : ''))); };
-  fill("#revlist", rev, p => `<span class="pill nokw">${esc(p.cat)}</span>`);
+  fill("#revlist", rev, p => `<span class="apill" data-c="slate">${esc(effCat(p))}</span>`);
   fill("#remlist", rem);
-  fill("#mmlist", mm, p => `<span class="pill tiermismatch">yours: ${esc(p.tier_mismatch)} · mine: ${esc(p.tier)}</span>`);
-  fill("#unlist", un, p => `<span class="pill nokw">${esc(p.cat)}</span>`);
+  fill("#mmlist", mv, p => `<span class="apill" data-c="blue">${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)} → ${esc(effCat(p))} · ${esc(TIERNAME[effTier(p)])}</span>`);
+  fill("#unlist", un, p => `<span class="apill" data-c="slate">${esc(effCat(p))}</span>`);
   const tb = $("#tbclist"); tb.innerHTML = "";
   (DATA.to_be_created || []).forEach(t => {
     const li = el("li");
@@ -359,8 +507,8 @@ function renderAll() {
   const q = ($("#q2").value || "").toLowerCase(), c = $("#fcat2").value, ti = $("#ftier2").value, ty = $("#ftype2").value;
   const an = $("#fann2") ? $("#fann2").value : "";
   let rows = P.filter(p => {
-    if (c && p.cat !== c) return false;
-    if (ti && p.tier !== ti) return false;
+    if (c && effCat(p) !== c) return false;
+    if (ti && effTier(p) !== ti) return false;
     if (ty && p.type !== ty) return false;
     if (an) { const save = F.ann; F.ann = an; const ok = matchAnn(p); F.ann = save; if (!ok) return false; }
     if (q) {
@@ -372,17 +520,23 @@ function renderAll() {
     }
     return true;
   });
-  const annKey = p => { const a = annOf(p.path); return a ? (a.updated || "") : ""; };
+  const key = (p, k) => {
+    if (k === "cat") return effCat(p);
+    if (k === "tier") return TIERNAME[effTier(p)] || effTier(p);
+    if (k === "status") return (statusById((annOf(p.path) || {}).status) || {}).name || "";
+    if (k === "labels") return effLabels(p).length;
+    if (k === "notes") return (annOf(p.path) || {}).updated || "";
+    return p[k];
+  };
   rows.sort((a, b) => {
-    if (sortK === "notes") return String(annKey(b)).localeCompare(String(annKey(a))) * (sortD < 0 ? 1 : -1);
-    let x = a[sortK], y = b[sortK];
-    if (x === null) x = sortK === "pos" ? 999 : ""; if (y === null) y = sortK === "pos" ? 999 : "";
+    let x = key(a, sortK), y = key(b, sortK);
+    if (x === null || x === undefined) x = sortK === "pos" ? 999 : "";
+    if (y === null || y === undefined) y = sortK === "pos" ? 999 : "";
     return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * sortD;
   });
-  const cols = [["label", "Page"], ["cat", "Cluster"], ["tier", "Tier"], ["sheet_status", "Your status"],
-  ["type", "Type"], ["kw", "Keywords", 1],
-  ["traffic", "Traffic", 1], ["pkw", "Top keyword"], ["vol", "Vol", 1], ["pos", "Pos", 1], ["flags", "Flags"],
-  ["notes", "Your notes"]];
+  const cols = [["label", "Page"], ["cat", "Cluster"], ["tier", "Tier"], ["status", "Status"],
+  ["type", "Type"], ["kw", "Keywords", 1], ["traffic", "Traffic", 1], ["pkw", "Top keyword"],
+  ["vol", "Vol", 1], ["pos", "Pos", 1], ["labels", "Labels"], ["notes", "Notes"]];
   t.innerHTML = `<thead><tr>${cols.map(([k, l, n]) => `<th data-k="${k}" class="${n ? 'num' : ''}">${l}${sortK === k ? (sortD < 0 ? ' ↓' : ' ↑') : ''}</th>`).join("")}</tr></thead><tbody></tbody>`;
   t.querySelectorAll("th").forEach(th => th.onclick = () => {
     const k = th.dataset.k; if (sortK === k) sortD *= -1; else { sortK = k; sortD = (k === "pos") ? 1 : -1; } renderAll();
@@ -392,14 +546,15 @@ function renderAll() {
     const tr = el("tr");
     tr.innerHTML = `<td><a href="${p.url}" target="_blank" rel="noopener">${esc(p.label)}</a>
         <div class="mono" style="color:var(--muted);margin-top:2px">${esc(p.path)}</div></td>
-      <td>${esc(p.cat)}</td><td style="text-transform:capitalize">${esc(p.tier)}</td>
-      <td>${p.sheet_status ? `<span class="pill ${p.sheet_status}">${FLAGLAB[p.sheet_status] || esc(p.sheet_status)}</span>` : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${esc(effCat(p))}${isMoved(p) ? ' <span class="movedot" title="moved by you">↔</span>' : ''}</td>
+      <td>${esc(TIERNAME[effTier(p)] || effTier(p))}</td>
+      <td>${statusPill(p.path) || '<span style="color:var(--muted)">—</span>'}</td>
       <td>${esc(p.type)}</td>
       <td class="num">${p.kw ? n0(p.kw) : '—'}</td><td class="num">${p.traffic ? n0(p.traffic) : '—'}</td>
       <td>${esc(p.pkw || '—')}</td><td class="num">${p.vol ? n0(p.vol) : '—'}</td>
       <td class="num">${p.pos ?? '—'}</td>
-      <td>${p.flags.map(f => `<span class="pill ${f}">${FLAGLAB[f]}</span>`).join(" ") || ''}</td>
-      <td style="white-space:nowrap">${noteBtnHTML(p.path)} ${annBadges(p.path, 2)}</td>`;
+      <td>${labelPills(p, 3) || ''}</td>
+      <td style="white-space:nowrap">${noteBtnHTML(p.path)}</td>`;
     tb.append(tr);
   });
 }
@@ -407,11 +562,12 @@ function renderAll() {
 /* ---------- coverage ---------- */
 function renderCov() {
   const rows = DATA.cats.map(c => {
-    const ps = P.filter(p => p.cat === c);
+    const ps = P.filter(p => effCat(p) === c);
     return {
       c, kw: ps.reduce((a, b) => a + b.kw, 0), n: ps.length,
-      t: ps.filter(p => p.tier === "transactional").length, co: ps.filter(p => p.tier === "core").length,
-      f: ps.filter(p => p.tier === "fanout").length
+      t: ps.filter(p => effTier(p) === "transactional").length,
+      co: ps.filter(p => effTier(p) === "core").length,
+      f: ps.filter(p => effTier(p) === "fanout").length
     };
   }).sort((a, b) => b.kw - a.kw);
   const max = Math.max(...rows.map(r => r.kw), 1);
@@ -423,18 +579,18 @@ function renderCov() {
       <span class="track"><span class="fill" style="width:${Math.max(1, 100 * r.kw / max)}%"></span></span>
       <span class="v">${n0(r.kw)}</span><span class="v2">${r.n}</span>`;
     bindTip(d, `<b>${esc(r.c)}</b><br>${n0(r.kw)} ranking keywords across ${r.n} pages<br>
-      ${r.t} transactional · ${r.co} core · ${r.f} fan-out`);
+      ${r.t} transactional · ${r.co} pillar · ${r.f} fan-out`);
     ch.append(d);
   });
 
   const st = $("#struct"); st.innerHTML = "";
   const tb = el("table");
-  tb.innerHTML = `<thead><tr><th>Cluster</th><th class="num">Transactional</th><th class="num">Core</th>
+  tb.innerHTML = `<thead><tr><th>Cluster</th><th class="num">Transactional</th><th class="num">Pillar</th>
     <th class="num">Fan-out</th><th>Structure</th></tr></thead><tbody>${rows.map(r => {
     let v, col;
-    if (!r.co && r.f > 3) { v = "No core page — fan-out has nothing to point at"; col = "var(--critical)"; }
+    if (!r.co && r.f > 3) { v = "No pillar page — fan-out has nothing to point at"; col = "var(--critical)"; }
     else if (!r.t && r.co) { v = "No transactional page in this cluster"; col = "var(--serious)"; }
-    else if (!r.co) { v = "No core page"; col = "var(--warning)"; }
+    else if (!r.co) { v = "No pillar page"; col = "var(--warning)"; }
     else v = "Complete", col = "var(--good-text)";
     return `<tr><td>${esc(r.c)}</td><td class="num">${r.t || '—'}</td><td class="num">${r.co || '—'}</td>
         <td class="num">${r.f || '—'}</td><td style="color:${col};font-weight:600">${v}</td></tr>`;

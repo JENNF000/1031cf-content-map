@@ -1,8 +1,8 @@
 <section id="tab-notes" class="hide">
   <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
-    <span>✎</span><div>Everything you've labelled or commented on, in one place. Labels and comments are yours —
-    they're keyed to the URL, so a data refresh updates the metrics underneath them without ever touching what
-    you wrote. Click any card to reopen it.</div>
+    <span>✎</span><div>Everything you've labelled, moved or commented on, in one place. It's all keyed to the URL,
+    so a data refresh updates the metrics underneath without ever touching what you wrote. Click any card to
+    reopen it.</div>
   </div>
   <div class="tiles" id="notetiles"></div>
   <div class="notesbar">
@@ -15,6 +15,7 @@
       <option value="traffic">Most traffic</option>
       <option value="path">URL A–Z</option>
     </select>
+    <button class="btn" id="annlabels">Manage labels</button>
     <button class="btn" id="annexport">Export notes</button>
     <button class="btn" id="annimport">Import</button>
     <input type="file" id="annfile" accept="application/json" style="display:none">
@@ -39,18 +40,25 @@
     </div>
 
     <div class="sect">
+      <span class="slab">Placement</span>
+      <div id="dplacement"></div>
+    </div>
+
+    <div class="sect">
       <span class="slab">Status</span>
       <div class="statgrid" id="dstatus"></div>
     </div>
 
     <div class="sect">
-      <span class="slab">Labels</span>
+      <span class="slab">Labels
+        <button class="linkbtn" id="dmanage" type="button">Manage</button></span>
       <div class="labgrid" id="dlabels"></div>
       <div class="rowbtns">
         <input type="text" id="dnewlabel" placeholder="New label…" style="flex:1">
         <button class="btn" id="daddlabel">Add</button>
       </div>
-      <div class="hint">New labels are added to your library and available on every page.</div>
+      <div class="hint">Labels marked <span class="auto">auto</span> were applied by the build. Switch one off
+        here and it stays off through every refresh.</div>
     </div>
 
     <div class="sect">
@@ -73,16 +81,39 @@
 
     <div class="sect">
       <button class="btn" id="dclear" style="color:var(--critical);border-color:color-mix(in srgb,var(--critical) 35%,var(--grid))">
-        Clear all notes for this page</button>
+        Clear everything for this page</button>
     </div>
   </div>
 </aside>
+
+<!-- ============ label manager ============ -->
+<div class="modal" id="labelmodal">
+  <div class="mbox">
+    <button class="dclose" id="labclose" aria-label="Close" style="position:absolute;top:14px;right:16px">✕</button>
+    <h2>Labels</h2>
+    <p class="msub">One library for everything. The ones marked <b>auto</b> are applied by the build —
+      Review and Remove come from your workbook, the rest are computed from the SEMrush and crawl data.
+      Rename any of them, change a colour, or remove one entirely. Removing takes it off every page.</p>
+
+    <div id="lablist" class="lablist"></div>
+
+    <div class="rowbtns" style="margin-top:14px">
+      <input type="text" id="labnew" placeholder="Add a label…" style="flex:1">
+      <button class="btn" id="labnewbtn">Add</button>
+    </div>
+    <div class="hint" id="labhidden" style="margin-top:12px"></div>
+
+    <div class="macts">
+      <button class="btn primary" id="labdone">Done</button>
+    </div>
+  </div>
+</div>
 
 <!-- ============ sync settings modal ============ -->
 <div class="modal" id="syncmodal">
   <div class="mbox">
     <h2>Sync settings</h2>
-    <p class="msub">Your labels and comments are always saved on this device first. Connecting a GitHub repo
+    <p class="msub">Your labels, comments and moves are always saved on this device first. Connecting a GitHub repo
       also pushes them to <code>annotations.json</code>, so your phone and laptop stay in step — and so the weekly
       rebuild can read what you've marked.</p>
 

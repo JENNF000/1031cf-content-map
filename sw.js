@@ -1,10 +1,10 @@
 /* 1031 CF Content Map — service worker.
    Shell: cache-first (fast, offline). Data: network-first (fresh, offline fallback). */
-const VERSION = "823e4595a6";
+const VERSION = "86466245c4";
 const SHELL = "shell-" + VERSION;
 const DATA  = "data-" + VERSION;
 const SHELL_FILES = [
-  "./", "index.html", "app.js?v=6b595119e1", "manifest.webmanifest",
+  "./", "index.html", "app.js?v=ddc4d94fa1", "manifest.webmanifest",
   "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon.png"
 ];
 

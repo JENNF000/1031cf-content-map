@@ -51,27 +51,46 @@ const DEFAULT_STATUSES = [
   { id: "wontdo",     name: "Won't do",      color: "slate"  },
 ];
 
-const DEFAULT_LABELS = [
-  { id: "rewrite",     name: "Rewrite",            color: "red"    },
-  { id: "refresh",     name: "Refresh content",    color: "amber"  },
-  { id: "consolidate", name: "Consolidate",        color: "red"    },
-  { id: "titlemeta",   name: "Title / meta",       color: "amber"  },
-  { id: "schema",      name: "Add schema",         color: "purple" },
-  { id: "aeo-answer",  name: "AEO: direct answer", color: "teal"   },
-  { id: "aeo-faq",     name: "AEO: FAQ block",     color: "teal"   },
-  { id: "intlinks",    name: "Internal links",     color: "blue"   },
-  { id: "eeat",        name: "E-E-A-T / author",   color: "purple" },
-  { id: "redirect",    name: "Needs 301",          color: "red"    },
-  { id: "keep",        name: "Keep as-is",         color: "green"  },
-  { id: "priority",    name: "Priority",           color: "pink"   },
+/* Labels the build computes for you. Their ids match the flag keys in
+   data.json, so a page carrying flag "slug" automatically wears the "Slug fix"
+   label. They are ordinary labels otherwise: rename them, recolour them, take
+   them off a page, or delete them from the library entirely. */
+const DERIVED_LABELS = [
+  { id: "review",       name: "Review",         color: "amber",  derived: true },
+  { id: "remove",       name: "Remove",         color: "red",    derived: true },
+  { id: "consolidate",  name: "Consolidate",    color: "red",    derived: true },
+  { id: "slug",         name: "Slug fix",       color: "amber",  derived: true },
+  { id: "underperform", name: "Underperformer", color: "pink",   derived: true },
+  { id: "tiermismatch", name: "Tier ≠ yours",   color: "blue",   derived: true },
+  { id: "untracked",    name: "Untracked",      color: "slate",  derived: true },
+  { id: "nokw",         name: "No keywords",    color: "slate",  derived: true },
+  { id: "redirect",     name: "301 redirect",   color: "green",  derived: true },
 ];
 
+const DEFAULT_LABELS = [
+  { id: "rewrite",    name: "Rewrite",            color: "red"    },
+  { id: "refresh",    name: "Refresh content",    color: "amber"  },
+  { id: "titlemeta",  name: "Title / meta",       color: "amber"  },
+  { id: "schema",     name: "Add schema",         color: "purple" },
+  { id: "aeo-answer", name: "AEO: direct answer", color: "teal"   },
+  { id: "aeo-faq",    name: "AEO: FAQ block",     color: "teal"   },
+  { id: "intlinks",   name: "Internal links",     color: "blue"   },
+  { id: "eeat",       name: "E-E-A-T / author",   color: "purple" },
+  { id: "needs301",   name: "Needs 301",          color: "red"    },
+  { id: "keep",       name: "Keep as-is",         color: "green"  },
+  { id: "priority",   name: "Priority",           color: "pink"   },
+];
+
+const ALL_DEFAULT_LABELS = () => DERIVED_LABELS.concat(DEFAULT_LABELS).map(l => ({ ...l }));
+
 const emptyAnn = () => ({
-  version: 1,
+  version: 2,
   updated: new Date(0).toISOString(),
   author: "",
-  statuses: DEFAULT_STATUSES.slice(),
-  labels: DEFAULT_LABELS.slice(),
+  statuses: DEFAULT_STATUSES.map(s => ({ ...s })),
+  labels: ALL_DEFAULT_LABELS(),
+  hidden: [],            // label ids removed from the library
+  hiddenAt: new Date(0).toISOString(),
   pages: {},
 });
 
@@ -81,21 +100,36 @@ const nowISO = () => new Date().toISOString();
 const uid = () => (crypto.randomUUID ? crypto.randomUUID()
   : "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 9));
 
+/* Fields that carry their own clock so two devices can edit different
+   properties of the same page without clobbering each other. */
+const PAGE_FIELDS = ["status", "labels", "target", "cluster", "tier", "offFlags"];
+
 function pageAnn(path, create) {
   let a = ANN.pages[path];
   if (!a && create) {
-    a = ANN.pages[path] = { status: "", labels: [], target: "", comments: [], delc: [], f: {}, updated: nowISO() };
+    a = ANN.pages[path] = {
+      status: "", labels: [], target: "", cluster: "", tier: "",
+      offFlags: [], comments: [], delc: [], f: {}, updated: nowISO(),
+    };
   }
-  if (a && !a.f) a.f = {};
+  if (a) {
+    if (!a.f) a.f = {};
+    if (!a.labels) a.labels = [];
+    if (!a.offFlags) a.offFlags = [];
+    if (!a.comments) a.comments = [];
+    if (!a.delc) a.delc = [];
+  }
   return a;
 }
 
 function annIsEmpty(a) {
-  return !a || (!a.status && !(a.labels || []).length && !(a.target || "").trim() && !(a.comments || []).length);
+  return !a || (!a.status && !(a.labels || []).length && !(a.target || "").trim() &&
+    !(a.cluster || "") && !(a.tier || "") && !(a.offFlags || []).length &&
+    !(a.comments || []).length);
 }
 
-/* `field` is one of status | labels | target. Comments carry their own ids and
-   tombstones, so they don't need a field clock. */
+/* `field` is one of PAGE_FIELDS. Comments carry their own ids and tombstones,
+   so they don't need a field clock. */
 function touch(path, field) {
   const a = pageAnn(path, true);
   a.updated = nowISO();
@@ -106,21 +140,29 @@ function touch(path, field) {
   Sync.schedule();
 }
 
+function touchLibrary() {
+  ANN.updated = nowISO();
+  saveLocal();
+  Sync.schedule();
+}
+
 function saveLocal() { return STORE.set("annotations", ANN); }
 
 /* Merge two annotation documents.
 
-   Fields (status / labels / target) resolve independently on their own
-   timestamps, so commenting on a laptop can't wipe a status set on a phone.
-   Comments are unioned by id with tombstones honoured; the status and label
-   libraries are unioned by id. */
+   Fields resolve independently on their own timestamps, so commenting on a
+   laptop can't wipe a status set on a phone. Comments are unioned by id with
+   tombstones honoured; the status and label libraries are unioned by id, each
+   entry resolving on its own `u` stamp so a rename propagates. */
 function mergeAnn(a, b) {
   const out = {
-    version: 1,
+    version: 2,
     updated: (a.updated > b.updated ? a.updated : b.updated),
     author: a.author || b.author || "",
     statuses: unionById(a.statuses, b.statuses),
     labels: unionById(a.labels, b.labels),
+    hidden: ((a.hiddenAt || "") >= (b.hiddenAt || "") ? a.hidden : b.hidden) || [],
+    hiddenAt: (a.hiddenAt || "") >= (b.hiddenAt || "") ? (a.hiddenAt || "") : (b.hiddenAt || ""),
     pages: {},
   };
   const paths = new Set([...Object.keys(a.pages || {}), ...Object.keys(b.pages || {})]);
@@ -140,37 +182,43 @@ function mergeAnn(a, b) {
        page created just to hold a comment would "win" every empty field and
        silently wipe a status set on another device. Explicitly clearing a
        field stamps `f`, so clearing still propagates. */
-    const isSet = (o, k) => k === "labels" ? (o.labels || []).length > 0 : !!(o[k] || "").trim?.();
+    const isSet = (o, k) => Array.isArray(o[k]) ? o[k].length > 0 : !!String(o[k] || "").trim();
     const fts = (o, k) => (o.f && o.f[k]) || (isSet(o, k) ? (o.updated || "") : "");
     const pick = k => (fts(x, k) >= fts(y, k) ? x : y);
-    const f = {};
-    ["status", "labels", "target"].forEach(k => {
-      const t = fts(x, k) >= fts(y, k) ? fts(x, k) : fts(y, k);
-      if (t) f[k] = t;
-    });
 
-    out.pages[p] = {
-      status: pick("status").status || "",
-      labels: pick("labels").labels || [],
-      target: pick("target").target || "",
-      comments, delc, f,
-      updated: (x.updated || "") >= (y.updated || "") ? x.updated : y.updated,
-    };
+    const merged = { comments, delc, f: {} };
+    PAGE_FIELDS.forEach(k => {
+      const src = pick(k);
+      merged[k] = Array.isArray(src[k]) ? (src[k] || []) : (src[k] || "");
+      const t = fts(x, k) >= fts(y, k) ? fts(x, k) : fts(y, k);
+      if (t) merged.f[k] = t;
+    });
+    merged.updated = (x.updated || "") >= (y.updated || "") ? x.updated : y.updated;
+    out.pages[p] = merged;
   });
   return out;
 }
 
 function normPage(p) {
-  return {
-    status: p.status || "", labels: p.labels || [], target: p.target || "",
+  const o = {
     comments: (p.comments || []).filter(c => !(p.delc || []).includes(c.id)),
     delc: p.delc || [], f: p.f || {}, updated: p.updated || "",
   };
+  PAGE_FIELDS.forEach(k => {
+    o[k] = (k === "labels" || k === "offFlags") ? (p[k] || []) : (p[k] || "");
+  });
+  return o;
 }
 
+/* Union two library arrays by id. Where both sides have an entry, the one with
+   the later `u` stamp wins, so renaming a label on one device propagates. */
 function unionById(x, y) {
   const m = new Map();
-  [...(y || []), ...(x || [])].forEach(o => { if (o && o.id) m.set(o.id, o); });
+  [...(y || []), ...(x || [])].forEach(o => {
+    if (!o || !o.id) return;
+    const prev = m.get(o.id);
+    if (!prev || (o.u || "") >= (prev.u || "")) m.set(o.id, o);
+  });
   return [...m.values()];
 }
 
@@ -179,7 +227,7 @@ const Sync = (() => {
   let cfg = null;          // {owner, repo, branch, path, token, author}
   let sha = null;
   let state = "local";     // local | synced | pending | error | offline
-  let msg = "Saved on this device only";
+  let msg = "Notes are saved in this browser only — click to sync them to GitHub";
   let timer = null;
   let inflight = false;
   let dirty = false;
@@ -229,14 +277,14 @@ const Sync = (() => {
     cfg = newCfg;
     await STORE.set("sync", cfg);
     sha = null;
-    if (!connected()) { set("local", "Saved on this device only"); return; }
+    if (!connected()) { set("local", "Notes are saved in this browser only — click to sync them to GitHub"); return; }
     await pull(true);
   }
 
   async function disconnect() {
     cfg = null; sha = null;
     await STORE.del("sync");
-    set("local", "Saved on this device only");
+    set("local", "Notes are saved in this browser only — click to sync them to GitHub");
   }
 
   async function test(c) {
@@ -282,7 +330,7 @@ const Sync = (() => {
       if (connected()) {
         if (dirty) { await push(); } else { set("synced", "Synced " + timeStr()); }
       } else {
-        set("local", "Saved on this device only");
+        set("local", "Notes are saved in this browser only — click to sync them to GitHub");
       }
       if (!quiet && typeof window.onAnnotationsChanged === "function") window.onAnnotationsChanged();
       return true;
@@ -332,7 +380,7 @@ const Sync = (() => {
 
   function schedule() {
     dirty = true;
-    if (!connected()) { set("local", "Saved on this device only"); return; }
+    if (!connected()) { set("local", "Notes are saved in this browser only — click to sync them to GitHub"); return; }
     set("pending", "Unsaved changes…");
     clearTimeout(timer);
     timer = setTimeout(() => push(), 2200);
