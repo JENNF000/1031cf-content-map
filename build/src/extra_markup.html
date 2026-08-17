@@ -1,0 +1,127 @@
+<section id="tab-notes" class="hide">
+  <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
+    <span>✎</span><div>Everything you've labelled or commented on, in one place. Labels and comments are yours —
+    they're keyed to the URL, so a data refresh updates the metrics underneath them without ever touching what
+    you wrote. Click any card to reopen it.</div>
+  </div>
+  <div class="tiles" id="notetiles"></div>
+  <div class="notesbar">
+    <input type="search" id="nq" placeholder="Search your notes and comments…" style="min-width:230px;flex:1">
+    <select id="nstatus"><option value="">Any status</option></select>
+    <select id="nlabel"><option value="">Any label</option></select>
+    <select id="nsort">
+      <option value="updated">Recently edited</option>
+      <option value="kw">Most keywords</option>
+      <option value="traffic">Most traffic</option>
+      <option value="path">URL A–Z</option>
+    </select>
+    <button class="btn" id="annexport">Export notes</button>
+    <button class="btn" id="annimport">Import</button>
+    <input type="file" id="annfile" accept="application/json" style="display:none">
+  </div>
+  <div class="grid2" id="notelist"></div>
+</section>
+
+<!--OVERLAYS-->
+<!-- ============ annotation drawer ============ -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dtitle">
+  <div class="dhead" style="position:relative">
+    <button class="dclose" id="dclose" aria-label="Close">✕</button>
+    <h2 id="dtitle"></h2>
+    <a class="dpath" id="dpath" target="_blank" rel="noopener"></a>
+    <div class="dmeta" id="dmeta"></div>
+  </div>
+  <div class="dbody">
+    <div class="sect" style="margin-top:0">
+      <span class="slab">Performance</span>
+      <div class="metricgrid" id="dmetrics"></div>
+    </div>
+
+    <div class="sect">
+      <span class="slab">Status</span>
+      <div class="statgrid" id="dstatus"></div>
+    </div>
+
+    <div class="sect">
+      <span class="slab">Labels</span>
+      <div class="labgrid" id="dlabels"></div>
+      <div class="rowbtns">
+        <input type="text" id="dnewlabel" placeholder="New label…" style="flex:1">
+        <button class="btn" id="daddlabel">Add</button>
+      </div>
+      <div class="hint">New labels are added to your library and available on every page.</div>
+    </div>
+
+    <div class="sect">
+      <span class="slab">Target keyword / prompt <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></span>
+      <input type="text" id="dtarget" placeholder="e.g. what is a dst 1031 exchange">
+      <div class="hint">Your intended target, separate from what the page currently ranks for.</div>
+    </div>
+
+    <div class="sect">
+      <span class="slab">Comments <span class="cnt" id="dccount"></span></span>
+      <ul class="thread" id="dthread"></ul>
+      <div style="margin-top:10px">
+        <textarea id="dcomment" rows="3" placeholder="Add a comment…"></textarea>
+        <div class="rowbtns">
+          <button class="btn primary" id="dpost">Post comment</button>
+          <span class="hint" style="margin:0" id="dsaved"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <button class="btn" id="dclear" style="color:var(--critical);border-color:color-mix(in srgb,var(--critical) 35%,var(--grid))">
+        Clear all notes for this page</button>
+    </div>
+  </div>
+</aside>
+
+<!-- ============ sync settings modal ============ -->
+<div class="modal" id="syncmodal">
+  <div class="mbox">
+    <h2>Sync settings</h2>
+    <p class="msub">Your labels and comments are always saved on this device first. Connecting a GitHub repo
+      also pushes them to <code>annotations.json</code>, so your phone and laptop stay in step — and so the weekly
+      rebuild can read what you've marked.</p>
+
+    <div class="warn" id="syncwarn">
+      Use a <b>fine-grained personal access token</b> scoped to this one repository, with
+      <b>Contents: Read and write</b> and nothing else. It's stored in this browser only — never in the repo,
+      never sent anywhere but github.com. Revoke it any time from your GitHub settings.
+    </div>
+
+    <div class="frow">
+      <div class="field"><label for="syowner">GitHub owner</label>
+        <input type="text" id="syowner" placeholder="your-username" autocomplete="off"></div>
+      <div class="field"><label for="syrepo">Repository</label>
+        <input type="text" id="syrepo" placeholder="1031cf-content-map" autocomplete="off"></div>
+    </div>
+    <div class="frow">
+      <div class="field"><label for="sybranch">Branch</label>
+        <input type="text" id="sybranch" placeholder="main" autocomplete="off"></div>
+      <div class="field"><label for="sypath">File path</label>
+        <input type="text" id="sypath" placeholder="annotations.json" autocomplete="off"></div>
+    </div>
+    <div class="field"><label for="sytoken">Access token</label>
+      <input type="password" id="sytoken" placeholder="github_pat_…" autocomplete="off"></div>
+    <div class="field"><label for="syauthor">Your name (shown on comments)</label>
+      <input type="text" id="syauthor" placeholder="Jennifer" autocomplete="off"></div>
+
+    <div class="status" id="systatus"></div>
+    <div class="macts">
+      <button class="btn" id="sydisconnect">Disconnect</button>
+      <button class="btn" id="sytest">Test connection</button>
+      <button class="btn" id="sycancel">Cancel</button>
+      <button class="btn primary" id="sysave">Save &amp; sync</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<div id="boot">
+  <div class="bs"></div>
+  <div id="bootmsg">Loading content map…</div>
+</div>

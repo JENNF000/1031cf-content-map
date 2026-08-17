@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1031 Crowdfunding — Content Topic Map</title>
+<style>
+:root{
+  color-scheme: light;
+  --plane:#f9f9f7; --surface:#fcfcfb; --surface-2:#f3f3f0;
+  --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --blue:#2a78d6; --blue-600:#184f95; --blue-100:#cde2fb; --blue-200:#9ec5f4; --blue-250:#86b6ef;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --good-text:#006300;
+  --t-trans:#1baf7a; --t-core:#2a78d6; --t-fan:#898781;
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --surface-2:#222221;
+  --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+  --blue:#3987e5; --blue-600:#184f95; --blue-100:#184f95; --blue-200:#256abf; --blue-250:#2a78d6;
+  --good-text:#0ca30c;
+  --t-trans:#199e70; --t-core:#3987e5; --t-fan:#898781;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+a:hover{text-decoration:underline;text-decoration-color:var(--axis);text-underline-offset:2px}
+.wrap{max-width:1680px;margin:0 auto;padding:20px 20px 72px}
+
+/* ---------- header ---------- */
+header.top{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;
+  padding-bottom:16px;border-bottom:1px solid var(--grid);margin-bottom:18px}
+h1{font-size:20px;font-weight:650;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--ink-2);font-size:13px;margin:0}
+.hdr-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fresh{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-2);
+  background:var(--surface);border:1px solid var(--ring);border-radius:999px;padding:6px 11px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);flex:none}
+.btn{background:var(--surface);border:1px solid var(--ring);color:var(--ink-2);border-radius:8px;
+  padding:6px 11px;font:inherit;font-size:12px;cursor:pointer}
+.btn:hover{background:var(--surface-2);color:var(--ink)}
+
+/* ---------- tabs ---------- */
+nav.tabs{display:flex;gap:2px;margin-bottom:18px;border-bottom:1px solid var(--grid);flex-wrap:wrap}
+nav.tabs button{background:none;border:0;border-bottom:2px solid transparent;color:var(--ink-2);
+  font:inherit;font-size:13px;padding:9px 14px;cursor:pointer;margin-bottom:-1px}
+nav.tabs button:hover{color:var(--ink)}
+nav.tabs button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--blue);font-weight:600}
+nav.tabs .cnt{color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+
+/* ---------- stat tiles ---------- */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:20px}
+.tile{background:var(--surface);border:1px solid var(--ring);border-radius:10px;padding:13px 14px}
+.tile .lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.tile .val{font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.1}
+.tile .note{font-size:11px;color:var(--ink-2);margin-top:3px}
+
+/* ---------- filters ---------- */
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+input[type=search],select{background:var(--surface);border:1px solid var(--ring);color:var(--ink);
+  border-radius:8px;padding:7px 10px;font:inherit;font-size:13px}
+input[type=search]{min-width:230px}
+input[type=search]::placeholder{color:var(--muted)}
+.chipfilter{display:flex;gap:4px;flex-wrap:wrap}
+.chipfilter button{background:var(--surface);border:1px solid var(--ring);color:var(--ink-2);
+  border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px}
+.chipfilter button[aria-pressed=true]{background:var(--ink);color:var(--plane);border-color:var(--ink)}
+.chipfilter .sw{width:8px;height:8px;border-radius:2px;flex:none}
+
+/* ---------- matrix ---------- */
+.matrix{display:flex;gap:12px;overflow-x:auto;padding-bottom:14px;align-items:flex-start}
+.col{flex:0 0 292px;background:var(--surface);border:1px solid var(--ring);border-radius:12px;
+  overflow:hidden}
+.col-h{padding:11px 13px;border-bottom:1px solid var(--grid);background:var(--surface-2);
+  position:sticky;top:0;z-index:2}
+.col-h .nm{font-weight:650;font-size:13px}
+.col-h .mt{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+.tierlab{font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:650;
+  padding:8px 13px 5px;display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.tierlab::before{content:"";width:3px;height:11px;border-radius:2px;background:var(--t-fan)}
+.tierlab.transactional::before{background:var(--t-trans)}
+.tierlab.core::before{background:var(--t-core)}
+.tierlab.redirect::before{background:var(--good)}
+.tierlab.redirect,.tierlab.utility{opacity:.65}
+.cell{display:block;padding:7px 13px;border-top:1px solid var(--grid);position:relative}
+.cell:first-of-type{border-top:0}
+.cell:hover{background:var(--surface-2);text-decoration:none}
+.cell .ttl{font-size:12.5px;line-height:1.35;display:flex;gap:6px;align-items:baseline}
+.cell .ttl .txt{flex:1;min-width:0}
+.cell .kw{font-variant-numeric:tabular-nums;font-size:11px;color:var(--ink-2);flex:none;
+  font-weight:600}
+.cell .kw.zero{color:var(--muted);font-weight:400}
+.bar{height:3px;border-radius:2px;background:var(--blue);margin-top:5px;min-width:2px}
+.bar.empty{background:var(--grid)}
+.cell .meta{font-size:10.5px;color:var(--muted);margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;
+  align-items:center}
+.pill{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700;
+  border-radius:4px;padding:1px 4px;display:inline-flex;align-items:center;gap:3px;
+  border:1px solid transparent;white-space:nowrap}
+.pill.consolidate{color:#8a1f1f;background:#fbe4e4;border-color:#f0c4c4}
+.pill.slug{color:#7a5300;background:#fdf0d1;border-color:#f5dfa8}
+.pill.underperform{color:#8a3d18;background:#fbe8de;border-color:#f2cdb8}
+.pill.nokw{color:var(--ink-2);background:var(--surface-2);border-color:var(--grid)}
+.pill.review{color:#5c4300;background:#fff9c4;border-color:#efdf7a}
+.pill.remove{color:#7a1414;background:#f7d4d4;border-color:#e8adad}
+.pill.redirect{color:#0a5c0a;background:#dff3df;border-color:#b6e0b6}
+:root[data-theme="dark"] .pill.redirect{color:#7ee07e;background:#123512;border-color:#1d4d1d}
+.cell.isredir{opacity:.6}
+.cell.isredir .ttl .txt{text-decoration:line-through;text-decoration-thickness:1px}
+.pill.untracked{color:var(--muted);background:transparent;border-color:var(--grid);border-style:dashed}
+.pill.tiermismatch{color:#0d366b;background:var(--blue-100);border-color:var(--blue-200)}
+:root[data-theme="dark"] .pill.review{color:#ffe97a;background:#3b3405;border-color:#5a4f0a}
+:root[data-theme="dark"] .pill.remove{color:#ffb0b0;background:#3d1414;border-color:#5e2020}
+:root[data-theme="dark"] .pill.tiermismatch{color:#9ec5f4;background:#12314f;border-color:#1c5cab}
+:root[data-theme="dark"] .pill.consolidate{color:#ffbdbd;background:#3a1717;border-color:#5c2222}
+:root[data-theme="dark"] .pill.slug{color:#ffd98a;background:#33280c;border-color:#4d3c11}
+:root[data-theme="dark"] .pill.underperform{color:#ffc9ae;background:#3a2318;border-color:#573424}
+.typ{font-size:10px;color:var(--muted)}
+.empty-col{padding:14px 13px;color:var(--muted);font-size:12px;font-style:italic}
+
+/* ---------- cards / tables ---------- */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--ring);border-radius:12px;padding:15px 16px}
+.card.crit{border-left:3px solid var(--critical)}
+.card.ser{border-left:3px solid var(--serious)}
+.card.warn{border-left:3px solid var(--warning)}
+.card.resolved{border-left:3px solid var(--good);opacity:.82}
+.card.partial{border-left:3px solid var(--blue)}
+.workbar{font-size:11.5px;border-radius:7px;padding:7px 9px;margin-bottom:10px;
+  border:1px solid var(--grid);background:var(--surface-2);color:var(--ink-2)}
+.workbar b{color:var(--ink)}
+.workbar.done{border-color:var(--good);background:transparent}
+.workbar.partial{border-color:var(--blue);background:transparent}
+ul.urls li.gone{opacity:.5}
+ul.urls li.gone .u{text-decoration:line-through;text-decoration-thickness:1px}
+.card h3{margin:0 0 3px;font-size:14px;font-weight:650;display:flex;gap:8px;align-items:center;
+  flex-wrap:wrap}
+.card .kv{font-size:11.5px;color:var(--muted);margin-bottom:9px;font-variant-numeric:tabular-nums}
+.card p{margin:0 0 11px;font-size:12.5px;color:var(--ink-2)}
+.sevtag{font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;font-weight:700;
+  padding:2px 6px;border-radius:4px}
+.sevtag.critical{background:var(--critical);color:#fff}
+.sevtag.serious{background:var(--serious);color:#2b1207}
+.sevtag.warning{background:var(--warning);color:#2b2107}
+.sevtag.resolved{background:var(--good);color:#fff}
+.sevtag.partial{background:var(--blue);color:#fff}
+ul.urls{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1px}
+ul.urls li{font-size:12px;padding:5px 8px;border-radius:6px;background:var(--surface-2);
+  display:flex;gap:8px;align-items:baseline}
+ul.urls li.keep{background:transparent;border:1px solid var(--good);}
+ul.urls li .kp{font-size:9.5px;font-weight:700;color:var(--good-text);text-transform:uppercase;
+  letter-spacing:.04em;flex:none}
+ul.urls li .u{flex:1;min-width:0;overflow-wrap:anywhere;font-family:ui-monospace,SFMono-Regular,monospace;
+  font-size:11.5px}
+ul.urls li .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:11px;flex:none}
+
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--ring);
+  border-radius:12px;overflow:hidden;font-size:12.5px}
+th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+  padding:9px 11px;border-bottom:1px solid var(--grid);background:var(--surface-2);
+  position:sticky;top:0;z-index:1;white-space:nowrap;cursor:pointer;font-weight:650}
+th:hover{color:var(--ink)}
+td{padding:8px 11px;border-bottom:1px solid var(--grid);vertical-align:top}
+tr:last-child td{border-bottom:0}
+tbody tr:hover{background:var(--surface-2)}
+td.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+td.mono{font-family:ui-monospace,SFMono-Regular,monospace;font-size:11.5px;overflow-wrap:anywhere}
+.old{color:var(--critical);text-decoration:line-through;text-decoration-thickness:1px}
+.new{color:var(--good-text);font-weight:600}
+.tablewrap{max-height:74vh;overflow:auto;border-radius:12px}
+
+/* ---------- chart ---------- */
+.chartcard{background:var(--surface);border:1px solid var(--ring);border-radius:12px;padding:16px 18px;
+  margin-bottom:12px}
+.chartcard h3{margin:0 0 2px;font-size:14px;font-weight:650}
+.chartcard .cs{font-size:12px;color:var(--ink-2);margin:0 0 14px}
+.hbar{display:grid;grid-template-columns:150px 1fr 62px 62px;gap:9px;align-items:center;
+  padding:3px 0;font-size:12px}
+.hbar .nm{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar .track{display:block;background:var(--grid);border-radius:3px;height:14px;position:relative;overflow:hidden}
+.hbar .fill{display:block;height:14px;border-radius:0 4px 4px 0;background:var(--blue)}
+.hbar .v{font-variant-numeric:tabular-nums;text-align:right;color:var(--ink)}
+.hbar .v2{font-variant-numeric:tabular-nums;text-align:right;color:var(--muted);font-size:11px}
+.hbar.head{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+  padding-bottom:5px;border-bottom:1px solid var(--grid);margin-bottom:6px}
+
+/* ---------- provenance ---------- */
+.prov{background:var(--surface);border:1px solid var(--ring);border-radius:12px;padding:16px 18px}
+.prov h3{margin:0 0 10px;font-size:14px;font-weight:650}
+.prov table{border:0;font-size:12.5px}
+.prov th{background:transparent;position:static;cursor:default}
+.srctag{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:2px 6px;border-radius:4px;white-space:nowrap}
+.srctag.live{background:#dff3df;color:#0a5c0a}
+.srctag.derived{background:var(--blue-100);color:#0d366b}
+.srctag.sample{background:#fdf0d1;color:#7a5300}
+:root[data-theme="dark"] .srctag.live{background:#123512;color:#7ee07e}
+:root[data-theme="dark"] .srctag.derived{background:#12314f;color:#9ec5f4}
+:root[data-theme="dark"] .srctag.sample{background:#33280c;color:#ffd98a}
+.banner{background:#fdf0d1;border:1px solid #f5dfa8;color:#5c3f00;border-radius:10px;
+  padding:11px 14px;font-size:12.5px;margin-bottom:16px;display:flex;gap:9px;align-items:flex-start}
+:root[data-theme="dark"] .banner{background:#2b2208;border-color:#4d3c11;color:#ffd98a}
+.banner b{font-weight:650}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--plane);font-size:11.5px;
+  padding:7px 9px;border-radius:7px;max-width:330px;z-index:99;opacity:0;transition:opacity .1s;
+  line-height:1.45;box-shadow:0 4px 14px rgba(0,0,0,.22)}
+.tip.on{opacity:1}
+.hide{display:none !important}
+footer{margin-top:26px;padding-top:14px;border-top:1px solid var(--grid);color:var(--muted);
+  font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>1031 Crowdfunding — Content Topic Map</h1>
+    <p class="sub">Every live post mapped to a topic cluster and a page tier, with SEMrush organic keyword volume per page.</p>
+  </div>
+  <div class="hdr-right">
+    <span class="fresh"><span class="dot"></span>Data as of <b id="asof" style="font-weight:600"></b></span>
+    <button class="btn" id="theme">Dark</button>
+    <button class="btn" id="csv">Export CSV</button>
+  </div>
+</header>
+
+<div class="banner" id="topbanner"></div>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" aria-selected="true" data-tab="map">Topic map</button>
+  <button role="tab" aria-selected="false" data-tab="attn">Needs attention <span class="cnt" id="c-attn"></span></button>
+  <button role="tab" aria-selected="false" data-tab="work">Your workflow <span class="cnt" id="c-work"></span></button>
+  <button role="tab" aria-selected="false" data-tab="redir">Redirects <span class="cnt" id="c-redir"></span></button>
+  <button role="tab" aria-selected="false" data-tab="slug">Slug updates <span class="cnt" id="c-slug"></span></button>
+  <button role="tab" aria-selected="false" data-tab="all">All pages <span class="cnt" id="c-all"></span></button>
+  <button role="tab" aria-selected="false" data-tab="cov">Cluster coverage</button>
+  <button role="tab" aria-selected="false" data-tab="src">Data sources</button>
+</nav>
+
+<section id="tab-map">
+  <div class="tiles" id="tiles"></div>
+  <div class="filters">
+    <input type="search" id="q" placeholder="Search slug, topic, or keyword…">
+    <select id="fcat"><option value="">All topic clusters</option></select>
+    <div class="chipfilter" id="fflags">
+      <button data-f="" aria-pressed="true">All pages</button>
+      <button data-f="review" aria-pressed="false"><span class="sw" style="background:#efdf7a"></span>Your “Review”</button>
+      <button data-f="remove" aria-pressed="false"><span class="sw" style="background:#e8adad"></span>Your “Remove”</button>
+      <button data-f="untracked" aria-pressed="false"><span class="sw" style="background:var(--muted)"></span>Not in your sheet</button>
+      <button data-f="consolidate" aria-pressed="false"><span class="sw" style="background:var(--critical)"></span>Consolidate</button>
+      <button data-f="slug" aria-pressed="false"><span class="sw" style="background:var(--warning)"></span>Slug fix</button>
+      <button data-f="underperform" aria-pressed="false"><span class="sw" style="background:var(--serious)"></span>Underperformer</button>
+      <button data-f="tiermismatch" aria-pressed="false"><span class="sw" style="background:var(--blue)"></span>Tier disagreement</button>
+      <button data-f="nokw" aria-pressed="false"><span class="sw" style="background:var(--axis)"></span>No keywords</button>
+    </div>
+  </div>
+  <div class="matrix" id="matrix"></div>
+</section>
+
+<section id="tab-attn" class="hide">
+  <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
+    <span>◆</span><div>Groups of pages that compete for the same keyword. <b>Keep</b> marks the page I'd make
+    canonical — usually the one already ranking best or the education-center hub. Everything else 301s into it or
+    gets re-scoped to a distinct long-tail. Ordered by severity.</div>
+  </div>
+  <div class="grid2" id="groups"></div>
+</section>
+
+<section id="tab-work" class="hide">
+  <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
+    <span>◆</span><div>Imported from your keyword workbook — the <b>Review</b> / <b>Remove</b> / <b>Calculator</b>
+    highlights from <i>URL Organizing</i>, and the pipeline from <i>Editorial Calendar</i>. Where your calendar shows
+    a consolidation already published, I've retired that flag on the Needs attention tab and switched the
+    <b>keep</b> page to the one you actually published.</div>
+  </div>
+  <div class="tiles" id="worktiles"></div>
+  <div id="redirgap"></div>
+  <div class="chartcard">
+    <h3>Editorial calendar</h3>
+    <p class="cs">Your pipeline, with the pages each rewrite absorbed.</p>
+    <div id="caltbl"></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Marked “Review” in your sheet <span class="cnt" id="n-rev"></span></h3>
+      <div class="kv">Yellow-highlighted topics, ordered by keyword count — the ones with volume are worth doing first.</div>
+      <ul class="urls" id="revlist"></ul></div>
+    <div class="card"><h3>Marked “Remove” <span class="cnt" id="n-rem"></span></h3>
+      <div class="kv">Pink-highlighted or struck-through. Check keyword counts before deleting — redirect, don't drop.</div>
+      <ul class="urls" id="remlist"></ul>
+      <h3 style="margin-top:16px">Pages you flagged to create</h3>
+      <div class="kv">Marked “TO BE CREATED” in your sheet.</div>
+      <ul class="urls" id="tbclist"></ul></div>
+    <div class="card"><h3>Live pages not in your sheet <span class="cnt" id="n-un"></span></h3>
+      <div class="kv">Ranked by keyword count. The top of this list is untracked content that's already earning traffic.</div>
+      <ul class="urls" id="unlist"></ul></div>
+    <div class="card"><h3>Where my tier disagrees with yours <span class="cnt" id="n-mm"></span></h3>
+      <div class="kv" id="mmnote"></div>
+      <ul class="urls" id="mmlist"></ul></div>
+  </div>
+</section>
+
+<section id="tab-redir" class="hide">
+  <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
+    <span>✓</span><div id="redirintro"></div>
+  </div>
+  <div class="grid2" style="grid-template-columns:1fr">
+    <div class="card"><h3>Things worth a second look</h3>
+      <div class="kv">Not errors — patterns in the redirect set that may not be what was intended.</div>
+      <ul class="urls" id="anomlist"></ul></div>
+  </div>
+  <div class="chartcard" style="margin-top:12px">
+    <h3>All verified redirects <span class="cnt" id="n-redir"></span></h3>
+    <p class="cs">Old URL → destination, with the keywords SEMrush still attributes to the old URL. Those numbers decay as Google reprocesses the redirect; they are not a problem.</p>
+    <div class="tablewrap"><table id="redirtbl"></table></div>
+  </div>
+</section>
+
+<section id="tab-slug" class="hide">
+  <div class="banner" style="background:var(--surface);border-color:var(--ring);color:var(--ink-2)">
+    <span>◆</span><div>Pages whose slug doesn't contain the keyword they actually rank for, plus WordPress
+    <code>-2</code> / <code>part-N</code> duplicates. Suggested slugs are drafts — pair each change with a 301 and
+    re-point internal links.</div>
+  </div>
+  <div class="tablewrap"><table id="slugtbl"></table></div>
+</section>
+
+<section id="tab-all" class="hide">
+  <div class="filters">
+    <input type="search" id="q2" placeholder="Search…">
+    <select id="fcat2"><option value="">All clusters</option></select>
+    <select id="ftier2"><option value="">All tiers</option><option value="transactional">Transactional</option>
+      <option value="core">Core</option><option value="fanout">Fan-out</option><option value="utility">Site / utility</option></select>
+    <select id="ftype2"><option value="">All page types</option></select>
+  </div>
+  <div class="tablewrap"><table id="alltbl"></table></div>
+</section>
+
+<section id="tab-cov" class="hide">
+  <div class="chartcard">
+    <h3>Organic keywords by topic cluster</h3>
+    <p class="cs">Total ranking keywords across every page in the cluster (SEMrush, US database, Google top 100).</p>
+    <div id="chart"></div>
+  </div>
+  <div class="chartcard">
+    <h3>Cluster structure check</h3>
+    <p class="cs">Whether each cluster has the transactional → core → fan-out shape. A cluster with fan-out pages
+      but no core page has nothing to consolidate link equity into.</p>
+    <div id="struct"></div>
+  </div>
+</section>
+
+<section id="tab-src" class="hide">
+  <div class="prov">
+    <h3>Field-by-field data provenance</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Source</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>URL / live-page inventory</td><td><span class="srctag live">Live</span></td>
+          <td>post-sitemap.xml, page-sitemap.xml, portfolio-sitemap.xml, plus any URL SEMrush reports as ranking. Union of both, so a page missing from one source still appears.</td></tr>
+        <tr><td>Keywords per page</td><td><span class="srctag live">Live</span></td>
+          <td>SEMrush Organic Pages report, <code>1031crowdfunding.com</code>, US database, top-100 positions.</td></tr>
+        <tr><td>Est. monthly traffic</td><td><span class="srctag live">Live</span></td><td>Same SEMrush report.</td></tr>
+        <tr><td>Intent split (transactional / commercial / informational)</td><td><span class="srctag live">Live</span></td>
+          <td>SEMrush intent-classified position counts. Used as a sanity check on my tier assignment.</td></tr>
+        <tr><td>Primary keyword, volume, position</td><td><span class="srctag live">Live</span></td>
+          <td>SEMrush Organic Keywords, ~930 rows sampled by traffic; each page's highest-volume term.</td></tr>
+        <tr><td>Consolidation groups</td><td><span class="srctag derived">Derived</span></td>
+          <td>Computed from keyword overlap in the SEMrush sample plus slug/title similarity. Real signal, but the <em>keep</em> pick is my judgment.</td></tr>
+        <tr><td>Slug suggestions</td><td><span class="srctag derived">Derived</span></td>
+          <td>Gap between each page's slug and its own ranking keyword. Drafts for review, not final.</td></tr>
+        <tr><td>Workflow status (Review / Remove / Calculator)</td><td><span class="srctag live">Your sheet</span></td>
+          <td>Read from the cell highlights in <code>URL Organizing</code>: yellow → Review, pink → Remove, green → Calculator, plus strikethrough → Remove. 213 of your rows matched a live URL.</td></tr>
+        <tr><td>Redirect status (existence + destination)</td><td><span class="srctag live">Verified</span></td>
+          <td>Tested in Chrome against all 329 inventory URLs. <code>fetch(redirect:'follow')</code> gives the destination; <code>redirect:'manual')</code> returning <code>type='opaqueredirect'</code> confirms a server-level HTTP 3xx, ruling out meta-refresh and JS redirects. 33 redirects found and excluded from all counts.</td></tr>
+        <tr><td>Redirect permanence (301 vs 302)</td><td><span class="srctag sample">Still unknown</span></td>
+          <td><b>Not readable in-browser.</b> <code>opaqueredirect</code> masks the status code, the CDP network log collapses redirect chains into the final 200, and resource-timing entries aren't exposed for these requests. Only a redirect-table export or a server-side check can confirm these are 301s rather than 302s. An earlier build wrongly asserted the redirects were missing entirely; that claim is retracted.</td></tr>
+        <tr><td>Editorial pipeline</td><td><span class="srctag live">Your sheet</span></td>
+          <td>From <code>Editorial Calendar</code>: status, content type, target keyword, volume, KD, and the Original URL(s) each rewrite absorbed. Used to retire consolidation flags you've already closed.</td></tr>
+        <tr><td>Your topic label &amp; cluster</td><td><span class="srctag live">Your sheet</span></td>
+          <td>Your own <code>Topic</code> names and column headers, kept alongside mine so you can see where we disagree. Shown on hover in the topic map.</td></tr>
+        <tr><td>Topic cluster (dashboard)</td><td><span class="srctag derived">Confirmed</span></td>
+          <td>Twelve clusters, signed off 2026-08-03. Your workbook used ten of the same names — I split "Others" into Asset Classes and Metrics &amp; Fundamentals.</td></tr>
+        <tr><td>Page tier (transactional / core / fan-out)</td><td><span class="srctag derived">Confirmed</span></td>
+          <td>Rule: <code>/education-center/</code> = core, offering/service pages = transactional, rest = fan-out. Signed off 2026-08-03. Where your sheet's row position disagrees, the page is flagged <b>Tier ≠ yours</b> rather than silently overridden.</td></tr>
+        <tr><td>Page title</td><td><span class="srctag derived">By design</span></td>
+          <td>Slug-derived. You confirmed this is fine; no <code>&lt;title&gt;</code> crawl needed.</td></tr>
+        <tr><td>Keyword counts in your sheet</td><td><span class="srctag sample">Superseded</span></td>
+          <td>Your sheet's own keyword numbers were not imported — you flagged them as possibly outdated. All counts shown come from this build's SEMrush pull. The five cyan-highlighted cells are noted on hover.</td></tr>
+        <tr><td>Publish date / last updated</td><td><span class="srctag sample">Not wired up</span></td>
+          <td>Only the seven dates in your editorial calendar are known. Sitemap <code>lastmod</code> or a WordPress export would fill the rest.</td></tr>
+        <tr><td>Position-change / trend</td><td><span class="srctag sample">Not wired up</span></td>
+          <td>Available from SEMrush but not pulled in this build. Easy add on the next refresh.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div>Built for 1031 Crowdfunding · SEMrush US database, Google organic top 100 · Sitemap union of post / page / portfolio sitemaps.</div>
+  <div id="foot2" style="margin-top:4px"></div>
+</footer>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<script>
