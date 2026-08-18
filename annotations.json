@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T17:07:23.381Z",
+ "updated": "2026-08-18T17:08:27.285Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -481,7 +481,6 @@
    "f": {
     "labels": "2026-08-18T17:03:56.119Z"
    },
-   "updated": "2026-08-18T17:03:56.119Z",
    "status": "",
    "labels": [
     "remove"
@@ -489,7 +488,8 @@
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": []
+   "offFlags": [],
+   "updated": "2026-08-18T17:03:56.119Z"
   },
   "/education-center/qofs-vs-dsts/": {
    "comments": [],
@@ -497,13 +497,45 @@
    "f": {
     "tier": "2026-08-18T17:07:23.381Z"
    },
-   "updated": "2026-08-18T17:07:23.381Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "fanout",
-   "offFlags": []
+   "offFlags": [],
+   "updated": "2026-08-18T17:07:23.381Z"
+  },
+  "/what-exactly-are-opportunity-zone-rules/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-18T17:08:14.408Z"
+   },
+   "updated": "2026-08-18T17:08:14.408Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "review"
+   ]
+  },
+  "/what-states-do-not-conform-with-qoz-tax-benefits/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-18T17:08:27.285Z"
+   },
+   "updated": "2026-08-18T17:08:27.285Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ]
   }
  }
 }
