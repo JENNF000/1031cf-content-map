@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T17:03:31.283Z",
+ "updated": "2026-08-18T17:07:23.381Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -442,28 +442,67 @@
    "comments": [],
    "delc": [],
    "f": {
-    "tier": "2026-08-18T17:02:29.899Z"
+    "tier": "2026-08-18T17:02:29.899Z",
+    "offFlags": "2026-08-18T17:04:15.700Z"
    },
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "core",
-   "offFlags": [],
-   "updated": "2026-08-18T17:02:29.899Z"
+   "offFlags": [
+    "review"
+   ],
+   "updated": "2026-08-18T17:04:15.700Z"
   },
   "/explore-the-potential-of-reits-a-guide-for-investors/": {
    "comments": [],
    "delc": [],
    "f": {
-    "tier": "2026-08-18T17:03:31.283Z"
+    "labels": "2026-08-18T17:03:47.915Z",
+    "tier": "2026-08-18T17:03:31.283Z",
+    "offFlags": "2026-08-18T17:03:44.689Z"
    },
-   "updated": "2026-08-18T17:03:31.283Z",
+   "status": "",
+   "labels": [
+    "remove"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "core",
+   "offFlags": [
+    "review"
+   ],
+   "updated": "2026-08-18T17:03:47.915Z"
+  },
+  "/what-is-a-reit-and-how-does-it-work/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-18T17:03:56.119Z"
+   },
+   "updated": "2026-08-18T17:03:56.119Z",
+   "status": "",
+   "labels": [
+    "remove"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": []
+  },
+  "/education-center/qofs-vs-dsts/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "tier": "2026-08-18T17:07:23.381Z"
+   },
+   "updated": "2026-08-18T17:07:23.381Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
-   "tier": "core",
+   "tier": "fanout",
    "offFlags": []
   }
  }
