@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T15:59:40.277Z",
+ "updated": "2026-08-18T16:01:25.737Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -187,19 +187,40 @@
    "comments": [],
    "delc": [],
    "f": {
-    "labels": "2026-08-18T15:59:39.475Z",
-    "offFlags": "2026-08-18T15:59:40.277Z"
+    "labels": "2026-08-18T15:59:43.016Z",
+    "offFlags": "2026-08-18T15:59:57.512Z"
    },
-   "updated": "2026-08-18T15:59:40.277Z",
    "status": "",
    "labels": [
-    "rewrite"
+    "rewrite",
+    "slug"
    ],
    "target": "",
    "cluster": "",
    "tier": "",
    "offFlags": [
+    "review",
+    "consolidate"
+   ],
+   "updated": "2026-08-18T15:59:57.512Z"
+  },
+  "/education-center/what-is-a-delaware-statutory-trust/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-18T16:01:25.188Z",
+    "offFlags": "2026-08-18T16:01:25.737Z"
+   },
+   "updated": "2026-08-18T16:01:25.737Z",
+   "status": "",
+   "labels": [
     "review"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
    ]
   }
  }
