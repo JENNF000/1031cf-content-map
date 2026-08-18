@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T16:39:29.923Z",
+ "updated": "2026-08-18T16:40:54.309Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -309,9 +309,25 @@
    "f": {
     "status": "2026-08-18T16:38:50.501Z"
    },
-   "updated": "2026-08-18T16:39:29.923Z",
    "status": "published",
    "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-18T16:39:29.923Z"
+  },
+  "/why-real-estate-investors-are-choosing-dsts-over-reits/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-18T16:40:54.309Z"
+   },
+   "updated": "2026-08-18T16:40:54.309Z",
+   "status": "",
+   "labels": [
+    "slug"
+   ],
    "target": "",
    "cluster": "",
    "tier": "",
