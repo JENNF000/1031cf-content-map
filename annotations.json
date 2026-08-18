@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T16:38:20.454Z",
+ "updated": "2026-08-18T16:39:29.923Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -246,10 +246,9 @@
    "comments": [],
    "delc": [],
    "f": {
-    "offFlags": "2026-08-18T16:37:26.063Z",
-    "labels": "2026-08-18T16:37:30.052Z"
+    "labels": "2026-08-18T16:37:30.052Z",
+    "offFlags": "2026-08-18T16:37:26.063Z"
    },
-   "updated": "2026-08-18T16:37:30.052Z",
    "status": "",
    "labels": [
     "remove"
@@ -259,16 +258,16 @@
    "tier": "",
    "offFlags": [
     "review"
-   ]
+   ],
+   "updated": "2026-08-18T16:37:30.052Z"
   },
   "/5-donts-of-dsts/": {
    "comments": [],
    "delc": [],
    "f": {
-    "offFlags": "2026-08-18T16:37:37.296Z",
-    "labels": "2026-08-18T16:37:37.837Z"
+    "labels": "2026-08-18T16:37:37.837Z",
+    "offFlags": "2026-08-18T16:37:37.296Z"
    },
-   "updated": "2026-08-18T16:37:37.837Z",
    "status": "",
    "labels": [
     "remove"
@@ -278,7 +277,8 @@
    "tier": "",
    "offFlags": [
     "review"
-   ]
+   ],
+   "updated": "2026-08-18T16:37:37.837Z"
   },
   "/dsts-in-california/": {
    "comments": [],
@@ -286,7 +286,6 @@
    "f": {
     "offFlags": "2026-08-18T16:38:20.454Z"
    },
-   "updated": "2026-08-18T16:38:20.454Z",
    "status": "",
    "labels": [],
    "target": "",
@@ -294,7 +293,29 @@
    "tier": "",
    "offFlags": [
     "consolidate"
-   ]
+   ],
+   "updated": "2026-08-18T16:38:20.454Z"
+  },
+  "/delaware-statutory-trust-pros-and-cons/": {
+   "comments": [
+    {
+     "id": "4e558e76-8563-431f-8bc3-012cd1b3708d",
+     "ts": "2026-08-18T16:39:29.923Z",
+     "author": "Jennifer",
+     "text": "Old post had 41 keywords."
+    }
+   ],
+   "delc": [],
+   "f": {
+    "status": "2026-08-18T16:38:50.501Z"
+   },
+   "updated": "2026-08-18T16:39:29.923Z",
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": []
   }
  }
 }
