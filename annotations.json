@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T16:01:25.737Z",
+ "updated": "2026-08-18T16:37:07.148Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -188,6 +188,7 @@
    "delc": [],
    "f": {
     "labels": "2026-08-18T15:59:43.016Z",
+    "cluster": "2026-08-18T16:02:06.062Z",
     "offFlags": "2026-08-18T15:59:57.512Z"
    },
    "status": "",
@@ -196,13 +197,13 @@
     "slug"
    ],
    "target": "",
-   "cluster": "",
+   "cluster": "1031 Exchange Rules",
    "tier": "",
    "offFlags": [
     "review",
     "consolidate"
    ],
-   "updated": "2026-08-18T15:59:57.512Z"
+   "updated": "2026-08-18T16:02:06.062Z"
   },
   "/education-center/what-is-a-delaware-statutory-trust/": {
    "comments": [],
@@ -211,7 +212,6 @@
     "labels": "2026-08-18T16:01:25.188Z",
     "offFlags": "2026-08-18T16:01:25.737Z"
    },
-   "updated": "2026-08-18T16:01:25.737Z",
    "status": "",
    "labels": [
     "review"
@@ -221,6 +221,24 @@
    "tier": "",
    "offFlags": [
     "consolidate"
+   ],
+   "updated": "2026-08-18T16:01:25.737Z"
+  },
+  "/the-5-dos-and-donts-of-dsts-2/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-18T16:37:07.148Z"
+   },
+   "updated": "2026-08-18T16:37:07.148Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "review",
+    "slug"
    ]
   }
  }
