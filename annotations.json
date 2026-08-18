@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T17:02:29.899Z",
+ "updated": "2026-08-18T17:03:31.283Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -423,10 +423,9 @@
    "comments": [],
    "delc": [],
    "f": {
-    "offFlags": "2026-08-18T17:01:49.083Z",
-    "labels": "2026-08-18T17:01:51.161Z"
+    "labels": "2026-08-18T17:01:51.161Z",
+    "offFlags": "2026-08-18T17:01:49.083Z"
    },
-   "updated": "2026-08-18T17:01:51.161Z",
    "status": "",
    "labels": [
     "rewrite"
@@ -436,7 +435,8 @@
    "tier": "",
    "offFlags": [
     "consolidate"
-   ]
+   ],
+   "updated": "2026-08-18T17:01:51.161Z"
   },
   "/everything-you-need-to-know-about-reits/": {
    "comments": [],
@@ -444,7 +444,21 @@
    "f": {
     "tier": "2026-08-18T17:02:29.899Z"
    },
-   "updated": "2026-08-18T17:02:29.899Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "core",
+   "offFlags": [],
+   "updated": "2026-08-18T17:02:29.899Z"
+  },
+  "/explore-the-potential-of-reits-a-guide-for-investors/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "tier": "2026-08-18T17:03:31.283Z"
+   },
+   "updated": "2026-08-18T17:03:31.283Z",
    "status": "",
    "labels": [],
    "target": "",
