@@ -110,7 +110,7 @@ function renderPlacement() {
 function renderStatusPicker() {
   const cur = (annOf(openPath) || {}).status || "";
   const w = $("#dstatus"); w.innerHTML = "";
-  ANN.statuses.forEach(s => {
+  visibleStatuses(true).forEach(s => {
     const b = el("button", null, esc(s.name));
     b.type = "button";
     b.dataset.c = s.color;
@@ -186,6 +186,115 @@ function slugId(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || ("l" + uid().slice(0, 6));
 }
 
+/* ---------- status manager ---------- */
+function statusUsage(id) {
+  return Object.values(ANN.pages).filter(a => a.status === id).length;
+}
+
+function renderStatusManager() {
+  const w = $("#statlist"); w.innerHTML = "";
+  const list = visibleStatuses(false);
+  if (!list.length) w.innerHTML = '<div class="emptyc" style="padding:8px 0">Every status has been removed.</div>';
+  list.forEach((st, i) => {
+    const n = statusUsage(st.id);
+    const row = el("div", "labrow");
+    row.dataset.id = st.id;
+    row.innerHTML = `
+      <div class="ord">
+        <button data-up type="button" title="Move up"${i === 0 ? " disabled" : ""}>▲</button>
+        <button data-down type="button" title="Move down"${i === list.length - 1 ? " disabled" : ""}>▼</button>
+      </div>
+      <button class="swatch" data-c="${esc(st.color || 'slate')}" type="button" title="Change colour"></button>
+      <input type="text" value="${esc(st.name)}" aria-label="Status name">
+      <span class="use">${n} page${n === 1 ? "" : "s"}</span>
+      <button class="del" type="button" title="Remove this status everywhere">Remove</button>`;
+
+    row.querySelector("[data-up]").onclick = () => reorderStatus(st.id, -1);
+    row.querySelector("[data-down]").onclick = () => reorderStatus(st.id, 1);
+    row.querySelector(".swatch").onclick = () => {
+      const k = LABEL_COLORS.indexOf(st.color || "slate");
+      st.color = LABEL_COLORS[(k + 1) % LABEL_COLORS.length];
+      st.u = nowISO();
+      touchLibrary(); renderStatusManager(); renderStatusPicker(); refreshViews();
+    };
+    const inp = row.querySelector("input");
+    let rt;
+    inp.oninput = () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => {
+        const v = inp.value.trim();
+        if (!v) return;
+        st.name = v; st.u = nowISO();
+        touchLibrary(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+      }, 400);
+    };
+    row.querySelector(".del").onclick = () => removeStatus(st);
+    w.append(row);
+  });
+
+  const hid = (ANN.hiddenS || []).length;
+  $("#stathidden").innerHTML = hid
+    ? `${hid} status${hid > 1 ? "es" : ""} removed. <button class="linkbtn" id="statrestore" type="button">Restore default statuses</button>`
+    : `<button class="linkbtn" id="statrestore" type="button">Restore default statuses</button>`;
+  $("#statrestore").onclick = restoreStatuses;
+}
+
+/* Order is stored, not implied by array position, so it survives a merge. */
+function reorderStatus(id, dir) {
+  const list = visibleStatuses(false);
+  const i = list.findIndex(x => x.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return;
+  const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+  const t = nowISO();
+  list.forEach((x, k) => { x.o = k; x.u = t; });
+  touchLibrary(); renderStatusManager(); renderStatusPicker(); refreshViews();
+}
+
+function removeStatus(st) {
+  const n = statusUsage(st.id);
+  const msg = n
+    ? `Remove the status “${st.name}”? ${n} page${n > 1 ? "s" : ""} currently ${n > 1 ? "use" : "uses"} it and will be left with no status.`
+    : `Remove the status “${st.name}”?`;
+  if (!confirm(msg)) return;
+
+  ANN.statuses = ANN.statuses.filter(x => x.id !== st.id);
+  ANN.hiddenS = [...new Set([...(ANN.hiddenS || []), st.id])];
+  ANN.hiddenSAt = nowISO();
+  Object.keys(ANN.pages).forEach(path => {
+    if (ANN.pages[path].status === st.id) {
+      ANN.pages[path].status = "";
+      touch(path, "status");
+    }
+  });
+  touchLibrary();
+  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+  toast(`Removed the status “${st.name}”`);
+}
+
+function addStatus(name) {
+  const v = (name || "").trim();
+  if (!v) return;
+  const id = slugId(v);
+  ANN.hiddenS = (ANN.hiddenS || []).filter(x => x !== id);
+  ANN.hiddenSAt = nowISO();
+  if (!ANN.statuses.some(x => x.id === id)) {
+    const max = Math.max(-1, ...ANN.statuses.filter(x => x.id !== "none").map(x => x.o ?? 0));
+    ANN.statuses.push({ id, name: v, color: LABEL_COLORS[ANN.statuses.length % LABEL_COLORS.length],
+      o: max + 1, u: nowISO() });
+  }
+  touchLibrary();
+  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+}
+
+function restoreStatuses() {
+  ANN.hiddenS = []; ANN.hiddenSAt = nowISO();
+  DEFAULT_STATUSES.forEach(d => { if (!ANN.statuses.some(x => x.id === d.id)) ANN.statuses.push({ ...d }); });
+  touchLibrary();
+  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+  toast("Default statuses restored");
+}
+
 /* ---------- label manager ---------- */
 function labelUsage(id) {
   let n = 0;
@@ -194,6 +303,7 @@ function labelUsage(id) {
 }
 
 function openLabels() {
+  renderStatusManager();
   renderLabelManager();
   $("#labelmodal").classList.add("on");
 }
@@ -262,6 +372,8 @@ function removeLabel(l) {
   renderLabelManager(); renderLabelPicker(); refreshViews(); buildAnnFilters();
   toast(`Removed “${l.name}”`);
 }
+
+function restoreAll() { restoreStatuses(); restoreLabels(); }
 
 function restoreLabels() {
   ANN.hidden = []; ANN.hiddenAt = nowISO();
@@ -345,7 +457,7 @@ function renderNotes() {
   const ss = $("#nstatus"), sl = $("#nlabel");
   const keepS = ss.value, keepL = sl.value;
   ss.innerHTML = '<option value="">Any status</option>' +
-    ANN.statuses.filter(s => s.id !== "none").map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
+    visibleStatuses(false).map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
   sl.innerHTML = '<option value="">Any label</option>' +
     ANN.labels.filter(l => !isHidden(l.id)).map(l => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("");
   ss.value = keepS; sl.value = keepL;
@@ -486,7 +598,20 @@ function refreshViews() {
   renderHeader();
   renderMatrix(); renderGroups(); renderWork(); renderAll(); renderCov(); renderNotes();
 }
-window.onAnnotationsChanged = () => { refreshViews(); buildAnnFilters(); };
+/* Called after any merge that may have brought in another device's edits. The
+   open drawer and the manager modal read from the library, so they have to be
+   redrawn too — otherwise a status renamed on the phone still shows its old name
+   in a panel that happens to be open on the laptop. */
+window.onAnnotationsChanged = () => {
+  refreshViews();
+  buildAnnFilters();
+  if (openPath && $("#drawer").classList.contains("on")) {
+    renderPlacement(); renderStatusPicker(); renderLabelPicker(); renderThread();
+  }
+  if ($("#labelmodal").classList.contains("on")) {
+    renderStatusManager(); renderLabelManager();
+  }
+};
 
 /* ------------------------------------------------------------ wiring ---- */
 function wire() {
@@ -544,6 +669,10 @@ function wire() {
   /* label manager */
   $("#labclose").onclick = closeLabels;
   $("#labdone").onclick = closeLabels;
+  $("#labrestoreall").onclick = restoreAll;
+  $("#dmanagestat").onclick = openLabels;
+  $("#statnewbtn").onclick = () => { addStatus($("#statnew").value); $("#statnew").value = ""; };
+  $("#statnew").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#statnewbtn").click(); } };
   $("#labelmodal").onclick = e => { if (e.target === $("#labelmodal")) closeLabels(); };
   $("#labnewbtn").onclick = () => {
     const v = $("#labnew").value.trim();
@@ -716,6 +845,7 @@ function registerSW() {
     if (stored && stored.pages) {
       ANN = mergeAnn(emptyAnn(), migrate(stored));
       ANN.labels = ANN.labels.filter(l => !isHidden(l.id));
+      ANN.statuses = ANN.statuses.filter(x => !isHiddenS(x.id));
     }
 
     await Sync.load();
@@ -766,7 +896,7 @@ function buildAnnFilters() {
     '<option value="__none">No notes</option>' +
     '<option value="__comment">Has comments</option>' +
     '<option value="__moved">Moved by me</option>' +
-    '<optgroup label="Status">' + ANN.statuses.filter(s => s.id !== "none")
+    '<optgroup label="Status">' + visibleStatuses(false)
       .map(s => `<option value="s:${esc(s.id)}">${esc(s.name)}</option>`).join("") + '</optgroup>' +
     '<optgroup label="Label">' + ANN.labels.filter(l => !isHidden(l.id))
       .map(l => `<option value="l:${esc(l.id)}">${esc(l.name)}</option>`).join("") + '</optgroup>';

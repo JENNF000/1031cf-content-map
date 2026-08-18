@@ -42,6 +42,15 @@ const annOf = path => ANN.pages[path];
 const statusById = id => (ANN.statuses || []).find(s => s.id === id);
 const labelById = id => (ANN.labels || []).find(l => l.id === id);
 const isHidden = id => (ANN.hidden || []).includes(id);
+const isHiddenS = id => (ANN.hiddenS || []).includes(id);
+
+/* Statuses in display order, minus any you've removed. `none` stays first — it is
+   the clear button, not a status. */
+function visibleStatuses(withNone) {
+  return (ANN.statuses || [])
+    .filter(s => (withNone || s.id !== "none") && !isHiddenS(s.id))
+    .sort((a, b) => (a.o ?? 99) - (b.o ?? 99));
+}
 
 function effCat(p) {
   const a = annOf(p.path);
@@ -86,7 +95,7 @@ function labelPills(p, max) {
 
 function statusPill(path) {
   const a = annOf(path);
-  if (!a || !a.status) return "";
+  if (!a || !a.status || isHiddenS(a.status)) return "";
   const st = statusById(a.status);
   if (!st) return "";
   return `<span class="apill st" data-c="${esc(st.color)}"><span class="adot"></span>${esc(st.name)}</span>`;
@@ -247,7 +256,7 @@ function renderMatrix() {
         const a = el("a", "cell" + (tk === "redirect" ? " isredir" : "") + (isMoved(p) ? " moved" : ""));
         a.href = p.url; a.target = "_blank"; a.rel = "noopener";
         a.dataset.path = p.path;
-        if (tk !== "redirect") a.draggable = true;
+        if (tk !== "redirect") a.dataset.drag = "1";
         const chips = dense ? "" : `${statusPill(p.path)}${labelPills(p, 3)}`;
         a.innerHTML = `<div class="ttl"><span class="txt">${esc(p.label)}</span>
             <span class="kw${p.kw ? '' : ' zero'}">${p.kw ? n0(p.kw) : '—'}</span></div>
@@ -269,43 +278,188 @@ function renderMatrix() {
   wireDrag();
 }
 
-/* ---------- drag to re-classify ---------- */
-let dragPath = null;
+/* ---------- drag to re-classify ----------------------------------------------
 
+   Deliberately NOT the HTML5 drag-and-drop API. These cells are <a> elements, so
+   native DnD fights the browser's own link-dragging; it also can't auto-scroll the
+   horizontally scrolling matrix, and does nothing at all on touch. Pointer events
+   give one code path for mouse, pen and long-press, and are testable with real
+   input rather than synthesised DragEvents.
+   ------------------------------------------------------------------------- */
+
+const DRAG = {
+  path: null, cell: null, id: null, active: false, moved: false,
+  sx: 0, sy: 0, ghost: null, zone: null, lp: null, raf: 0,
+  vx: 0, vy: 0, lastX: null, lastY: null, suppress: false,
+};
+
+const THRESHOLD = 6;      // px of movement before a mouse drag begins
+const LONGPRESS = 380;    // ms of stillness before a touch drag begins
+
+/* Called after every renderMatrix(). Listeners are delegated and installed once,
+   so re-rendering can't leave stale handlers behind. */
 function wireDrag() {
-  document.querySelectorAll(".matrix .cell[draggable]").forEach(c => {
-    c.addEventListener("dragstart", e => {
-      dragPath = c.dataset.path;
-      e.dataTransfer.effectAllowed = "move";
-      try { e.dataTransfer.setData("text/plain", dragPath); } catch (_) {}
-      document.body.classList.add("dragging");
-      c.classList.add("dragsrc");
-    });
-    c.addEventListener("dragend", () => {
-      document.body.classList.remove("dragging");
-      c.classList.remove("dragsrc");
-      document.querySelectorAll(".dropok").forEach(n => n.classList.remove("dropok"));
-      dragPath = null;
-    });
+  if (wireDrag.done) return;
+  wireDrag.done = true;
+
+  /* kill the browser's native link drag outright */
+  document.addEventListener("dragstart", e => {
+    if (e.target.closest && e.target.closest(".matrix .cell")) e.preventDefault();
   });
 
-  document.querySelectorAll(".matrix [data-drop]").forEach(z => {
-    z.addEventListener("dragover", e => {
-      if (!dragPath) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      z.classList.add("dropok");
-    });
-    z.addEventListener("dragleave", () => z.classList.remove("dropok"));
-    z.addEventListener("drop", e => {
-      e.preventDefault();
-      z.classList.remove("dropok");
-      const path = dragPath || (e.dataTransfer && e.dataTransfer.getData("text/plain"));
-      if (!path) return;
-      const col = z.closest(".col");
-      movePage(path, col && col.dataset.cluster, z.dataset.drop === "tier" ? z.dataset.tier : null);
-    });
+  document.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const cell = e.target.closest && e.target.closest(".matrix .cell[data-drag]");
+    if (!cell) return;
+    if (e.target.closest("[data-note]")) return;        // the ✎ is not a drag handle
+    DRAG.suppress = false;
+    DRAG.path = cell.dataset.path;
+    DRAG.cell = cell;
+    DRAG.id = e.pointerId;
+    DRAG.sx = e.clientX; DRAG.sy = e.clientY;
+    DRAG.active = false; DRAG.moved = false;
+    if (e.pointerType === "touch") {
+      const x = e.clientX, y = e.clientY;
+      clearTimeout(DRAG.lp);
+      DRAG.lp = setTimeout(() => { if (DRAG.path && !DRAG.moved) beginDrag(x, y); }, LONGPRESS);
+    }
+  }, true);
+
+  addEventListener("pointermove", e => {
+    if (DRAG.path === null || e.pointerId !== DRAG.id) return;
+    const dx = e.clientX - DRAG.sx, dy = e.clientY - DRAG.sy;
+    if (!DRAG.active) {
+      if (Math.abs(dx) + Math.abs(dy) > THRESHOLD) {
+        DRAG.moved = true;
+        clearTimeout(DRAG.lp);
+        if (e.pointerType === "touch") { endDrag(false); return; }   // let the page scroll
+        beginDrag(e.clientX, e.clientY);
+      }
+      if (!DRAG.active) return;
+    }
+    e.preventDefault();
+    moveDrag(e.clientX, e.clientY);
+  }, { passive: false });
+
+  addEventListener("pointerup", e => {
+    if (DRAG.path === null || e.pointerId !== DRAG.id) return;
+    if (DRAG.active) { e.preventDefault(); dropDrag(); } else { endDrag(false); }
   });
+  addEventListener("pointercancel", () => endDrag(false));
+
+  /* a drag must not also follow the link */
+  document.addEventListener("click", e => {
+    if (!DRAG.suppress) return;
+    DRAG.suppress = false;
+    e.preventDefault(); e.stopPropagation();
+  }, true);
+
+  addEventListener("keydown", e => {
+    if (e.key === "Escape" && DRAG.active) { endDrag(false); toast("Move cancelled"); }
+  });
+}
+
+function beginDrag(x, y) {
+  if (!DRAG.cell) return;
+  DRAG.active = true;
+  document.body.classList.add("dragging");
+  DRAG.cell.classList.add("dragsrc");
+  const label = DRAG.cell.querySelector(".ttl .txt");
+  DRAG.ghost = el("div", "dragghost", esc(label ? label.textContent : DRAG.path));
+  document.body.append(DRAG.ghost);
+  /* while a touch drag is live, stop the page scrolling under it */
+  DRAG.blockTouch = ev => ev.preventDefault();
+  addEventListener("touchmove", DRAG.blockTouch, { passive: false });
+  moveDrag(x, y);
+}
+
+function moveDrag(x, y) {
+  DRAG.lastX = x; DRAG.lastY = y;
+  if (DRAG.ghost) { DRAG.ghost.style.left = x + "px"; DRAG.ghost.style.top = y + "px"; }
+  const z = zoneAt(x, y);
+  if (z !== DRAG.zone) {
+    if (DRAG.zone) DRAG.zone.classList.remove("dropok");
+    DRAG.zone = z;
+    if (z) z.classList.add("dropok");
+  }
+  autoScroll(x, y);
+}
+
+function zoneAt(x, y) {
+  const n = document.elementFromPoint(x, y);      // the ghost is pointer-events:none
+  return n && n.closest ? n.closest("[data-drop]") : null;
+}
+
+/* A drag has to be able to reach a target that isn't currently on screen. The
+   matrix scrolls sideways and rarely fits 12 clusters; columns are also taller
+   than the viewport, so the Transactional band at the top of a column can be
+   well above a fan-out page near the bottom of another. Both axes auto-scroll
+   when the pointer nears an edge. */
+function autoScroll(x, y) {
+  const m = $("#matrix");
+  const HEDGE = 70, VEDGE = 60, SPEED = 22;
+  let vx = 0, vy = 0;
+
+  if (m) {
+    const r = m.getBoundingClientRect();
+    if (x < r.left + HEDGE) vx = -SPEED * Math.min(1, (r.left + HEDGE - x) / HEDGE);
+    else if (x > r.right - HEDGE) vx = SPEED * Math.min(1, (x - (r.right - HEDGE)) / HEDGE);
+  }
+  /* Only scroll vertically when the pointer is NOT over a drop target. A column
+     header sits near the top of the screen, so scrolling up on approach would
+     slide the very thing being aimed at out from under the cursor. */
+  if (!DRAG.zone) {
+    if (y < VEDGE) vy = -SPEED * Math.min(1, (VEDGE - y) / VEDGE);
+    else if (y > innerHeight - VEDGE) vy = SPEED * Math.min(1, (y - (innerHeight - VEDGE)) / VEDGE);
+  }
+
+  DRAG.vx = vx; DRAG.vy = vy;
+  if ((vx || vy) && !DRAG.raf) {
+    const step = () => {
+      if (!DRAG.active || (!DRAG.vx && !DRAG.vy)) { DRAG.raf = 0; return; }
+      if (DRAG.vx && m) m.scrollLeft += DRAG.vx;
+      if (DRAG.vy) scrollBy(0, DRAG.vy);
+      /* the pointer hasn't moved but the page under it has, so re-test the zone */
+      if (DRAG.lastX != null) {
+        const z = zoneAt(DRAG.lastX, DRAG.lastY);
+        if (z !== DRAG.zone) {
+          if (DRAG.zone) DRAG.zone.classList.remove("dropok");
+          DRAG.zone = z;
+          if (z) z.classList.add("dropok");
+        }
+        if (z) DRAG.vy = 0;      // a target is under the cursor — stop chasing it away
+      }
+      DRAG.raf = requestAnimationFrame(step);
+    };
+    DRAG.raf = requestAnimationFrame(step);
+  }
+}
+
+function dropDrag() {
+  const zone = DRAG.zone, path = DRAG.path;
+  const col = zone && zone.closest(".col");
+  endDrag(true);
+  if (!zone || !col) return;
+  movePage(path, col.dataset.cluster, zone.dataset.drop === "tier" ? zone.dataset.tier : null);
+}
+
+function endDrag(wasDrag) {
+  clearTimeout(DRAG.lp);
+  if (DRAG.raf) { cancelAnimationFrame(DRAG.raf); DRAG.raf = 0; }
+  if (DRAG.blockTouch) { removeEventListener("touchmove", DRAG.blockTouch); DRAG.blockTouch = null; }
+  if (DRAG.ghost) { DRAG.ghost.remove(); DRAG.ghost = null; }
+  if (DRAG.zone) { DRAG.zone.classList.remove("dropok"); DRAG.zone = null; }
+  if (DRAG.cell) DRAG.cell.classList.remove("dragsrc");
+  document.body.classList.remove("dragging");
+  document.querySelectorAll(".dropok").forEach(n => n.classList.remove("dropok"));
+  DRAG.suppress = !!(wasDrag || DRAG.active);
+  /* The click that a drag suppresses may never arrive — the pointer can come up
+     over a different element entirely. Expire the flag so it can't swallow an
+     unrelated click later on. */
+  if (DRAG.suppress) setTimeout(() => { DRAG.suppress = false; }, 350);
+  DRAG.active = false; DRAG.moved = false;
+  DRAG.path = null; DRAG.cell = null; DRAG.id = null;
+  DRAG.vx = 0; DRAG.vy = 0; DRAG.lastX = null; DRAG.lastY = null;
 }
 
 /* Apply a manual move. `tier` null means "cluster only, keep the tier". */

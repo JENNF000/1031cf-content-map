@@ -217,6 +217,63 @@ ok('placement not lost by the label round-trip',
    `${fin.pages[shared].cluster} / ${fin.pages[shared].tier}`);
 await a.evaluate(() => closeDrawer());
 
+/* status library edits merge per entry, and a removal isn't undone by the other
+   device still having it */
+await a.evaluate(() => {
+  const st = ANN.statuses.find(x => x.id === 'drafted');
+  st.name = 'Drafted (A)'; st.u = new Date().toISOString();
+  touchLibrary();
+});
+await a.waitForTimeout(3200);
+ok('status rename from A pushed',
+   JSON.parse(repoFile.content).statuses.some(x => x.name === 'Drafted (A)'));
+
+await b.reload({ waitUntil: 'networkidle' });
+await b.waitForSelector('#boot.off', { state: 'attached' });
+await b.waitForTimeout(1800);
+ok('device B sees the rename', await b.evaluate(() => ANN.statuses.some(x => x.name === 'Drafted (A)')));
+
+/* B removes a different status; A reorders. Both must survive. */
+await b.evaluate(() => {
+  ANN.statuses = ANN.statuses.filter(x => x.id !== 'monitoring');
+  ANN.hiddenS = ['monitoring']; ANN.hiddenSAt = new Date().toISOString();
+  touchLibrary();
+});
+await b.waitForTimeout(3200);
+await a.evaluate(() => {
+  const t = new Date().toISOString();
+  visibleStatuses(false).slice().reverse().forEach((x, k) => { x.o = k; x.u = t; });
+  touchLibrary();
+});
+await a.waitForTimeout(3400);
+const fin2 = JSON.parse(repoFile.content);
+/* A hidden entry may stay in the library — `hiddenS` is what suppresses it, and
+   that's deliberate so the other device can't resurrect it. What matters is that
+   nothing renders it. */
+ok('removal from B survives A reordering',
+   (fin2.hiddenS || []).includes('monitoring'), JSON.stringify(fin2.hiddenS || []));
+/* check the live library, then reopen the drawer to confirm the picker rebuilds
+   from it (a closed drawer keeps whatever it last rendered) */
+ok('a hidden status is gone from the library on A',
+   await a.evaluate(() => !visibleStatuses(true).some(x => x.id === 'monitoring')));
+ok('reopening the drawer no longer offers it',
+   await a.evaluate(t => {
+     openDrawer(t);
+     const gone = ![...document.querySelectorAll('#dstatus button')].some(n => /Monitoring/.test(n.textContent));
+     closeDrawer();
+     return gone;
+   }, shared));
+ok('order from A survives too',
+   fin2.statuses.filter(x => x.id !== 'none').every(x => typeof x.o === 'number'));
+
+/* B reloads: the removed status must not come back from A's copy */
+await b.reload({ waitUntil: 'networkidle' });
+await b.waitForSelector('#boot.off', { state: 'attached' });
+await b.waitForTimeout(1800);
+ok('removed status stays removed on B',
+   await b.evaluate(() => (ANN.hiddenS || []).includes('monitoring')
+     && !visibleStatuses(false).some(x => x.id === 'monitoring')));
+
 /* disconnect leaves local data intact */
 await a.click('#syncchip'); await a.click('#sydisconnect'); await a.waitForTimeout(500);
 ok('disconnect returns to local', (await a.locator('#syncchip').getAttribute('data-s')) === 'local');

@@ -15,7 +15,7 @@
       <option value="traffic">Most traffic</option>
       <option value="path">URL A–Z</option>
     </select>
-    <button class="btn" id="annlabels">Manage labels</button>
+    <button class="btn" id="annlabels">Statuses &amp; labels</button>
     <button class="btn" id="annexport">Export notes</button>
     <button class="btn" id="annimport">Import</button>
     <input type="file" id="annfile" accept="application/json" style="display:none">
@@ -45,7 +45,8 @@
     </div>
 
     <div class="sect">
-      <span class="slab">Status</span>
+      <span class="slab">Status
+        <button class="linkbtn" id="dmanagestat" type="button">Manage</button></span>
       <div class="statgrid" id="dstatus"></div>
     </div>
 
@@ -86,24 +87,41 @@
   </div>
 </aside>
 
-<!-- ============ label manager ============ -->
+<!-- ============ label + status manager ============ -->
 <div class="modal" id="labelmodal">
   <div class="mbox">
     <button class="dclose" id="labclose" aria-label="Close" style="position:absolute;top:14px;right:16px">✕</button>
-    <h2>Labels</h2>
-    <p class="msub">One library for everything. The ones marked <b>auto</b> are applied by the build —
-      Review and Remove come from your workbook, the rest are computed from the SEMrush and crawl data.
-      Rename any of them, change a colour, or remove one entirely. Removing takes it off every page.</p>
+    <h2>Statuses &amp; labels</h2>
+    <p class="msub">Both are yours to shape. Rename anything, change a colour, add your own, or remove what
+      you don't use — removing takes it off every page.</p>
 
-    <div id="lablist" class="lablist"></div>
-
-    <div class="rowbtns" style="margin-top:14px">
-      <input type="text" id="labnew" placeholder="Add a label…" style="flex:1">
-      <button class="btn" id="labnewbtn">Add</button>
+    <div class="msect">
+      <span class="slab">Statuses</span>
+      <p class="mnote">One per page, and the order here is the order they appear on a page. These are the steps
+        of your workflow, so arrange them however you actually work.</p>
+      <div id="statlist" class="lablist"></div>
+      <div class="rowbtns">
+        <input type="text" id="statnew" placeholder="Add a status…" style="flex:1">
+        <button class="btn" id="statnewbtn">Add</button>
+      </div>
+      <div class="hint" id="stathidden" style="margin-top:10px"></div>
     </div>
-    <div class="hint" id="labhidden" style="margin-top:12px"></div>
+
+    <div class="msect">
+      <span class="slab">Labels</span>
+      <p class="mnote">Any number per page. The ones marked <b>auto</b> are applied by the build — Review and
+        Remove came from your workbook, the rest are computed from the SEMrush and crawl data. They're editable
+        and removable like all the others.</p>
+      <div id="lablist" class="lablist"></div>
+      <div class="rowbtns">
+        <input type="text" id="labnew" placeholder="Add a label…" style="flex:1">
+        <button class="btn" id="labnewbtn">Add</button>
+      </div>
+      <div class="hint" id="labhidden" style="margin-top:10px"></div>
+    </div>
 
     <div class="macts">
+      <button class="btn" id="labrestoreall">Restore all defaults</button>
       <button class="btn primary" id="labdone">Done</button>
     </div>
   </div>

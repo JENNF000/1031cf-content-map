@@ -40,15 +40,18 @@ const STORE = (() => {
 })();
 
 /* --------------------------------------------------------- annotations -- */
+/* `none` is the clear-the-status button, not a status: it can't be renamed,
+   recoloured or removed. `o` is the display order, which is meaningful here in a
+   way it isn't for labels — these are the steps of a workflow. */
 const DEFAULT_STATUSES = [
-  { id: "none",       name: "No status",     color: "slate"  },
-  { id: "todo",       name: "To do",         color: "slate"  },
-  { id: "inprogress", name: "In progress",   color: "amber"  },
-  { id: "drafted",    name: "Drafted",       color: "purple" },
-  { id: "published",  name: "Published",     color: "green"  },
-  { id: "monitoring", name: "Monitoring",    color: "blue"   },
-  { id: "blocked",    name: "Blocked",       color: "red"    },
-  { id: "wontdo",     name: "Won't do",      color: "slate"  },
+  { id: "none",       name: "No status",     color: "slate",  fixed: true, o: -1 },
+  { id: "todo",       name: "To do",         color: "slate",  o: 0 },
+  { id: "inprogress", name: "In progress",   color: "amber",  o: 1 },
+  { id: "drafted",    name: "Drafted",       color: "purple", o: 2 },
+  { id: "published",  name: "Published",     color: "green",  o: 3 },
+  { id: "monitoring", name: "Monitoring",    color: "blue",   o: 4 },
+  { id: "blocked",    name: "Blocked",       color: "red",    o: 5 },
+  { id: "wontdo",     name: "Won't do",      color: "slate",  o: 6 },
 ];
 
 /* Labels the build computes for you. Their ids match the flag keys in
@@ -91,6 +94,8 @@ const emptyAnn = () => ({
   labels: ALL_DEFAULT_LABELS(),
   hidden: [],            // label ids removed from the library
   hiddenAt: new Date(0).toISOString(),
+  hiddenS: [],           // status ids removed from the library
+  hiddenSAt: new Date(0).toISOString(),
   pages: {},
 });
 
@@ -163,6 +168,8 @@ function mergeAnn(a, b) {
     labels: unionById(a.labels, b.labels),
     hidden: ((a.hiddenAt || "") >= (b.hiddenAt || "") ? a.hidden : b.hidden) || [],
     hiddenAt: (a.hiddenAt || "") >= (b.hiddenAt || "") ? (a.hiddenAt || "") : (b.hiddenAt || ""),
+    hiddenS: ((a.hiddenSAt || "") >= (b.hiddenSAt || "") ? a.hiddenS : b.hiddenS) || [],
+    hiddenSAt: (a.hiddenSAt || "") >= (b.hiddenSAt || "") ? (a.hiddenSAt || "") : (b.hiddenSAt || ""),
     pages: {},
   };
   const paths = new Set([...Object.keys(a.pages || {}), ...Object.keys(b.pages || {})]);
@@ -364,6 +371,9 @@ const Sync = (() => {
           sha = j.content && j.content.sha;
           dirty = false;
           set("synced", "Synced " + timeStr());
+          /* the push merged the remote in first, so the other device's edits may
+             have landed — let the UI redraw against them */
+          if (typeof window.onAnnotationsChanged === "function") window.onAnnotationsChanged();
           return true;
         }
         if (r.status === 409 || r.status === 422) { sha = null; continue; }  // stale sha, retry
@@ -442,6 +452,15 @@ const annOf = path => ANN.pages[path];
 const statusById = id => (ANN.statuses || []).find(s => s.id === id);
 const labelById = id => (ANN.labels || []).find(l => l.id === id);
 const isHidden = id => (ANN.hidden || []).includes(id);
+const isHiddenS = id => (ANN.hiddenS || []).includes(id);
+
+/* Statuses in display order, minus any you've removed. `none` stays first — it is
+   the clear button, not a status. */
+function visibleStatuses(withNone) {
+  return (ANN.statuses || [])
+    .filter(s => (withNone || s.id !== "none") && !isHiddenS(s.id))
+    .sort((a, b) => (a.o ?? 99) - (b.o ?? 99));
+}
 
 function effCat(p) {
   const a = annOf(p.path);
@@ -486,7 +505,7 @@ function labelPills(p, max) {
 
 function statusPill(path) {
   const a = annOf(path);
-  if (!a || !a.status) return "";
+  if (!a || !a.status || isHiddenS(a.status)) return "";
   const st = statusById(a.status);
   if (!st) return "";
   return `<span class="apill st" data-c="${esc(st.color)}"><span class="adot"></span>${esc(st.name)}</span>`;
@@ -647,7 +666,7 @@ function renderMatrix() {
         const a = el("a", "cell" + (tk === "redirect" ? " isredir" : "") + (isMoved(p) ? " moved" : ""));
         a.href = p.url; a.target = "_blank"; a.rel = "noopener";
         a.dataset.path = p.path;
-        if (tk !== "redirect") a.draggable = true;
+        if (tk !== "redirect") a.dataset.drag = "1";
         const chips = dense ? "" : `${statusPill(p.path)}${labelPills(p, 3)}`;
         a.innerHTML = `<div class="ttl"><span class="txt">${esc(p.label)}</span>
             <span class="kw${p.kw ? '' : ' zero'}">${p.kw ? n0(p.kw) : '—'}</span></div>
@@ -669,43 +688,188 @@ function renderMatrix() {
   wireDrag();
 }
 
-/* ---------- drag to re-classify ---------- */
-let dragPath = null;
+/* ---------- drag to re-classify ----------------------------------------------
 
+   Deliberately NOT the HTML5 drag-and-drop API. These cells are <a> elements, so
+   native DnD fights the browser's own link-dragging; it also can't auto-scroll the
+   horizontally scrolling matrix, and does nothing at all on touch. Pointer events
+   give one code path for mouse, pen and long-press, and are testable with real
+   input rather than synthesised DragEvents.
+   ------------------------------------------------------------------------- */
+
+const DRAG = {
+  path: null, cell: null, id: null, active: false, moved: false,
+  sx: 0, sy: 0, ghost: null, zone: null, lp: null, raf: 0,
+  vx: 0, vy: 0, lastX: null, lastY: null, suppress: false,
+};
+
+const THRESHOLD = 6;      // px of movement before a mouse drag begins
+const LONGPRESS = 380;    // ms of stillness before a touch drag begins
+
+/* Called after every renderMatrix(). Listeners are delegated and installed once,
+   so re-rendering can't leave stale handlers behind. */
 function wireDrag() {
-  document.querySelectorAll(".matrix .cell[draggable]").forEach(c => {
-    c.addEventListener("dragstart", e => {
-      dragPath = c.dataset.path;
-      e.dataTransfer.effectAllowed = "move";
-      try { e.dataTransfer.setData("text/plain", dragPath); } catch (_) {}
-      document.body.classList.add("dragging");
-      c.classList.add("dragsrc");
-    });
-    c.addEventListener("dragend", () => {
-      document.body.classList.remove("dragging");
-      c.classList.remove("dragsrc");
-      document.querySelectorAll(".dropok").forEach(n => n.classList.remove("dropok"));
-      dragPath = null;
-    });
+  if (wireDrag.done) return;
+  wireDrag.done = true;
+
+  /* kill the browser's native link drag outright */
+  document.addEventListener("dragstart", e => {
+    if (e.target.closest && e.target.closest(".matrix .cell")) e.preventDefault();
   });
 
-  document.querySelectorAll(".matrix [data-drop]").forEach(z => {
-    z.addEventListener("dragover", e => {
-      if (!dragPath) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
-      z.classList.add("dropok");
-    });
-    z.addEventListener("dragleave", () => z.classList.remove("dropok"));
-    z.addEventListener("drop", e => {
-      e.preventDefault();
-      z.classList.remove("dropok");
-      const path = dragPath || (e.dataTransfer && e.dataTransfer.getData("text/plain"));
-      if (!path) return;
-      const col = z.closest(".col");
-      movePage(path, col && col.dataset.cluster, z.dataset.drop === "tier" ? z.dataset.tier : null);
-    });
+  document.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    const cell = e.target.closest && e.target.closest(".matrix .cell[data-drag]");
+    if (!cell) return;
+    if (e.target.closest("[data-note]")) return;        // the ✎ is not a drag handle
+    DRAG.suppress = false;
+    DRAG.path = cell.dataset.path;
+    DRAG.cell = cell;
+    DRAG.id = e.pointerId;
+    DRAG.sx = e.clientX; DRAG.sy = e.clientY;
+    DRAG.active = false; DRAG.moved = false;
+    if (e.pointerType === "touch") {
+      const x = e.clientX, y = e.clientY;
+      clearTimeout(DRAG.lp);
+      DRAG.lp = setTimeout(() => { if (DRAG.path && !DRAG.moved) beginDrag(x, y); }, LONGPRESS);
+    }
+  }, true);
+
+  addEventListener("pointermove", e => {
+    if (DRAG.path === null || e.pointerId !== DRAG.id) return;
+    const dx = e.clientX - DRAG.sx, dy = e.clientY - DRAG.sy;
+    if (!DRAG.active) {
+      if (Math.abs(dx) + Math.abs(dy) > THRESHOLD) {
+        DRAG.moved = true;
+        clearTimeout(DRAG.lp);
+        if (e.pointerType === "touch") { endDrag(false); return; }   // let the page scroll
+        beginDrag(e.clientX, e.clientY);
+      }
+      if (!DRAG.active) return;
+    }
+    e.preventDefault();
+    moveDrag(e.clientX, e.clientY);
+  }, { passive: false });
+
+  addEventListener("pointerup", e => {
+    if (DRAG.path === null || e.pointerId !== DRAG.id) return;
+    if (DRAG.active) { e.preventDefault(); dropDrag(); } else { endDrag(false); }
   });
+  addEventListener("pointercancel", () => endDrag(false));
+
+  /* a drag must not also follow the link */
+  document.addEventListener("click", e => {
+    if (!DRAG.suppress) return;
+    DRAG.suppress = false;
+    e.preventDefault(); e.stopPropagation();
+  }, true);
+
+  addEventListener("keydown", e => {
+    if (e.key === "Escape" && DRAG.active) { endDrag(false); toast("Move cancelled"); }
+  });
+}
+
+function beginDrag(x, y) {
+  if (!DRAG.cell) return;
+  DRAG.active = true;
+  document.body.classList.add("dragging");
+  DRAG.cell.classList.add("dragsrc");
+  const label = DRAG.cell.querySelector(".ttl .txt");
+  DRAG.ghost = el("div", "dragghost", esc(label ? label.textContent : DRAG.path));
+  document.body.append(DRAG.ghost);
+  /* while a touch drag is live, stop the page scrolling under it */
+  DRAG.blockTouch = ev => ev.preventDefault();
+  addEventListener("touchmove", DRAG.blockTouch, { passive: false });
+  moveDrag(x, y);
+}
+
+function moveDrag(x, y) {
+  DRAG.lastX = x; DRAG.lastY = y;
+  if (DRAG.ghost) { DRAG.ghost.style.left = x + "px"; DRAG.ghost.style.top = y + "px"; }
+  const z = zoneAt(x, y);
+  if (z !== DRAG.zone) {
+    if (DRAG.zone) DRAG.zone.classList.remove("dropok");
+    DRAG.zone = z;
+    if (z) z.classList.add("dropok");
+  }
+  autoScroll(x, y);
+}
+
+function zoneAt(x, y) {
+  const n = document.elementFromPoint(x, y);      // the ghost is pointer-events:none
+  return n && n.closest ? n.closest("[data-drop]") : null;
+}
+
+/* A drag has to be able to reach a target that isn't currently on screen. The
+   matrix scrolls sideways and rarely fits 12 clusters; columns are also taller
+   than the viewport, so the Transactional band at the top of a column can be
+   well above a fan-out page near the bottom of another. Both axes auto-scroll
+   when the pointer nears an edge. */
+function autoScroll(x, y) {
+  const m = $("#matrix");
+  const HEDGE = 70, VEDGE = 60, SPEED = 22;
+  let vx = 0, vy = 0;
+
+  if (m) {
+    const r = m.getBoundingClientRect();
+    if (x < r.left + HEDGE) vx = -SPEED * Math.min(1, (r.left + HEDGE - x) / HEDGE);
+    else if (x > r.right - HEDGE) vx = SPEED * Math.min(1, (x - (r.right - HEDGE)) / HEDGE);
+  }
+  /* Only scroll vertically when the pointer is NOT over a drop target. A column
+     header sits near the top of the screen, so scrolling up on approach would
+     slide the very thing being aimed at out from under the cursor. */
+  if (!DRAG.zone) {
+    if (y < VEDGE) vy = -SPEED * Math.min(1, (VEDGE - y) / VEDGE);
+    else if (y > innerHeight - VEDGE) vy = SPEED * Math.min(1, (y - (innerHeight - VEDGE)) / VEDGE);
+  }
+
+  DRAG.vx = vx; DRAG.vy = vy;
+  if ((vx || vy) && !DRAG.raf) {
+    const step = () => {
+      if (!DRAG.active || (!DRAG.vx && !DRAG.vy)) { DRAG.raf = 0; return; }
+      if (DRAG.vx && m) m.scrollLeft += DRAG.vx;
+      if (DRAG.vy) scrollBy(0, DRAG.vy);
+      /* the pointer hasn't moved but the page under it has, so re-test the zone */
+      if (DRAG.lastX != null) {
+        const z = zoneAt(DRAG.lastX, DRAG.lastY);
+        if (z !== DRAG.zone) {
+          if (DRAG.zone) DRAG.zone.classList.remove("dropok");
+          DRAG.zone = z;
+          if (z) z.classList.add("dropok");
+        }
+        if (z) DRAG.vy = 0;      // a target is under the cursor — stop chasing it away
+      }
+      DRAG.raf = requestAnimationFrame(step);
+    };
+    DRAG.raf = requestAnimationFrame(step);
+  }
+}
+
+function dropDrag() {
+  const zone = DRAG.zone, path = DRAG.path;
+  const col = zone && zone.closest(".col");
+  endDrag(true);
+  if (!zone || !col) return;
+  movePage(path, col.dataset.cluster, zone.dataset.drop === "tier" ? zone.dataset.tier : null);
+}
+
+function endDrag(wasDrag) {
+  clearTimeout(DRAG.lp);
+  if (DRAG.raf) { cancelAnimationFrame(DRAG.raf); DRAG.raf = 0; }
+  if (DRAG.blockTouch) { removeEventListener("touchmove", DRAG.blockTouch); DRAG.blockTouch = null; }
+  if (DRAG.ghost) { DRAG.ghost.remove(); DRAG.ghost = null; }
+  if (DRAG.zone) { DRAG.zone.classList.remove("dropok"); DRAG.zone = null; }
+  if (DRAG.cell) DRAG.cell.classList.remove("dragsrc");
+  document.body.classList.remove("dragging");
+  document.querySelectorAll(".dropok").forEach(n => n.classList.remove("dropok"));
+  DRAG.suppress = !!(wasDrag || DRAG.active);
+  /* The click that a drag suppresses may never arrive — the pointer can come up
+     over a different element entirely. Expire the flag so it can't swallow an
+     unrelated click later on. */
+  if (DRAG.suppress) setTimeout(() => { DRAG.suppress = false; }, 350);
+  DRAG.active = false; DRAG.moved = false;
+  DRAG.path = null; DRAG.cell = null; DRAG.id = null;
+  DRAG.vx = 0; DRAG.vy = 0; DRAG.lastX = null; DRAG.lastY = null;
 }
 
 /* Apply a manual move. `tier` null means "cluster only, keep the tier". */
@@ -1117,7 +1281,7 @@ function renderPlacement() {
 function renderStatusPicker() {
   const cur = (annOf(openPath) || {}).status || "";
   const w = $("#dstatus"); w.innerHTML = "";
-  ANN.statuses.forEach(s => {
+  visibleStatuses(true).forEach(s => {
     const b = el("button", null, esc(s.name));
     b.type = "button";
     b.dataset.c = s.color;
@@ -1193,6 +1357,115 @@ function slugId(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || ("l" + uid().slice(0, 6));
 }
 
+/* ---------- status manager ---------- */
+function statusUsage(id) {
+  return Object.values(ANN.pages).filter(a => a.status === id).length;
+}
+
+function renderStatusManager() {
+  const w = $("#statlist"); w.innerHTML = "";
+  const list = visibleStatuses(false);
+  if (!list.length) w.innerHTML = '<div class="emptyc" style="padding:8px 0">Every status has been removed.</div>';
+  list.forEach((st, i) => {
+    const n = statusUsage(st.id);
+    const row = el("div", "labrow");
+    row.dataset.id = st.id;
+    row.innerHTML = `
+      <div class="ord">
+        <button data-up type="button" title="Move up"${i === 0 ? " disabled" : ""}>▲</button>
+        <button data-down type="button" title="Move down"${i === list.length - 1 ? " disabled" : ""}>▼</button>
+      </div>
+      <button class="swatch" data-c="${esc(st.color || 'slate')}" type="button" title="Change colour"></button>
+      <input type="text" value="${esc(st.name)}" aria-label="Status name">
+      <span class="use">${n} page${n === 1 ? "" : "s"}</span>
+      <button class="del" type="button" title="Remove this status everywhere">Remove</button>`;
+
+    row.querySelector("[data-up]").onclick = () => reorderStatus(st.id, -1);
+    row.querySelector("[data-down]").onclick = () => reorderStatus(st.id, 1);
+    row.querySelector(".swatch").onclick = () => {
+      const k = LABEL_COLORS.indexOf(st.color || "slate");
+      st.color = LABEL_COLORS[(k + 1) % LABEL_COLORS.length];
+      st.u = nowISO();
+      touchLibrary(); renderStatusManager(); renderStatusPicker(); refreshViews();
+    };
+    const inp = row.querySelector("input");
+    let rt;
+    inp.oninput = () => {
+      clearTimeout(rt);
+      rt = setTimeout(() => {
+        const v = inp.value.trim();
+        if (!v) return;
+        st.name = v; st.u = nowISO();
+        touchLibrary(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+      }, 400);
+    };
+    row.querySelector(".del").onclick = () => removeStatus(st);
+    w.append(row);
+  });
+
+  const hid = (ANN.hiddenS || []).length;
+  $("#stathidden").innerHTML = hid
+    ? `${hid} status${hid > 1 ? "es" : ""} removed. <button class="linkbtn" id="statrestore" type="button">Restore default statuses</button>`
+    : `<button class="linkbtn" id="statrestore" type="button">Restore default statuses</button>`;
+  $("#statrestore").onclick = restoreStatuses;
+}
+
+/* Order is stored, not implied by array position, so it survives a merge. */
+function reorderStatus(id, dir) {
+  const list = visibleStatuses(false);
+  const i = list.findIndex(x => x.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return;
+  const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
+  const t = nowISO();
+  list.forEach((x, k) => { x.o = k; x.u = t; });
+  touchLibrary(); renderStatusManager(); renderStatusPicker(); refreshViews();
+}
+
+function removeStatus(st) {
+  const n = statusUsage(st.id);
+  const msg = n
+    ? `Remove the status “${st.name}”? ${n} page${n > 1 ? "s" : ""} currently ${n > 1 ? "use" : "uses"} it and will be left with no status.`
+    : `Remove the status “${st.name}”?`;
+  if (!confirm(msg)) return;
+
+  ANN.statuses = ANN.statuses.filter(x => x.id !== st.id);
+  ANN.hiddenS = [...new Set([...(ANN.hiddenS || []), st.id])];
+  ANN.hiddenSAt = nowISO();
+  Object.keys(ANN.pages).forEach(path => {
+    if (ANN.pages[path].status === st.id) {
+      ANN.pages[path].status = "";
+      touch(path, "status");
+    }
+  });
+  touchLibrary();
+  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+  toast(`Removed the status “${st.name}”`);
+}
+
+function addStatus(name) {
+  const v = (name || "").trim();
+  if (!v) return;
+  const id = slugId(v);
+  ANN.hiddenS = (ANN.hiddenS || []).filter(x => x !== id);
+  ANN.hiddenSAt = nowISO();
+  if (!ANN.statuses.some(x => x.id === id)) {
+    const max = Math.max(-1, ...ANN.statuses.filter(x => x.id !== "none").map(x => x.o ?? 0));
+    ANN.statuses.push({ id, name: v, color: LABEL_COLORS[ANN.statuses.length % LABEL_COLORS.length],
+      o: max + 1, u: nowISO() });
+  }
+  touchLibrary();
+  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+}
+
+function restoreStatuses() {
+  ANN.hiddenS = []; ANN.hiddenSAt = nowISO();
+  DEFAULT_STATUSES.forEach(d => { if (!ANN.statuses.some(x => x.id === d.id)) ANN.statuses.push({ ...d }); });
+  touchLibrary();
+  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
+  toast("Default statuses restored");
+}
+
 /* ---------- label manager ---------- */
 function labelUsage(id) {
   let n = 0;
@@ -1201,6 +1474,7 @@ function labelUsage(id) {
 }
 
 function openLabels() {
+  renderStatusManager();
   renderLabelManager();
   $("#labelmodal").classList.add("on");
 }
@@ -1269,6 +1543,8 @@ function removeLabel(l) {
   renderLabelManager(); renderLabelPicker(); refreshViews(); buildAnnFilters();
   toast(`Removed “${l.name}”`);
 }
+
+function restoreAll() { restoreStatuses(); restoreLabels(); }
 
 function restoreLabels() {
   ANN.hidden = []; ANN.hiddenAt = nowISO();
@@ -1352,7 +1628,7 @@ function renderNotes() {
   const ss = $("#nstatus"), sl = $("#nlabel");
   const keepS = ss.value, keepL = sl.value;
   ss.innerHTML = '<option value="">Any status</option>' +
-    ANN.statuses.filter(s => s.id !== "none").map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
+    visibleStatuses(false).map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
   sl.innerHTML = '<option value="">Any label</option>' +
     ANN.labels.filter(l => !isHidden(l.id)).map(l => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("");
   ss.value = keepS; sl.value = keepL;
@@ -1493,7 +1769,20 @@ function refreshViews() {
   renderHeader();
   renderMatrix(); renderGroups(); renderWork(); renderAll(); renderCov(); renderNotes();
 }
-window.onAnnotationsChanged = () => { refreshViews(); buildAnnFilters(); };
+/* Called after any merge that may have brought in another device's edits. The
+   open drawer and the manager modal read from the library, so they have to be
+   redrawn too — otherwise a status renamed on the phone still shows its old name
+   in a panel that happens to be open on the laptop. */
+window.onAnnotationsChanged = () => {
+  refreshViews();
+  buildAnnFilters();
+  if (openPath && $("#drawer").classList.contains("on")) {
+    renderPlacement(); renderStatusPicker(); renderLabelPicker(); renderThread();
+  }
+  if ($("#labelmodal").classList.contains("on")) {
+    renderStatusManager(); renderLabelManager();
+  }
+};
 
 /* ------------------------------------------------------------ wiring ---- */
 function wire() {
@@ -1551,6 +1840,10 @@ function wire() {
   /* label manager */
   $("#labclose").onclick = closeLabels;
   $("#labdone").onclick = closeLabels;
+  $("#labrestoreall").onclick = restoreAll;
+  $("#dmanagestat").onclick = openLabels;
+  $("#statnewbtn").onclick = () => { addStatus($("#statnew").value); $("#statnew").value = ""; };
+  $("#statnew").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#statnewbtn").click(); } };
   $("#labelmodal").onclick = e => { if (e.target === $("#labelmodal")) closeLabels(); };
   $("#labnewbtn").onclick = () => {
     const v = $("#labnew").value.trim();
@@ -1723,6 +2016,7 @@ function registerSW() {
     if (stored && stored.pages) {
       ANN = mergeAnn(emptyAnn(), migrate(stored));
       ANN.labels = ANN.labels.filter(l => !isHidden(l.id));
+      ANN.statuses = ANN.statuses.filter(x => !isHiddenS(x.id));
     }
 
     await Sync.load();
@@ -1773,7 +2067,7 @@ function buildAnnFilters() {
     '<option value="__none">No notes</option>' +
     '<option value="__comment">Has comments</option>' +
     '<option value="__moved">Moved by me</option>' +
-    '<optgroup label="Status">' + ANN.statuses.filter(s => s.id !== "none")
+    '<optgroup label="Status">' + visibleStatuses(false)
       .map(s => `<option value="s:${esc(s.id)}">${esc(s.name)}</option>`).join("") + '</optgroup>' +
     '<optgroup label="Label">' + ANN.labels.filter(l => !isHidden(l.id))
       .map(l => `<option value="l:${esc(l.id)}">${esc(l.name)}</option>`).join("") + '</optgroup>';

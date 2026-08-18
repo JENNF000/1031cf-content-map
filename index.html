@@ -507,10 +507,17 @@ body[data-density="compact"] .cell{padding:6px 12px 7px}
 body[data-density="compact"] .cell .bar{margin-top:4px}
 
 /* ---- drag & drop ---- */
-.cell[draggable="true"]{cursor:grab}
-.cell.dragsrc{opacity:.35}
-body.dragging .cell{pointer-events:none}
+.cell[data-drag]{cursor:grab;-webkit-user-drag:none;-webkit-touch-callout:none}
+.cell.dragsrc{opacity:.3}
+body.dragging{cursor:grabbing;user-select:none;-webkit-user-select:none}
+body.dragging .cell[data-drag]{cursor:grabbing}
 body.dragging .tiergroup,body.dragging .col-h{transition:box-shadow .12s,background .12s}
+
+/* the thing that follows the cursor */
+.dragghost{position:fixed;z-index:200;pointer-events:none;transform:translate(12px,10px);
+  background:var(--surface);border:1px solid var(--blue);border-radius:8px;padding:7px 11px;
+  font-size:12.5px;font-weight:600;color:var(--ink);max-width:250px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;box-shadow:0 10px 26px rgba(0,0,0,.22)}
 .tiergroup.dropok,.col-h.dropok{box-shadow:0 0 0 2px var(--blue) inset;background:var(--blue-100)}
 .tiergroup.dropok .tierlab{background:transparent}
 .dropzone{padding:14px 12px;font-size:11.5px;color:var(--muted);font-style:italic;text-align:center}
@@ -583,6 +590,25 @@ body.dragging .tiergroup,body.dragging .col-h{transition:box-shadow .12s,backgro
 .modal .rowbtns input[type="text"]{flex:1;min-width:0}
 .modal .rowbtns .btn{flex:none}
 .lablist{border-top:1px solid var(--grid);border-bottom:1px solid var(--grid);padding:2px 4px}
+
+/* ---- manager modal: two sections ---- */
+.msect{margin-top:20px}
+.msect:first-of-type{margin-top:6px}
+.msect .slab{display:block;font-size:11px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:5px}
+.msect .mnote{font-size:12px;color:var(--ink-2);line-height:1.6;margin:0 0 9px}
+.labrow .ord{display:flex;flex-direction:column;gap:1px;flex:none}
+.labrow .ord button{border:1px solid var(--grid);background:var(--surface);color:var(--ink-2);
+  border-radius:4px;font:inherit;font-size:8px;line-height:1;padding:2px 4px;cursor:pointer}
+.labrow .ord button:hover:not([disabled]){border-color:var(--blue);color:var(--blue)}
+.labrow .ord button[disabled]{opacity:.3;cursor:default}
+.labrow.fixedrow{opacity:.6}
+
+/* with two lists in one modal, each gets less room and Done stays reachable */
+.lablist{max-height:min(30vh,290px)}
+#labelmodal .mbox{padding-bottom:0}
+#labelmodal .macts{position:sticky;bottom:0;background:var(--surface);padding:14px 0 20px;
+  margin-top:18px;border-top:1px solid var(--grid)}
 
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 .wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
@@ -800,7 +826,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
       <option value="traffic">Most traffic</option>
       <option value="path">URL A–Z</option>
     </select>
-    <button class="btn" id="annlabels">Manage labels</button>
+    <button class="btn" id="annlabels">Statuses &amp; labels</button>
     <button class="btn" id="annexport">Export notes</button>
     <button class="btn" id="annimport">Import</button>
     <input type="file" id="annfile" accept="application/json" style="display:none">
@@ -837,7 +863,8 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     </div>
 
     <div class="sect">
-      <span class="slab">Status</span>
+      <span class="slab">Status
+        <button class="linkbtn" id="dmanagestat" type="button">Manage</button></span>
       <div class="statgrid" id="dstatus"></div>
     </div>
 
@@ -878,24 +905,41 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   </div>
 </aside>
 
-<!-- ============ label manager ============ -->
+<!-- ============ label + status manager ============ -->
 <div class="modal" id="labelmodal">
   <div class="mbox">
     <button class="dclose" id="labclose" aria-label="Close" style="position:absolute;top:14px;right:16px">✕</button>
-    <h2>Labels</h2>
-    <p class="msub">One library for everything. The ones marked <b>auto</b> are applied by the build —
-      Review and Remove come from your workbook, the rest are computed from the SEMrush and crawl data.
-      Rename any of them, change a colour, or remove one entirely. Removing takes it off every page.</p>
+    <h2>Statuses &amp; labels</h2>
+    <p class="msub">Both are yours to shape. Rename anything, change a colour, add your own, or remove what
+      you don't use — removing takes it off every page.</p>
 
-    <div id="lablist" class="lablist"></div>
-
-    <div class="rowbtns" style="margin-top:14px">
-      <input type="text" id="labnew" placeholder="Add a label…" style="flex:1">
-      <button class="btn" id="labnewbtn">Add</button>
+    <div class="msect">
+      <span class="slab">Statuses</span>
+      <p class="mnote">One per page, and the order here is the order they appear on a page. These are the steps
+        of your workflow, so arrange them however you actually work.</p>
+      <div id="statlist" class="lablist"></div>
+      <div class="rowbtns">
+        <input type="text" id="statnew" placeholder="Add a status…" style="flex:1">
+        <button class="btn" id="statnewbtn">Add</button>
+      </div>
+      <div class="hint" id="stathidden" style="margin-top:10px"></div>
     </div>
-    <div class="hint" id="labhidden" style="margin-top:12px"></div>
+
+    <div class="msect">
+      <span class="slab">Labels</span>
+      <p class="mnote">Any number per page. The ones marked <b>auto</b> are applied by the build — Review and
+        Remove came from your workbook, the rest are computed from the SEMrush and crawl data. They're editable
+        and removable like all the others.</p>
+      <div id="lablist" class="lablist"></div>
+      <div class="rowbtns">
+        <input type="text" id="labnew" placeholder="Add a label…" style="flex:1">
+        <button class="btn" id="labnewbtn">Add</button>
+      </div>
+      <div class="hint" id="labhidden" style="margin-top:10px"></div>
+    </div>
 
     <div class="macts">
+      <button class="btn" id="labrestoreall">Restore all defaults</button>
       <button class="btn primary" id="labdone">Done</button>
     </div>
   </div>
@@ -949,6 +993,6 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   <div id="bootmsg">Loading content map…</div>
 </div>
 
-<script src="app.js?v=ddc4d94fa1"></script>
+<script src="app.js?v=07e3cb2ebd"></script>
 </body>
 </html>

@@ -40,15 +40,18 @@ const STORE = (() => {
 })();
 
 /* --------------------------------------------------------- annotations -- */
+/* `none` is the clear-the-status button, not a status: it can't be renamed,
+   recoloured or removed. `o` is the display order, which is meaningful here in a
+   way it isn't for labels — these are the steps of a workflow. */
 const DEFAULT_STATUSES = [
-  { id: "none",       name: "No status",     color: "slate"  },
-  { id: "todo",       name: "To do",         color: "slate"  },
-  { id: "inprogress", name: "In progress",   color: "amber"  },
-  { id: "drafted",    name: "Drafted",       color: "purple" },
-  { id: "published",  name: "Published",     color: "green"  },
-  { id: "monitoring", name: "Monitoring",    color: "blue"   },
-  { id: "blocked",    name: "Blocked",       color: "red"    },
-  { id: "wontdo",     name: "Won't do",      color: "slate"  },
+  { id: "none",       name: "No status",     color: "slate",  fixed: true, o: -1 },
+  { id: "todo",       name: "To do",         color: "slate",  o: 0 },
+  { id: "inprogress", name: "In progress",   color: "amber",  o: 1 },
+  { id: "drafted",    name: "Drafted",       color: "purple", o: 2 },
+  { id: "published",  name: "Published",     color: "green",  o: 3 },
+  { id: "monitoring", name: "Monitoring",    color: "blue",   o: 4 },
+  { id: "blocked",    name: "Blocked",       color: "red",    o: 5 },
+  { id: "wontdo",     name: "Won't do",      color: "slate",  o: 6 },
 ];
 
 /* Labels the build computes for you. Their ids match the flag keys in
@@ -91,6 +94,8 @@ const emptyAnn = () => ({
   labels: ALL_DEFAULT_LABELS(),
   hidden: [],            // label ids removed from the library
   hiddenAt: new Date(0).toISOString(),
+  hiddenS: [],           // status ids removed from the library
+  hiddenSAt: new Date(0).toISOString(),
   pages: {},
 });
 
@@ -163,6 +168,8 @@ function mergeAnn(a, b) {
     labels: unionById(a.labels, b.labels),
     hidden: ((a.hiddenAt || "") >= (b.hiddenAt || "") ? a.hidden : b.hidden) || [],
     hiddenAt: (a.hiddenAt || "") >= (b.hiddenAt || "") ? (a.hiddenAt || "") : (b.hiddenAt || ""),
+    hiddenS: ((a.hiddenSAt || "") >= (b.hiddenSAt || "") ? a.hiddenS : b.hiddenS) || [],
+    hiddenSAt: (a.hiddenSAt || "") >= (b.hiddenSAt || "") ? (a.hiddenSAt || "") : (b.hiddenSAt || ""),
     pages: {},
   };
   const paths = new Set([...Object.keys(a.pages || {}), ...Object.keys(b.pages || {})]);
@@ -364,6 +371,9 @@ const Sync = (() => {
           sha = j.content && j.content.sha;
           dirty = false;
           set("synced", "Synced " + timeStr());
+          /* the push merged the remote in first, so the other device's edits may
+             have landed — let the UI redraw against them */
+          if (typeof window.onAnnotationsChanged === "function") window.onAnnotationsChanged();
           return true;
         }
         if (r.status === 409 || r.status === 422) { sha = null; continue; }  // stale sha, retry

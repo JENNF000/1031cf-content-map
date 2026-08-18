@@ -25,8 +25,15 @@ An installable web app (PWA) for tracking and organising every organic page on
 
 Four things live in `annotations.json` and survive every data refresh:
 
-- **Status** — one of To do / In progress / Drafted / Published / Monitoring /
-  Blocked / Won't do.
+- **Status** — one per page, from a library you control. Ships as To do /
+  In progress / Drafted / Published / Monitoring / Blocked / Won't do; all of them
+  can be renamed, recoloured, reordered, removed or added to. Order is stored on
+  each entry as `o` rather than implied by array position, so it survives a merge.
+  `none` is the clear button, not a status: `fixed: true`, never editable.
+  Removals go in `hiddenS` (statuses) / `hidden` (labels) with their own clocks, so
+  deleting something on one device isn't undone by the other device still having
+  it — the entry may linger in the library but nothing renders it. Read
+  `visibleStatuses()`, never `ANN.statuses` directly.
 - **Labels** — one library holding both the build-computed ones (Review,
   Consolidate, Slug fix, Underperformer, Untracked, No keywords, 301 redirect)
   and your own. Every entry can be renamed, recoloured or removed. Switching a
@@ -36,6 +43,13 @@ Four things live in `annotations.json` and survive every data refresh:
   the build's classification untouched; `cluster` and `tier` in your annotations
   override it, and the whole app reads `effCat()` / `effTier()` rather than the
   raw fields.
+
+  Dragging is implemented on **pointer events, not the HTML5 drag-and-drop API**.
+  The cells are `<a>` elements, so native DnD fights the browser's own
+  link-dragging (it hung the drag loop outright in Chromium), can't auto-scroll a
+  horizontally scrolling container, and does nothing on touch. Pointer events give
+  one path for mouse, pen and long-press — and can be tested with real trusted
+  input, which is what `build/test-realdrag.mjs` does. Don't swap this back.
 - **Comments** and a **target keyword**.
 
 Tier names in the interface are Transactional / **Pillar** / Fan-out. The
@@ -83,7 +97,8 @@ Only needed when the interface changes, not when the data does.
 
 ```bash
 python3 build/assemble.py     # writes index.html, app.js, sw.js, manifest, icons
-cd build && node test.mjs && node test-v2.mjs && node test-sync.mjs && node test-orphan.mjs
+cd build && node test.mjs && node test-v2.mjs && node test-realdrag.mjs \
+            && node test-status.mjs && node test-sync.mjs && node test-orphan.mjs
 ```
 
 Sources live in `build/src/`: `store.js` (local store, annotation model, GitHub

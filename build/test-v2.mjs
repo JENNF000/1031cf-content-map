@@ -88,26 +88,16 @@ const inNewCol = await page.evaluate(t => {
 ok('page renders in its new column', inNewCol);
 ok('moved page is marked on the map', await page.locator(`.cell[data-path="${target}"].moved`).count() === 1);
 
-/* ---------- 2b. drag and drop ---------- */
-const dragged = await page.evaluate(() => {
-  /* find a fan-out page in the first column and drop it on another column's
-     transactional band, driving the same handlers a real drag uses */
-  const cell = document.querySelector('.matrix .col .tiergroup.fanout .cell[draggable]');
-  const path = cell.dataset.path;
-  const destCol = [...document.querySelectorAll('.matrix .col')].find(c => c.dataset.cluster === 'REIT');
-  const dt = new DataTransfer();
-  cell.dispatchEvent(new DragEvent('dragstart', { bubbles: true, dataTransfer: dt }));
-  let zone = destCol.querySelector('.tiergroup.transactional');
-  zone.dispatchEvent(new DragEvent('dragover', { bubbles: true, dataTransfer: dt }));
-  zone.dispatchEvent(new DragEvent('drop', { bubbles: true, dataTransfer: dt }));
-  cell.dispatchEvent(new DragEvent('dragend', { bubbles: true, dataTransfer: dt }));
-  const p = byPath[path];
-  return { path, cat: effCat(p), tier: effTier(p), was: p.cat + '/' + p.tier };
-});
-ok('drag moves a page to another cluster + tier',
-   dragged.cat === 'REIT' && dragged.tier === 'transactional',
-   `${dragged.was} → ${dragged.cat}/${dragged.tier}`);
-ok('undo toast offered', (await page.locator('.toast .tact').count()) >= 1);
+/* ---------- 2b. drag handles are present ----------
+   The drag itself is exercised with real trusted input in test-realdrag.mjs.
+   An earlier synthetic-DragEvent test here passed while the feature was broken,
+   so this file only checks the wiring is in place. */
+const handles = await page.locator('.matrix .cell[data-drag]').count();
+ok('cells carry drag handles', handles > 200, handles + ' draggable cells');
+ok('no native draggable attribute left behind',
+   (await page.locator('.matrix .cell[draggable]').count()) === 0);
+const zones = await page.locator('.matrix [data-drop]').count();
+ok('drop zones exist', zones > 30, zones + ' zones');
 
 /* empty bands only appear while dragging, so there is always somewhere to drop */
 const emptyHidden = await page.evaluate(() => {

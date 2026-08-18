@@ -110,9 +110,15 @@ your laptop and phone stay in step and I can read your labels on each refresh.
    the chip turns orange. You just make a new one and paste it in.)*
 4. **Repository access:** select **Only select repositories**, then choose
    `1031cf-content-map`.
-5. **Permissions → Repository permissions:** find **Contents** and set it to
-   **Read and write**. Leave everything else alone. *(Metadata → Read-only gets
-   added automatically. That's correct.)*
+5. **Permissions.** GitHub redesigned this box — it starts empty, and you add
+   permissions one at a time rather than scrolling a list:
+   - Click **+ Add permissions** (top-right of the Permissions box).
+   - A searchable list opens. Type `Contents`, and select it.
+   - **Contents** appears as a row under the **Repositories** tab with an access
+     dropdown beside it. Set that dropdown to **Read and write**.
+   - **Metadata** is added on its own as *Read-only*. That's mandatory and
+     correct — leave it.
+   - The counters at the top should read **Repositories 2**, **Account 0**.
 6. Click **Generate token** at the bottom, then **copy the token**. It's shown
    once and never again.
 
@@ -145,15 +151,29 @@ table, the consolidation groups, and your workflow lists. A panel slides in from
 the right with that page's metrics, its placement, a status, labels, a target
 keyword field, and a comment thread.
 
-**To move a page:** drag it. Drop it on another cluster column to re-cluster it,
-or on a **Transactional** / **Pillar** / **Fan-out** band to re-tier it. Empty
-bands appear while you're dragging, so there's always somewhere to drop. On a
-phone — or if you'd rather not drag — use the **Placement** dropdowns in the
-panel. Either way the move sticks through every data refresh, a moved page is
-marked with a purple edge, and the panel offers **Reset to build default**.
+**To move a page:** press on it and drag. Drop it on another cluster's **column
+header** to change only its cluster, or on a **Transactional** / **Pillar** /
+**Fan-out** band to change both. Empty bands appear while you're dragging, so
+there's always somewhere to drop, and the target you're over lights up blue.
 
-**Statuses** are single-choice: To do, In progress, Drafted, Published,
-Monitoring, Blocked, Won't do.
+- A page name follows your cursor so you can see what you're carrying.
+- Drag toward the left or right edge and the columns scroll, so you can reach a
+  cluster that's off-screen.
+- **Esc** cancels mid-drag; after a drop you get an **Undo**.
+- On a phone, **press and hold** for about half a second, then drag. A quick swipe
+  still scrolls the page as normal.
+- Prefer not to drag at all? The **Placement** dropdowns in the panel do the same
+  thing, and work everywhere.
+
+Either way the move sticks through every data refresh, a moved page is marked with
+a purple edge, and the panel offers **Reset to build default**.
+
+**Statuses** are single-choice, and they're yours to define. They ship as To do,
+In progress, Drafted, Published, Monitoring, Blocked, Won't do — rename any of
+them, change a colour, add your own, remove ones you don't use, and drag the order
+around with the ▲▼ arrows so they read as the steps you actually work through.
+The order you set is the order they appear on every page. Removing a status that's
+in use leaves those pages with no status rather than a dead label.
 
 **Labels** are one library — the ones the build works out for itself (Review,
 Remove, Consolidate, Slug fix, Underperformer, Untracked, No keywords, 301
@@ -163,8 +183,9 @@ Needs 301, Keep as-is, Priority). Build-applied ones are marked **auto** and dra
 as outlines; the ones you apply yourself draw solid, so you can tell at a glance
 which is which.
 
-Everything is editable. **Manage** (in the panel, or **Manage labels** on the My
-notes tab) lets you rename any label, change its colour, or remove it entirely —
+Everything is editable. **Manage** — next to either the Status or Labels heading in
+the panel, or **Statuses & labels** on the My notes tab — opens one place to rename
+anything, change a colour, or remove it entirely —
 including the automatic ones. Removing takes it off every page and it stops
 appearing anywhere; **Restore default labels** brings them back. Switching an
 *auto* label off on a single page is remembered, so the next refresh can't turn
