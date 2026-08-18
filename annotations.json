@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T17:00:51.828Z",
+ "updated": "2026-08-18T17:02:29.899Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -408,14 +408,48 @@
    "comments": [],
    "delc": [],
    "f": {
-    "cluster": "2026-08-18T17:00:51.828Z"
+    "cluster": "2026-08-18T17:00:51.828Z",
+    "tier": "2026-08-18T17:00:57.143Z"
    },
-   "updated": "2026-08-18T17:00:51.828Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "Company & News",
+   "tier": "core",
+   "offFlags": [],
+   "updated": "2026-08-18T17:00:57.143Z"
+  },
+  "/education-center/guide-to-1031-exchanges/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-18T17:01:49.083Z",
+    "labels": "2026-08-18T17:01:51.161Z"
+   },
+   "updated": "2026-08-18T17:01:51.161Z",
+   "status": "",
+   "labels": [
+    "rewrite"
+   ],
+   "target": "",
+   "cluster": "",
    "tier": "",
+   "offFlags": [
+    "consolidate"
+   ]
+  },
+  "/everything-you-need-to-know-about-reits/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "tier": "2026-08-18T17:02:29.899Z"
+   },
+   "updated": "2026-08-18T17:02:29.899Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "core",
    "offFlags": []
   }
  }
