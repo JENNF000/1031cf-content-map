@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T16:40:54.309Z",
+ "updated": "2026-08-18T16:43:11.322Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -323,11 +323,25 @@
    "f": {
     "labels": "2026-08-18T16:40:54.309Z"
    },
-   "updated": "2026-08-18T16:40:54.309Z",
    "status": "",
    "labels": [
     "slug"
    ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-18T16:40:54.309Z"
+  },
+  "/how-to-choose-a-dst-sponsor/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-18T16:43:11.322Z"
+   },
+   "updated": "2026-08-18T16:43:11.322Z",
+   "status": "published",
+   "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
