@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T16:59:58.323Z",
+ "updated": "2026-08-18T17:00:51.828Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -366,7 +366,6 @@
     "labels": "2026-08-18T16:45:12.641Z",
     "offFlags": "2026-08-18T16:45:00.053Z"
    },
-   "updated": "2026-08-18T16:45:12.641Z",
    "status": "",
    "labels": [
     "rewrite"
@@ -376,19 +375,20 @@
    "tier": "",
    "offFlags": [
     "consolidate"
-   ]
+   ],
+   "updated": "2026-08-18T16:45:12.641Z"
   },
   "/1031cf-portfolio-4-dst/": {
    "comments": [],
    "delc": [],
    "f": {},
-   "updated": "2026-08-18T16:59:39.185Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": []
+   "offFlags": [],
+   "updated": "2026-08-18T16:59:39.185Z"
   },
   "/education-center/1031-exchange-services/": {
    "comments": [],
@@ -396,12 +396,26 @@
    "f": {
     "tier": "2026-08-18T16:59:58.323Z"
    },
-   "updated": "2026-08-18T16:59:58.323Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "fanout",
+   "offFlags": [],
+   "updated": "2026-08-18T16:59:58.323Z"
+  },
+  "/marketplace-for-1031-exchange-investments/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-08-18T17:00:51.828Z"
+   },
+   "updated": "2026-08-18T17:00:51.828Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "Company & News",
+   "tier": "",
    "offFlags": []
   }
  }
