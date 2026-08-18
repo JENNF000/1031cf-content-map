@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T16:43:11.322Z",
+ "updated": "2026-08-18T16:44:48.072Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -165,9 +165,10 @@
   "intlinks",
   "titlemeta",
   "schema",
-  "eeat"
+  "eeat",
+  "refresh"
  ],
- "hiddenAt": "2026-08-18T15:57:36.211Z",
+ "hiddenAt": "2026-08-18T16:44:48.072Z",
  "pages": {
   "/retirement-reit/": {
    "comments": [],
@@ -339,13 +340,13 @@
    "f": {
     "status": "2026-08-18T16:43:11.322Z"
    },
-   "updated": "2026-08-18T16:43:11.322Z",
    "status": "published",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": []
+   "offFlags": [],
+   "updated": "2026-08-18T16:43:11.322Z"
   }
  }
 }
