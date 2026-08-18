@@ -1,47 +1,56 @@
 {
  "version": 2,
- "updated": "2026-08-18T16:44:48.072Z",
+ "updated": "2026-08-18T16:59:58.323Z",
  "author": "Jennifer",
  "statuses": [
   {
    "id": "none",
    "name": "No status",
-   "color": "slate"
+   "color": "slate",
+   "fixed": true,
+   "o": -1
   },
   {
    "id": "todo",
    "name": "To do",
-   "color": "slate"
+   "color": "slate",
+   "o": 0
   },
   {
    "id": "inprogress",
    "name": "In progress",
-   "color": "amber"
+   "color": "amber",
+   "o": 1
   },
   {
    "id": "drafted",
    "name": "Drafted",
-   "color": "purple"
+   "color": "purple",
+   "o": 2
   },
   {
    "id": "published",
    "name": "Published",
-   "color": "green"
+   "color": "green",
+   "o": 3
   },
   {
    "id": "monitoring",
    "name": "Monitoring",
-   "color": "blue"
+   "color": "blue",
+   "o": 4
   },
   {
    "id": "blocked",
    "name": "Blocked",
-   "color": "red"
+   "color": "red",
+   "o": 5
   },
   {
    "id": "wontdo",
    "name": "Won't do",
-   "color": "slate"
+   "color": "slate",
+   "o": 6
   }
  ],
  "labels": [
@@ -169,6 +178,8 @@
   "refresh"
  ],
  "hiddenAt": "2026-08-18T16:44:48.072Z",
+ "hiddenS": [],
+ "hiddenSAt": "1970-01-01T00:00:00.000Z",
  "pages": {
   "/retirement-reit/": {
    "comments": [],
@@ -347,6 +358,51 @@
    "tier": "",
    "offFlags": [],
    "updated": "2026-08-18T16:43:11.322Z"
+  },
+  "/7-benefits-of-all-cash-dsts/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-18T16:45:12.641Z",
+    "offFlags": "2026-08-18T16:45:00.053Z"
+   },
+   "updated": "2026-08-18T16:45:12.641Z",
+   "status": "",
+   "labels": [
+    "rewrite"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ]
+  },
+  "/1031cf-portfolio-4-dst/": {
+   "comments": [],
+   "delc": [],
+   "f": {},
+   "updated": "2026-08-18T16:59:39.185Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": []
+  },
+  "/education-center/1031-exchange-services/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "tier": "2026-08-18T16:59:58.323Z"
+   },
+   "updated": "2026-08-18T16:59:58.323Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "fanout",
+   "offFlags": []
   }
  }
 }
