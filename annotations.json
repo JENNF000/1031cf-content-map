@@ -1,8 +1,153 @@
 {
- "version": 1,
- "updated": "1970-01-01T00:00:00.000Z",
+ "version": 2,
+ "updated": "2026-08-17T23:56:23.045Z",
  "author": "",
- "statuses": [],
- "labels": [],
+ "statuses": [
+  {
+   "id": "none",
+   "name": "No status",
+   "color": "slate"
+  },
+  {
+   "id": "todo",
+   "name": "To do",
+   "color": "slate"
+  },
+  {
+   "id": "inprogress",
+   "name": "In progress",
+   "color": "amber"
+  },
+  {
+   "id": "drafted",
+   "name": "Drafted",
+   "color": "purple"
+  },
+  {
+   "id": "published",
+   "name": "Published",
+   "color": "green"
+  },
+  {
+   "id": "monitoring",
+   "name": "Monitoring",
+   "color": "blue"
+  },
+  {
+   "id": "blocked",
+   "name": "Blocked",
+   "color": "red"
+  },
+  {
+   "id": "wontdo",
+   "name": "Won't do",
+   "color": "slate"
+  }
+ ],
+ "labels": [
+  {
+   "id": "rewrite",
+   "name": "Rewrite",
+   "color": "red"
+  },
+  {
+   "id": "refresh",
+   "name": "Refresh content",
+   "color": "amber"
+  },
+  {
+   "id": "consolidate",
+   "name": "Consolidate",
+   "color": "red",
+   "derived": true
+  },
+  {
+   "id": "titlemeta",
+   "name": "Title / meta",
+   "color": "amber"
+  },
+  {
+   "id": "schema",
+   "name": "Add schema",
+   "color": "purple"
+  },
+  {
+   "id": "aeo-answer",
+   "name": "AEO: direct answer",
+   "color": "teal"
+  },
+  {
+   "id": "aeo-faq",
+   "name": "AEO: FAQ block",
+   "color": "teal"
+  },
+  {
+   "id": "intlinks",
+   "name": "Internal links",
+   "color": "blue"
+  },
+  {
+   "id": "eeat",
+   "name": "E-E-A-T / author",
+   "color": "purple"
+  },
+  {
+   "id": "needs301",
+   "name": "Needs 301",
+   "color": "red"
+  },
+  {
+   "id": "keep",
+   "name": "Keep as-is",
+   "color": "green"
+  },
+  {
+   "id": "review",
+   "name": "Review",
+   "color": "amber",
+   "derived": true
+  },
+  {
+   "id": "remove",
+   "name": "Remove",
+   "color": "red",
+   "derived": true
+  },
+  {
+   "id": "slug",
+   "name": "Slug fix",
+   "color": "amber",
+   "derived": true
+  },
+  {
+   "id": "underperform",
+   "name": "Underperformer",
+   "color": "pink",
+   "derived": true
+  },
+  {
+   "id": "untracked",
+   "name": "Untracked",
+   "color": "slate",
+   "derived": true
+  },
+  {
+   "id": "nokw",
+   "name": "No keywords",
+   "color": "slate",
+   "derived": true
+  },
+  {
+   "id": "redirect",
+   "name": "301 redirect",
+   "color": "green",
+   "derived": true
+  }
+ ],
+ "hidden": [
+  "priority",
+  "tiermismatch"
+ ],
+ "hiddenAt": "2026-08-17T23:56:23.045Z",
  "pages": {}
 }
