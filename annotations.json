@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-17T23:56:23.045Z",
+ "updated": "2026-08-18T15:47:25.660Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -160,5 +160,20 @@
   "tiermismatch"
  ],
  "hiddenAt": "2026-08-17T23:56:23.045Z",
- "pages": {}
+ "pages": {
+  "/retirement-reit/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "tier": "2026-08-18T15:47:25.660Z"
+   },
+   "updated": "2026-08-18T15:47:25.660Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "fanout",
+   "offFlags": []
+  }
+ }
 }
