@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T15:56:04.573Z",
+ "updated": "2026-08-18T15:57:36.211Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -48,7 +48,8 @@
   {
    "id": "rewrite",
    "name": "Rewrite",
-   "color": "red"
+   "color": "amber",
+   "u": "2026-08-18T15:57:03.611Z"
   },
   {
    "id": "refresh",
@@ -140,8 +141,9 @@
   {
    "id": "redirect",
    "name": "301 redirect",
-   "color": "green",
-   "derived": true
+   "color": "blue",
+   "derived": true,
+   "u": "2026-08-18T15:56:38.233Z"
   },
   {
    "id": "tiermismatch",
@@ -160,9 +162,12 @@
   "tiermismatch",
   "aeo-answer",
   "aeo-faq",
-  "intlinks"
+  "intlinks",
+  "titlemeta",
+  "schema",
+  "eeat"
  ],
- "hiddenAt": "2026-08-18T15:56:04.573Z",
+ "hiddenAt": "2026-08-18T15:57:36.211Z",
  "pages": {
   "/retirement-reit/": {
    "comments": [],
