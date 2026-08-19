@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-18T17:08:27.285Z",
+ "updated": "2026-08-19T23:23:24.937Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -511,7 +511,6 @@
    "f": {
     "offFlags": "2026-08-18T17:08:14.408Z"
    },
-   "updated": "2026-08-18T17:08:14.408Z",
    "status": "",
    "labels": [],
    "target": "",
@@ -519,7 +518,8 @@
    "tier": "",
    "offFlags": [
     "review"
-   ]
+   ],
+   "updated": "2026-08-18T17:08:14.408Z"
   },
   "/what-states-do-not-conform-with-qoz-tax-benefits/": {
    "comments": [],
@@ -527,7 +527,6 @@
    "f": {
     "offFlags": "2026-08-18T17:08:27.285Z"
    },
-   "updated": "2026-08-18T17:08:27.285Z",
    "status": "",
    "labels": [],
    "target": "",
@@ -535,6 +534,27 @@
    "tier": "",
    "offFlags": [
     "consolidate"
+   ],
+   "updated": "2026-08-18T17:08:27.285Z"
+  },
+  "/1031-exchanges-back-to-the-basics-2/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-19T23:23:24.937Z",
+    "labels": "2026-08-19T23:23:24.502Z"
+   },
+   "updated": "2026-08-19T23:23:24.937Z",
+   "status": "",
+   "labels": [
+    "remove"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "slug",
+    "review"
    ]
   }
  }
