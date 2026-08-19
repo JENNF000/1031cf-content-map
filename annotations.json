@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-19T23:24:36.685Z",
+ "updated": "2026-08-19T23:44:52.672Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -564,7 +564,81 @@
     "labels": "2026-08-19T23:23:40.028Z",
     "offFlags": "2026-08-19T23:23:40.447Z"
    },
-   "updated": "2026-08-19T23:23:40.447Z",
+   "status": "",
+   "labels": [
+    "remove"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ],
+   "updated": "2026-08-19T23:23:40.447Z"
+  },
+  "/improvement-1031-exchange/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-19T23:24:14.783Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ],
+   "updated": "2026-08-19T23:24:14.783Z"
+  },
+  "/the-role-of-a-qualified-intermediary-in-1031-exchanges/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-19T23:24:21.909Z",
+    "offFlags": "2026-08-19T23:24:22.388Z"
+   },
+   "status": "",
+   "labels": [
+    "review"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ],
+   "updated": "2026-08-19T23:24:22.388Z"
+  },
+  "/can-you-use-1031-exchanges-for-renovations/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-19T23:24:36.130Z",
+    "offFlags": "2026-08-19T23:24:36.685Z"
+   },
+   "status": "",
+   "labels": [
+    "review",
+    "slug"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ],
+   "updated": "2026-08-19T23:24:36.685Z"
+  },
+  "/bidens-proposed-2024-budget-1031-exchanges/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-19T23:24:57.639Z",
+    "offFlags": "2026-08-19T23:24:58.570Z"
+   },
+   "updated": "2026-08-19T23:24:58.570Z",
    "status": "",
    "labels": [
     "remove"
@@ -576,30 +650,13 @@
     "consolidate"
    ]
   },
-  "/improvement-1031-exchange/": {
+  "/simultaneous-1031-exchange/": {
    "comments": [],
    "delc": [],
    "f": {
-    "offFlags": "2026-08-19T23:24:14.783Z"
+    "labels": "2026-08-19T23:25:21.580Z"
    },
-   "updated": "2026-08-19T23:24:14.783Z",
-   "status": "",
-   "labels": [],
-   "target": "",
-   "cluster": "",
-   "tier": "",
-   "offFlags": [
-    "consolidate"
-   ]
-  },
-  "/the-role-of-a-qualified-intermediary-in-1031-exchanges/": {
-   "comments": [],
-   "delc": [],
-   "f": {
-    "labels": "2026-08-19T23:24:21.909Z",
-    "offFlags": "2026-08-19T23:24:22.388Z"
-   },
-   "updated": "2026-08-19T23:24:22.388Z",
+   "updated": "2026-08-19T23:25:21.580Z",
    "status": "",
    "labels": [
     "review"
@@ -607,28 +664,25 @@
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": [
-    "consolidate"
-   ]
+   "offFlags": []
   },
-  "/can-you-use-1031-exchanges-for-renovations/": {
+  "/what-to-know-before-your-1031-exchange-process-begins/": {
    "comments": [],
    "delc": [],
    "f": {
-    "labels": "2026-08-19T23:24:36.130Z",
-    "offFlags": "2026-08-19T23:24:36.685Z"
+    "labels": "2026-08-19T23:44:52.052Z",
+    "offFlags": "2026-08-19T23:44:52.672Z"
    },
-   "updated": "2026-08-19T23:24:36.685Z",
+   "updated": "2026-08-19T23:44:52.672Z",
    "status": "",
    "labels": [
-    "review",
-    "slug"
+    "remove"
    ],
    "target": "",
    "cluster": "",
    "tier": "",
    "offFlags": [
-    "consolidate"
+    "review"
    ]
   }
  }
