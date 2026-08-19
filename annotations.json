@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-19T23:23:24.937Z",
+ "updated": "2026-08-19T23:24:36.685Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -541,10 +541,9 @@
    "comments": [],
    "delc": [],
    "f": {
-    "offFlags": "2026-08-19T23:23:24.937Z",
-    "labels": "2026-08-19T23:23:24.502Z"
+    "labels": "2026-08-19T23:23:24.502Z",
+    "offFlags": "2026-08-19T23:23:24.937Z"
    },
-   "updated": "2026-08-19T23:23:24.937Z",
    "status": "",
    "labels": [
     "remove"
@@ -555,6 +554,81 @@
    "offFlags": [
     "slug",
     "review"
+   ],
+   "updated": "2026-08-19T23:23:24.937Z"
+  },
+  "/bidens-proposed-2025-budget-1031-exchanges/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-19T23:23:40.028Z",
+    "offFlags": "2026-08-19T23:23:40.447Z"
+   },
+   "updated": "2026-08-19T23:23:40.447Z",
+   "status": "",
+   "labels": [
+    "remove"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ]
+  },
+  "/improvement-1031-exchange/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-19T23:24:14.783Z"
+   },
+   "updated": "2026-08-19T23:24:14.783Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ]
+  },
+  "/the-role-of-a-qualified-intermediary-in-1031-exchanges/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-19T23:24:21.909Z",
+    "offFlags": "2026-08-19T23:24:22.388Z"
+   },
+   "updated": "2026-08-19T23:24:22.388Z",
+   "status": "",
+   "labels": [
+    "review"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ]
+  },
+  "/can-you-use-1031-exchanges-for-renovations/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-19T23:24:36.130Z",
+    "offFlags": "2026-08-19T23:24:36.685Z"
+   },
+   "updated": "2026-08-19T23:24:36.685Z",
+   "status": "",
+   "labels": [
+    "review",
+    "slug"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
    ]
   }
  }
