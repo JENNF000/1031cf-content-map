@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-19T23:44:52.672Z",
+ "updated": "2026-08-20T20:01:42.078Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -638,7 +638,6 @@
     "labels": "2026-08-19T23:24:57.639Z",
     "offFlags": "2026-08-19T23:24:58.570Z"
    },
-   "updated": "2026-08-19T23:24:58.570Z",
    "status": "",
    "labels": [
     "remove"
@@ -648,7 +647,8 @@
    "tier": "",
    "offFlags": [
     "consolidate"
-   ]
+   ],
+   "updated": "2026-08-19T23:24:58.570Z"
   },
   "/simultaneous-1031-exchange/": {
    "comments": [],
@@ -656,7 +656,6 @@
    "f": {
     "labels": "2026-08-19T23:25:21.580Z"
    },
-   "updated": "2026-08-19T23:25:21.580Z",
    "status": "",
    "labels": [
     "review"
@@ -664,7 +663,8 @@
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": []
+   "offFlags": [],
+   "updated": "2026-08-19T23:25:21.580Z"
   },
   "/what-to-know-before-your-1031-exchange-process-begins/": {
    "comments": [],
@@ -673,7 +673,6 @@
     "labels": "2026-08-19T23:44:52.052Z",
     "offFlags": "2026-08-19T23:44:52.672Z"
    },
-   "updated": "2026-08-19T23:44:52.672Z",
    "status": "",
    "labels": [
     "remove"
@@ -683,7 +682,24 @@
    "tier": "",
    "offFlags": [
     "review"
-   ]
+   ],
+   "updated": "2026-08-19T23:44:52.672Z"
+  },
+  "/use-401k-for-real-estate-investing/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-20T20:01:42.078Z"
+   },
+   "updated": "2026-08-20T20:01:42.078Z",
+   "status": "",
+   "labels": [
+    "remove"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": []
   }
  }
 }
