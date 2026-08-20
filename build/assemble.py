@@ -64,24 +64,33 @@ NEW_HDR = """  <div class="hdr-right">
       <span class="sdot"></span><span class="stxt">Local only</span></button>
     <button class="btn" id="refresh" type="button">Refresh</button>
     <button class="btn" id="density" type="button">Compact</button>
-    <button class="btn" id="theme" type="button">Dark</button>
     <button class="btn" id="csv" type="button">Export CSV</button>
     <button class="btn primary hideinapp" id="install" type="button" style="display:none">Install app</button>
   </div>"""
 assert OLD_HDR in head
 head = head.replace(OLD_HDR, NEW_HDR, 1)
 
+# ---------------------------------------------------------- header copy ----
+# The subtitle moves out of the header and merges with the intro line below the
+# rule, so the top of the page is just a title and its controls.
+OLD_SUB = """    <h1>1031 Crowdfunding \u2014 Content Topic Map</h1>
+    <p class="sub">Every live post mapped to a topic cluster and a page tier, with SEMrush organic keyword volume per page.</p>"""
+NEW_SUB = """    <h1>1031 Crowdfunding \u2014 Content Topic Map</h1>"""
+assert OLD_SUB in head, "header subtitle not found"
+head = head.replace(OLD_SUB, NEW_SUB, 1)
+
 # ------------------------------------------------------------ system bars --
-BARS = """<div class="sysbar offline" id="offlinebar">
+BARS = """<p class="intro" id="topbanner"></p>
+<p class="partialnote" id="partialnote"></p>
+
+<div class="sysbar offline" id="offlinebar">
   <span>◍</span><div class="grow">You're offline. Everything below is the last copy that loaded, and any
   labels or comments you add are saved locally and will sync when you're back.</div>
 </div>
 <div class="sysbar update" id="updatebar">
   <span>↻</span><div class="grow">A new version of the app is ready.</div>
   <button class="btn" id="doupdate" type="button">Reload</button>
-</div>
-
-<div class="banner" id="topbanner"></div>"""
+</div>"""
 assert '<div class="banner" id="topbanner"></div>' in head
 head = head.replace('<div class="banner" id="topbanner"></div>', BARS, 1)
 
@@ -120,9 +129,7 @@ i = head.index('<div class="chipfilter" id="fflags">')
 j = head.index('</div>', head.index('</div>', i) - 0)
 # walk to the matching close: the block contains only <button> children
 j = head.index('    </div>', i) + len('    </div>')
-head = head[:i] + ('<div class="maphint">Drag any page onto another cluster column, or onto a '
-                   '<b>Transactional</b> / <b>Pillar</b> / <b>Fan-out</b> band, to re-classify it. '
-                   'Your moves stick through every data refresh.</div>') + head[j:]
+head = head[:i] + head[j:]
 
 # ---------------------------------------------------- de-sheet the copy ----
 REPL = [

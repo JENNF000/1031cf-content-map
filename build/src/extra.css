@@ -382,3 +382,21 @@ body.dragging .tiergroup,body.dragging .col-h{transition:box-shadow .12s,backgro
 #labelmodal .mbox{padding-bottom:0}
 #labelmodal .macts{position:sticky;bottom:0;background:var(--surface);padding:14px 0 20px;
   margin-top:18px;border-top:1px solid var(--grid)}
+
+/* ---- quiet intro line, sitting under the header rule ---- */
+.intro{font-size:12px;line-height:1.65;color:var(--muted);margin:0 0 18px;max-width:96ch}
+
+/* age of the dataset, and a warning when a weekly rebuild has been missed */
+.fresh .age{color:var(--muted);font-variant-numeric:tabular-nums}
+.fresh.stale{border-color:color-mix(in srgb,var(--warning) 55%,var(--grid));
+  background:color-mix(in srgb,var(--warning) 12%,var(--surface));cursor:help}
+.fresh.stale .dot{background:var(--warning)}
+.fresh.stale .age{color:#7a5300;font-weight:650}
+:root[data-theme="dark"] .fresh.stale .age{color:#ffd98a}
+
+/* a build where only some fields were re-pulled */
+.partialnote{display:none;font-size:11.5px;line-height:1.6;margin:-8px 0 18px;padding:7px 11px;
+  border-radius:7px;max-width:96ch;color:var(--ink-2);
+  background:color-mix(in srgb,var(--warning) 10%,var(--surface));
+  border:1px solid color-mix(in srgb,var(--warning) 38%,var(--grid))}
+.partialnote.on{display:block}

@@ -194,6 +194,14 @@ it back on.
 **Compact** in the header strips the chips off the topic map when you want to see
 structure rather than detail.
 
+**Light or dark** follows your Mac's appearance setting — there's no toggle in the
+app. Say the word if you'd rather have one back.
+
+**The "Data as of" chip shows the dataset's age.** It turns amber once the build is
+more than 8 days old, which means a weekly rebuild was missed. **Refresh** only
+pulls what has been *published to the repo* — it can't run a SEMrush pull itself, so
+if the chip is amber, ask me for a fresh one.
+
 **Target keyword / prompt** is deliberately separate from the keyword the page
 currently ranks for — it's what you *intend* it to win, including AEO prompts.
 

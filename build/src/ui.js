@@ -584,9 +584,16 @@ async function refreshData(manual) {
     renderAllViews();
     buildAnnFilters();
     if (manual) {
-      toast(prev && prev === d.stats.generated
-        ? "Already up to date — data as of " + d.stats.generated
-        : "Updated — data as of " + d.stats.generated);
+      const age = dataAgeDays();
+      if (prev && prev === d.stats.generated) {
+        /* Don't say "up to date" when the newest *published* data is weeks old —
+           that's the one thing this message must not imply. */
+        toast(age !== null && age > STALE_AFTER
+          ? `No newer data published. This build is ${age} days old — a fresh SEMrush pull needs running.`
+          : "No newer data published — this is the latest, from " + d.stats.generated);
+      } else {
+        toast("Updated — data as of " + d.stats.generated);
+      }
     }
   } catch (e) {
     if (manual) toast("Couldn't refresh: " + (e.message || e), true);
@@ -707,14 +714,6 @@ function wire() {
     if (b.dataset.tab === "notes") renderNotes();
   });
 
-  $("#theme").onclick = () => {
-    const d = document.documentElement.dataset.theme === "dark";
-    document.documentElement.dataset.theme = d ? "light" : "dark";
-    $("#theme").textContent = d ? "Dark" : "Light";
-    document.querySelector('meta[name="theme-color"]').content = d ? "#f9f9f7" : "#0d0d0d";
-    STORE.set("theme", d ? "light" : "dark");
-  };
-
   $("#density").onclick = () => {
     const compact = document.body.dataset.density === "compact";
     document.body.dataset.density = compact ? "detailed" : "compact";
@@ -787,14 +786,6 @@ function wire() {
     c.title = msg;
   });
 
-  /* collapsible intro banner on narrow screens (re-rendered by renderHeader) */
-  document.addEventListener("click", e => {
-    const b = e.target.closest(".bantoggle");
-    if (!b) return;
-    const c = $("#topbanner").classList.toggle("clamped");
-    b.textContent = c ? "Read more" : "Show less";
-  });
-
   addEventListener("online", () => $("#offlinebar").classList.remove("on"));
   addEventListener("offline", () => $("#offlinebar").classList.add("on"));
   if (!navigator.onLine) $("#offlinebar").classList.add("on");
@@ -835,6 +826,8 @@ function registerSW() {
 /* ------------------------------------------------------------- boot ----- */
 (async function boot() {
   try {
+    /* No theme switch in the UI any more — follow whatever the OS asks for, and
+       keep honouring a preference set before the button was removed. */
     const theme = await STORE.get("theme");
     const dark = theme ? theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
     if (dark) document.documentElement.dataset.theme = "dark";
@@ -855,7 +848,6 @@ function registerSW() {
     catch (e) { d = await STORE.get("data"); if (!d) throw e; }
     bindData(d);
 
-    if (dark) $("#theme").textContent = "Light";
     if (document.body.dataset.density === "compact") $("#density").textContent = "Detailed";
 
     wire();

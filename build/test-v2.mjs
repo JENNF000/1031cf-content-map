@@ -35,7 +35,21 @@ ok('"Core page" is now "Pillar"', tierNames.includes('Pillar') && !tierNames.som
    [...new Set(tierNames)].join(', '));
 ok('every band shows a count', (await page.locator('.tierlab .tcount').count()) === (await page.locator('.tiergroup').count()));
 ok('flag chip-row removed', (await page.locator('#fflags').count()) === 0);
-ok('drag hint present', (await page.locator('.maphint').count()) === 1);
+ok('drag hint removed', (await page.locator('.maphint').count()) === 0);
+ok('theme toggle removed', (await page.locator('#theme').count()) === 0);
+ok('intro is plain prose, not a yellow banner',
+   (await page.locator('p.intro#topbanner').count()) === 1
+   && (await page.locator('#topbanner').evaluate(n => !n.classList.contains('banner'))));
+ok('intro sits below the header rule',
+   await page.evaluate(() => {
+     const h = document.querySelector('header.top'), i = document.querySelector('#topbanner');
+     return h.compareDocumentPosition(i) & Node.DOCUMENT_POSITION_FOLLOWING ? true : false;
+   }));
+const introTxt = await page.locator('#topbanner').textContent();
+ok('correction paragraph gone from the intro',
+   !/Correction|301s|slug-derived/i.test(introTxt), introTxt.trim().slice(0, 70) + '…');
+ok('intro absorbed the old subtitle',
+   /topic cluster and a page tier/.test(introTxt) && (await page.locator('.sub').count()) === 0);
 
 /* ---------- 6. topic-map tiles trimmed ---------- */
 const tiles = await page.locator('#tiles .tile .lab').allTextContents();
@@ -197,6 +211,28 @@ const chipsBefore = await page.locator('.matrix .cell .meta').count();
 await page.click('#density'); await page.waitForTimeout(400);
 const chipsAfter = await page.locator('.matrix .cell .meta').count();
 ok('compact density strips chips', chipsBefore > 0 && chipsAfter === 0, `${chipsBefore} → ${chipsAfter}`);
+
+/* the data-age indicator — test the mechanism, not today's happenstance */
+const ageInfo = await page.evaluate(() => {
+  const chip = document.querySelector('.fresh');
+  const now = { stale: chip.classList.contains('stale'), age: chip.querySelector('.age').textContent };
+  const real = S.generated;
+  S.generated = '2026-01-01 09:00 UTC'; renderHeader();
+  const aged = { stale: chip.classList.contains('stale'), age: chip.querySelector('.age').textContent };
+  S.generated = real; renderHeader();
+  return { now, aged, restored: chip.querySelector('.age').textContent };
+});
+ok('current data is not flagged stale', !ageInfo.now.stale, JSON.stringify(ageInfo.now));
+ok('an old build IS flagged stale', ageInfo.aged.stale && /day/.test(ageInfo.aged.age), JSON.stringify(ageInfo.aged));
+ok('age indicator restores', ageInfo.restored === ageInfo.now.age);
+
+/* a build with only some fields re-pulled says so */
+const pnote = await page.evaluate(() => {
+  const n = document.querySelector('#partialnote');
+  return { on: n.classList.contains('on'), txt: n.textContent.slice(0, 60), has: !!S.partial };
+});
+ok('partial-build note shown when stats.partial is set',
+   !pnote.has || (pnote.on && pnote.txt.length > 20), JSON.stringify(pnote));
 await page.click('#density'); await page.waitForTimeout(400);
 
 /* ---------- screenshots ---------- */

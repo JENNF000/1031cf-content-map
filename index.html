@@ -610,6 +610,24 @@ body.dragging .tiergroup,body.dragging .col-h{transition:box-shadow .12s,backgro
 #labelmodal .macts{position:sticky;bottom:0;background:var(--surface);padding:14px 0 20px;
   margin-top:18px;border-top:1px solid var(--grid)}
 
+/* ---- quiet intro line, sitting under the header rule ---- */
+.intro{font-size:12px;line-height:1.65;color:var(--muted);margin:0 0 18px;max-width:96ch}
+
+/* age of the dataset, and a warning when a weekly rebuild has been missed */
+.fresh .age{color:var(--muted);font-variant-numeric:tabular-nums}
+.fresh.stale{border-color:color-mix(in srgb,var(--warning) 55%,var(--grid));
+  background:color-mix(in srgb,var(--warning) 12%,var(--surface));cursor:help}
+.fresh.stale .dot{background:var(--warning)}
+.fresh.stale .age{color:#7a5300;font-weight:650}
+:root[data-theme="dark"] .fresh.stale .age{color:#ffd98a}
+
+/* a build where only some fields were re-pulled */
+.partialnote{display:none;font-size:11.5px;line-height:1.6;margin:-8px 0 18px;padding:7px 11px;
+  border-radius:7px;max-width:96ch;color:var(--ink-2);
+  background:color-mix(in srgb,var(--warning) 10%,var(--surface));
+  border:1px solid color-mix(in srgb,var(--warning) 38%,var(--grid))}
+.partialnote.on{display:block}
+
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 .wrap{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
 
@@ -621,7 +639,6 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 <header class="top">
   <div>
     <h1>1031 Crowdfunding — Content Topic Map</h1>
-    <p class="sub">Every live post mapped to a topic cluster and a page tier, with SEMrush organic keyword volume per page.</p>
   </div>
   <div class="hdr-right">
     <span class="fresh"><span class="dot"></span>Data as of <b id="asof" style="font-weight:600"></b></span>
@@ -629,11 +646,13 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
       <span class="sdot"></span><span class="stxt">Local only</span></button>
     <button class="btn" id="refresh" type="button">Refresh</button>
     <button class="btn" id="density" type="button">Compact</button>
-    <button class="btn" id="theme" type="button">Dark</button>
     <button class="btn" id="csv" type="button">Export CSV</button>
     <button class="btn primary hideinapp" id="install" type="button" style="display:none">Install app</button>
   </div>
 </header>
+
+<p class="intro" id="topbanner"></p>
+<p class="partialnote" id="partialnote"></p>
 
 <div class="sysbar offline" id="offlinebar">
   <span>◍</span><div class="grow">You're offline. Everything below is the last copy that loaded, and any
@@ -643,8 +662,6 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   <span>↻</span><div class="grow">A new version of the app is ready.</div>
   <button class="btn" id="doupdate" type="button">Reload</button>
 </div>
-
-<div class="banner" id="topbanner"></div>
 
 <nav class="tabs" role="tablist">
   <button role="tab" aria-selected="true" data-tab="map">Topic map</button>
@@ -664,7 +681,7 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
     <input type="search" id="q" placeholder="Search slug, topic, or keyword…">
     <select id="fcat"><option value="">All topic clusters</option></select>
     <select id="fann"><option value="">Any of my notes</option></select>
-    <div class="maphint">Drag any page onto another cluster column, or onto a <b>Transactional</b> / <b>Pillar</b> / <b>Fan-out</b> band, to re-classify it. Your moves stick through every data refresh.</div>
+    
   </div>
   <div class="matrix" id="matrix"></div>
 </section>
@@ -993,6 +1010,6 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   <div id="bootmsg">Loading content map…</div>
 </div>
 
-<script src="app.js?v=07e3cb2ebd"></script>
+<script src="app.js?v=b74e36c5a5"></script>
 </body>
 </html>

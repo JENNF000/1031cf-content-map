@@ -528,19 +528,43 @@ function liveStats() {
 }
 
 /* ---------- header / tiles ---------- */
+/* How old is the dataset? The Refresh button only re-fetches what has been
+   published to the repo, so "nothing new" and "this data is three weeks old" are
+   different statements and the header has to make that distinction. */
+function dataAgeDays() {
+  const m = /(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(S.generated || "");
+  if (!m) return null;
+  const t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+  return Math.floor((Date.now() - t) / 86400000);
+}
+const STALE_AFTER = 8;   // the rebuild runs weekly, so 8 days means one was missed
+
 function renderHeader() {
-  $("#topbanner").innerHTML = `<span>⚠</span><div style="flex:1"><div class="btext"><b>Read before using:</b> URLs, keyword counts, positions and
-    search volumes are live SEMrush + sitemap data, refreshed weekly. Everything you add — statuses, labels,
-    comments, and any page you move between clusters or tiers — is yours and is keyed to the URL, so a refresh
-    updates the numbers underneath without touching your work.
-    <br><b>Correction (2026-08-03):</b> an earlier build claimed your published consolidations were missing their
-    301s. That was wrong. Re-tested properly in Chrome: ${n0(S.redirects)} of ${n0(S.crawled)} crawled URLs return a
-    server-level HTTP redirect — including both DST URLs and the California one — and are excluded from every
-    count here. One genuine gap survived the re-check; see <b>Your workflow</b>.
-    <br>Page titles are slug-derived and publish dates aren't captured. See <b>Data sources</b> for the
-    field-by-field breakdown.</div>
-    <button class="bantoggle" type="button">Read more</button></div>`;
-  $("#topbanner").classList.add("clamped");
+  $("#topbanner").innerHTML = `Every live page mapped to a topic cluster and a page tier, with SEMrush organic
+    keyword volume per page. Keyword counts, positions and volumes come from a weekly SEMrush and sitemap pull;
+    statuses, labels, comments and any page you move are yours, keyed to the URL, so a refresh changes the numbers
+    underneath without touching your work.`;
+
+  /* A build can be fresh in some fields and carried over in others — say so
+     rather than letting one timestamp imply everything was re-pulled. */
+  const pn = $("#partialnote");
+  if (pn) {
+    pn.textContent = S.partial || "";
+    pn.classList.toggle("on", !!S.partial);
+  }
+
+  const age = dataAgeDays();
+  const chip = $("#asof").closest(".fresh");
+  if (chip) {
+    const stale = age !== null && age > STALE_AFTER;
+    chip.classList.toggle("stale", stale);
+    let n = chip.querySelector(".age");
+    if (!n) { n = el("span", "age"); chip.append(n); }
+    n.textContent = age === null ? "" : age === 0 ? "· today" : `· ${age} day${age === 1 ? "" : "s"} old`;
+    chip.title = stale
+      ? `This dataset was built ${age} days ago. Refresh only pulls what's been published to the repo — a new SEMrush pull has to be run and committed. Ask Claude to refresh the content map.`
+      : "Age of the published dataset";
+  }
 
   $("#asof").textContent = S.generated;
   $("#foot2").textContent = `${n0(S.total)} live URLs · ${n0(S.keywords)} ranking keywords · ${n0(S.traffic)} est. monthly organic visits · generated ${S.generated}`;
@@ -618,7 +642,7 @@ function tipFor(p) {
   return `<b>${esc(p.label)}</b><br><span style="opacity:.7">${esc(p.path)}</span><br>
     <span style="opacity:.7">${esc(p.type)}</span><br><br>
     Keywords: <b>${n0(p.kw)}</b> · Est. traffic: <b>${n0(p.traffic)}</b><br>
-    ${p.pkw ? `Top keyword: <b>${esc(p.pkw)}</b><br>Volume ${n0(p.vol)}/mo · position ${p.pos}<br>` : ''}
+    ${p.pkw ? `Top keyword: <b>${esc(p.pkw)}</b><br>Volume ${n0(p.vol)}/mo · position ${p.pos}${p.pkw_stale ? ' <span style="opacity:.7">(not re-pulled)</span>' : ''}<br>` : ''}
     ${p.trans || p.comm ? `Intent: ${p.trans} transactional / ${p.comm} commercial / ${p.info} informational<br>` : ''}
     ${moved ? `<br>↔ Moved by you to <b>${esc(effCat(p))} · ${esc(TIERNAME[effTier(p)])}</b><br>
        <span style="opacity:.7">was ${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)}</span>` : ''}
@@ -1755,9 +1779,16 @@ async function refreshData(manual) {
     renderAllViews();
     buildAnnFilters();
     if (manual) {
-      toast(prev && prev === d.stats.generated
-        ? "Already up to date — data as of " + d.stats.generated
-        : "Updated — data as of " + d.stats.generated);
+      const age = dataAgeDays();
+      if (prev && prev === d.stats.generated) {
+        /* Don't say "up to date" when the newest *published* data is weeks old —
+           that's the one thing this message must not imply. */
+        toast(age !== null && age > STALE_AFTER
+          ? `No newer data published. This build is ${age} days old — a fresh SEMrush pull needs running.`
+          : "No newer data published — this is the latest, from " + d.stats.generated);
+      } else {
+        toast("Updated — data as of " + d.stats.generated);
+      }
     }
   } catch (e) {
     if (manual) toast("Couldn't refresh: " + (e.message || e), true);
@@ -1878,14 +1909,6 @@ function wire() {
     if (b.dataset.tab === "notes") renderNotes();
   });
 
-  $("#theme").onclick = () => {
-    const d = document.documentElement.dataset.theme === "dark";
-    document.documentElement.dataset.theme = d ? "light" : "dark";
-    $("#theme").textContent = d ? "Dark" : "Light";
-    document.querySelector('meta[name="theme-color"]').content = d ? "#f9f9f7" : "#0d0d0d";
-    STORE.set("theme", d ? "light" : "dark");
-  };
-
   $("#density").onclick = () => {
     const compact = document.body.dataset.density === "compact";
     document.body.dataset.density = compact ? "detailed" : "compact";
@@ -1958,14 +1981,6 @@ function wire() {
     c.title = msg;
   });
 
-  /* collapsible intro banner on narrow screens (re-rendered by renderHeader) */
-  document.addEventListener("click", e => {
-    const b = e.target.closest(".bantoggle");
-    if (!b) return;
-    const c = $("#topbanner").classList.toggle("clamped");
-    b.textContent = c ? "Read more" : "Show less";
-  });
-
   addEventListener("online", () => $("#offlinebar").classList.remove("on"));
   addEventListener("offline", () => $("#offlinebar").classList.add("on"));
   if (!navigator.onLine) $("#offlinebar").classList.add("on");
@@ -2006,6 +2021,8 @@ function registerSW() {
 /* ------------------------------------------------------------- boot ----- */
 (async function boot() {
   try {
+    /* No theme switch in the UI any more — follow whatever the OS asks for, and
+       keep honouring a preference set before the button was removed. */
     const theme = await STORE.get("theme");
     const dark = theme ? theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
     if (dark) document.documentElement.dataset.theme = "dark";
@@ -2026,7 +2043,6 @@ function registerSW() {
     catch (e) { d = await STORE.get("data"); if (!d) throw e; }
     bindData(d);
 
-    if (dark) $("#theme").textContent = "Light";
     if (document.body.dataset.density === "compact") $("#density").textContent = "Detailed";
 
     wire();
