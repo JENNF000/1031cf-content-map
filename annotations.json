@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-20T22:43:29.245Z",
+ "updated": "2026-08-20T22:45:11.455Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -180,7 +180,32 @@
  "hiddenAt": "2026-08-18T16:44:48.072Z",
  "hiddenS": [],
  "hiddenSAt": "1970-01-01T00:00:00.000Z",
- "live": {},
+ "live": {
+  "/understanding-dst-1031-exchanges-part-2/": {
+   "s": "redirect",
+   "at": "2026-08-20T22:45:11.455Z"
+  },
+  "/bidens-proposed-2025-budget-1031-exchanges/": {
+   "s": "redirect",
+   "at": "2026-08-20T22:45:11.455Z"
+  },
+  "/1031-exchanges-back-to-the-basics-2/": {
+   "s": "redirect",
+   "at": "2026-08-20T22:45:11.455Z"
+  },
+  "/bidens-proposed-2024-budget-1031-exchanges/": {
+   "s": "redirect",
+   "at": "2026-08-20T22:45:11.455Z"
+  },
+  "/what-to-know-before-your-1031-exchange-process-begins/": {
+   "s": "redirect",
+   "at": "2026-08-20T22:45:11.455Z"
+  },
+  "/use-401k-for-real-estate-investing/": {
+   "s": "redirect",
+   "at": "2026-08-20T22:45:11.455Z"
+  }
+ },
  "pages": {
   "/retirement-reit/": {
    "comments": [],
@@ -460,13 +485,14 @@
    "comments": [],
    "delc": [],
    "f": {
-    "labels": "2026-08-18T17:03:47.915Z",
+    "labels": "2026-08-20T22:44:15.744Z",
     "tier": "2026-08-18T17:03:31.283Z",
     "offFlags": "2026-08-18T17:03:44.689Z"
    },
    "status": "",
    "labels": [
-    "remove"
+    "remove",
+    "rewrite"
    ],
    "target": "",
    "cluster": "",
@@ -474,7 +500,7 @@
    "offFlags": [
     "review"
    ],
-   "updated": "2026-08-18T17:03:47.915Z"
+   "updated": "2026-08-20T22:44:15.744Z"
   },
   "/education-center/qofs-vs-dsts/": {
    "comments": [],
@@ -725,17 +751,17 @@
    "comments": [],
    "delc": [],
    "f": {
-    "labels": "2026-08-18T17:03:56.119Z"
+    "labels": "2026-08-20T22:43:57.834Z"
    },
-   "updated": "2026-08-18T17:03:56.119Z",
    "status": "",
    "labels": [
-    "remove"
+    "rewrite"
    ],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": []
+   "offFlags": [],
+   "updated": "2026-08-20T22:43:57.834Z"
   }
  }
 }
