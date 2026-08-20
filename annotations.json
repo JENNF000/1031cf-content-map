@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-20T22:42:01.580Z",
+ "updated": "2026-08-20T22:43:29.245Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -476,22 +476,6 @@
    ],
    "updated": "2026-08-18T17:03:47.915Z"
   },
-  "/what-is-a-reit-and-how-does-it-work/": {
-   "comments": [],
-   "delc": [],
-   "f": {
-    "labels": "2026-08-18T17:03:56.119Z"
-   },
-   "status": "",
-   "labels": [
-    "remove"
-   ],
-   "target": "",
-   "cluster": "",
-   "tier": "",
-   "offFlags": [],
-   "updated": "2026-08-18T17:03:56.119Z"
-  },
   "/education-center/qofs-vs-dsts/": {
    "comments": [],
    "delc": [],
@@ -543,7 +527,7 @@
    "delc": [],
    "f": {
     "labels": "2026-08-19T23:23:24.502Z",
-    "offFlags": "2026-08-19T23:23:24.937Z"
+    "offFlags": "2026-08-20T22:42:51.307Z"
    },
    "status": "",
    "labels": [
@@ -554,9 +538,10 @@
    "tier": "",
    "offFlags": [
     "slug",
-    "review"
+    "review",
+    "consolidate"
    ],
-   "updated": "2026-08-19T23:23:24.937Z"
+   "updated": "2026-08-20T22:42:51.307Z"
   },
   "/bidens-proposed-2025-budget-1031-exchanges/": {
    "comments": [],
@@ -709,7 +694,6 @@
     "status": "2026-08-20T20:01:50.703Z",
     "offFlags": "2026-08-20T20:01:52.667Z"
    },
-   "updated": "2026-08-20T20:01:52.667Z",
    "status": "published",
    "labels": [],
    "target": "",
@@ -717,23 +701,41 @@
    "tier": "",
    "offFlags": [
     "consolidate"
-   ]
+   ],
+   "updated": "2026-08-20T20:01:52.667Z"
   },
   "/understanding-dst-1031-exchanges-part-2/": {
    "comments": [],
    "delc": [],
    "f": {
-    "offFlags": "2026-08-20T22:42:01.580Z"
+    "offFlags": "2026-08-20T22:42:04.792Z"
    },
-   "updated": "2026-08-20T22:42:01.580Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
    "offFlags": [
-    "slug"
-   ]
+    "slug",
+    "consolidate"
+   ],
+   "updated": "2026-08-20T22:42:04.792Z"
+  },
+  "/what-is-a-reit-and-how-does-it-work/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "labels": "2026-08-18T17:03:56.119Z"
+   },
+   "updated": "2026-08-18T17:03:56.119Z",
+   "status": "",
+   "labels": [
+    "remove"
+   ],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": []
   }
  }
 }
