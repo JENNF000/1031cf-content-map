@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-20T20:01:42.078Z",
+ "updated": "2026-08-20T22:42:01.580Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -180,6 +180,7 @@
  "hiddenAt": "2026-08-18T16:44:48.072Z",
  "hiddenS": [],
  "hiddenSAt": "1970-01-01T00:00:00.000Z",
+ "live": {},
  "pages": {
   "/retirement-reit/": {
    "comments": [],
@@ -691,7 +692,6 @@
    "f": {
     "labels": "2026-08-20T20:01:42.078Z"
    },
-   "updated": "2026-08-20T20:01:42.078Z",
    "status": "",
    "labels": [
     "remove"
@@ -699,7 +699,41 @@
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": []
+   "offFlags": [],
+   "updated": "2026-08-20T20:01:42.078Z"
+  },
+  "/how-to-use-401k-to-invest-in-real-estate/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-20T20:01:50.703Z",
+    "offFlags": "2026-08-20T20:01:52.667Z"
+   },
+   "updated": "2026-08-20T20:01:52.667Z",
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "consolidate"
+   ]
+  },
+  "/understanding-dst-1031-exchanges-part-2/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "offFlags": "2026-08-20T22:42:01.580Z"
+   },
+   "updated": "2026-08-20T22:42:01.580Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [
+    "slug"
+   ]
   }
  }
 }
