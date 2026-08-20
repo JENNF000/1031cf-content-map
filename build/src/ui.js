@@ -50,6 +50,7 @@ function openDrawer(path) {
       <div class="mn">${p.groups && p.groups.length ? "competes on " + p.groups.length + " term" + (p.groups.length > 1 ? "s" : "") : "no keyword overlap flagged"}</div></div>`;
 
   renderPlacement();
+  renderLive();
   renderStatusPicker();
   renderLabelPicker();
   const pa = annOf(path);
@@ -104,6 +105,32 @@ function renderPlacement() {
   };
   const dr = $("#dreset");
   if (dr) dr.onclick = () => { resetMove(openPath); renderPlacement(); openDrawer(openPath); refreshViews(); flashSaved("Reset"); };
+}
+
+/* ---------- live status: does this URL still serve a page? ---------- */
+function renderLive() {
+  const p = byPath[openPath];
+  const w = $("#dlive");
+  if (!p) { w.innerHTML = '<span class="emptyc">Not in the current inventory.</span>'; return; }
+  const cur = effTier(p) === "redirect" ? "redirect" : "live";
+  const ov = (ANN.live || {})[openPath];
+  const built = p.tier === "redirect" ? "a redirect" : "a live page";
+  w.innerHTML = `
+    <div class="statgrid" id="dlivebtns">
+      <button type="button" data-v="live" aria-pressed="${cur === "live"}">Serves a page</button>
+      <button type="button" data-v="redirect" aria-pressed="${cur === "redirect"}">Redirects</button>
+    </div>
+    <div class="phint">${ov
+      ? `You set this on ${esc((ov.at || "").slice(0, 10))}. The last data build had it as ${built}.
+         <button class="linkbtn" id="dliveclear" type="button">Use the build's value</button>`
+      : `From the last data build, which had it as ${built}.`}</div>`;
+  w.querySelectorAll("#dlivebtns button").forEach(b => b.onclick = () => {
+    setLiveStatus([openPath], b.dataset.v);
+    renderLive(); renderPlacement();
+    flashSaved(b.dataset.v === "redirect" ? "Marked as redirecting" : "Marked as serving");
+  });
+  const c = $("#dliveclear");
+  if (c) c.onclick = () => { clearLiveStatus(openPath); renderLive(); renderPlacement(); flashSaved("Reset"); };
 }
 
 /* ---------- status ---------- */
@@ -443,9 +470,9 @@ function renderNotes() {
   paths.forEach(p => { const s = ANN.pages[p].status; if (s) byStatus[s] = (byStatus[s] || 0) + 1; });
   const topStatus = Object.entries(byStatus).sort((a, b) => b[1] - a[1])[0];
   const kwCovered = paths.reduce((n, p) => n + ((byPath[p] || {}).kw || 0), 0);
-  [["Pages you've marked", n0(paths.length), `of ${n0(S.total)} live pages`],
+  [["Pages you've marked", n0(paths.length), `of ${n0(liveStats().total)} live pages`],
   ["Comments", n0(cCount), "across all pages"],
-  ["Keywords under management", n0(kwCovered), `${S.keywords ? Math.round(100 * kwCovered / S.keywords) : 0}% of your ranking keywords`],
+  ["Keywords under management", n0(kwCovered), `${liveStats().keywords ? Math.round(100 * kwCovered / liveStats().keywords) : 0}% of your ranking keywords`],
   ["Most common status", topStatus ? (statusById(topStatus[0]) || {}).name || "—" : "—",
     topStatus ? topStatus[1] + " page" + (topStatus[1] > 1 ? "s" : "") : "nothing marked yet", true],
   ].forEach(([l, v, n, isText]) => {
@@ -586,11 +613,13 @@ async function refreshData(manual) {
     if (manual) {
       const age = dataAgeDays();
       if (prev && prev === d.stats.generated) {
-        /* Don't say "up to date" when the newest *published* data is weeks old —
-           that's the one thing this message must not imply. */
+        /* This button fetches the published file. It says nothing about whether
+           that file still matches the site — that's what Check redirects is for,
+           so point at it rather than implying everything is current. */
         toast(age !== null && age > STALE_AFTER
-          ? `No newer data published. This build is ${age} days old — a fresh SEMrush pull needs running.`
-          : "No newer data published — this is the latest, from " + d.stats.generated);
+          ? `Nothing newer published — this build is ${age} days old. Shipped redirects since? Use Check redirects.`
+          : "Nothing newer published. Shipped redirects since? Use Check redirects.",
+          false, { label: "Check redirects", run: openCheck });
       } else {
         toast("Updated — data as of " + d.stats.generated);
       }
@@ -634,7 +663,8 @@ function wire() {
   $("#scrim").onclick = closeDrawer;
   addEventListener("keydown", e => {
     if (e.key === "Escape") {
-      if ($("#labelmodal").classList.contains("on")) closeLabels();
+      if ($("#checkmodal").classList.contains("on")) closeCheck();
+      else if ($("#labelmodal").classList.contains("on")) closeLabels();
       else if ($("#syncmodal").classList.contains("on")) closeSync();
       else if ($("#drawer").classList.contains("on")) closeDrawer();
     }
@@ -742,6 +772,15 @@ function wire() {
   };
 
   $("#refresh").onclick = () => refreshData(true);
+
+  $("#checkbtn").onclick = openCheck;
+  $("#chkclose").onclick = closeCheck;
+  $("#chkcancel").onclick = closeCheck;
+  $("#chkstart").onclick = runCheck;
+  $("#chkstop").onclick = () => { SWEEP.abort = true; };
+  $("#chkurls").oninput = previewPaste;
+  document.querySelectorAll('input[name="chkstate"]').forEach(r => r.onchange = previewPaste);
+  $("#dbulkstat").onclick = openCheck;
 
   /* sync modal */
   $("#syncchip").onclick = openSync;
@@ -888,6 +927,7 @@ function buildAnnFilters() {
     '<option value="__none">No notes</option>' +
     '<option value="__comment">Has comments</option>' +
     '<option value="__moved">Moved by me</option>' +
+    '<option value="__statuschanged">Redirect status changed by me</option>' +
     '<optgroup label="Status">' + visibleStatuses(false)
       .map(s => `<option value="s:${esc(s.id)}">${esc(s.name)}</option>`).join("") + '</optgroup>' +
     '<optgroup label="Label">' + ANN.labels.filter(l => !isHidden(l.id))

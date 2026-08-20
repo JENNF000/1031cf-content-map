@@ -96,6 +96,12 @@ const emptyAnn = () => ({
   hiddenAt: new Date(0).toISOString(),
   hiddenS: [],           // status ids removed from the library
   hiddenSAt: new Date(0).toISOString(),
+  /* Results of the in-app redirect check, keyed by path:
+     { "/path/": { s: "redirect" | "live", at: ISO } }
+     This is deliberately separate from `pages` — it's an observation about the
+     site, not an annotation, and it is what lets the app reflect a redirect you
+     shipped an hour ago without waiting for a SEMrush rebuild. */
+  live: {},
   pages: {},
 });
 
@@ -170,6 +176,7 @@ function mergeAnn(a, b) {
     hiddenAt: (a.hiddenAt || "") >= (b.hiddenAt || "") ? (a.hiddenAt || "") : (b.hiddenAt || ""),
     hiddenS: ((a.hiddenSAt || "") >= (b.hiddenSAt || "") ? a.hiddenS : b.hiddenS) || [],
     hiddenSAt: (a.hiddenSAt || "") >= (b.hiddenSAt || "") ? (a.hiddenSAt || "") : (b.hiddenSAt || ""),
+    live: mergeLive(a.live, b.live),
     pages: {},
   };
   const paths = new Set([...Object.keys(a.pages || {}), ...Object.keys(b.pages || {})]);
@@ -215,6 +222,19 @@ function normPage(p) {
     o[k] = (k === "labels" || k === "offFlags") ? (p[k] || []) : (p[k] || "");
   });
   return o;
+}
+
+/* Per-URL last-write-wins on the observation timestamp: whichever device checked
+   most recently is the one telling the truth about that URL. */
+function mergeLive(x, y) {
+  const out = {};
+  new Set([...Object.keys(x || {}), ...Object.keys(y || {})]).forEach(k => {
+    const m = (x || {})[k], n = (y || {})[k];
+    if (!m) { out[k] = n; return; }
+    if (!n) { out[k] = m; return; }
+    out[k] = (m.at || "") >= (n.at || "") ? m : n;
+  });
+  return out;
 }
 
 /* Union two library arrays by id. Where both sides have an entry, the one with
@@ -467,11 +487,31 @@ function effCat(p) {
   const c = a && a.cluster;
   return (c && DATA.cats.includes(c)) ? c : p.cat;
 }
+/* The in-app redirect check outranks data.json on the question of whether a URL
+   is still a page — it is simply more recent. A URL the build listed as live but
+   that now 3xx-redirects drops out of the live counts immediately; one the build
+   listed as a redirect but that now serves content comes back as fan-out unless
+   you have given it a tier yourself. */
+const liveOverride = path => (ANN.live || {})[path];
+
 function effTier(p) {
+  const ov = liveOverride(p.path);
   const a = annOf(p.path);
-  if (p.tier === "redirect") return "redirect";     // redirects are not pages
   const t = a && a.tier;
+  if (ov && ov.s === "redirect") return "redirect";
+  if (p.tier === "redirect") {
+    if (ov && ov.s === "live") return (t && MOVABLE_TIERS.includes(t)) ? t : "fanout";
+    return "redirect";
+  }
   return (t && MOVABLE_TIERS.includes(t)) ? t : p.tier;
+}
+
+/* true when the check disagrees with the published build */
+function statusChanged(p) {
+  const ov = liveOverride(p.path);
+  if (!ov) return null;
+  const was = p.tier === "redirect" ? "redirect" : "live";
+  return ov.s === was ? null : ov.s;      // "redirect" = newly redirecting, "live" = back
 }
 const isMoved = p => {
   const a = annOf(p.path);
@@ -524,6 +564,14 @@ function liveStats() {
   const live = P.filter(p => effTier(p) !== "redirect");
   const c = { transactional: 0, core: 0, fanout: 0, utility: 0 };
   live.forEach(p => { const t = effTier(p); if (c[t] !== undefined) c[t]++; });
+  /* `total` has to come from here, not from stats.total — a page you marked as
+     redirecting is not a live page, and the headline must agree with the bands
+     underneath it. */
+  c.total = live.length;
+  c.redirects = P.length - live.length;
+  c.keywords = live.reduce((a, b) => a + b.kw, 0);
+  c.traffic = live.reduce((a, b) => a + b.traffic, 0);
+  c.ranking = live.filter(p => p.kw > 0).length;
   return c;
 }
 
@@ -561,24 +609,48 @@ function renderHeader() {
     let n = chip.querySelector(".age");
     if (!n) { n = el("span", "age"); chip.append(n); }
     n.textContent = age === null ? "" : age === 0 ? "· today" : `· ${age} day${age === 1 ? "" : "s"} old`;
+
+    /* The redirect picture has its own vintage — it changes when Jennifer ships,
+       not when SEMrush is re-pulled — so it gets its own chip. */
+    const lc = lastCheckedAt();
+    let rc = $("#redirchip");
+    if (!rc) {
+      rc = el("button", "syncchip");
+      rc.id = "redirchip"; rc.type = "button";
+      rc.innerHTML = '<span class="sdot"></span><span class="rtxt"></span>';
+      rc.onclick = () => openCheck();
+      chip.after(rc);
+    }
+    if (lc) {
+      const d = Math.floor((Date.now() - new Date(lc).getTime()) / 86400000);
+      rc.querySelector(".rtxt").textContent =
+        "Redirects checked " + (d <= 0 ? "today" : d === 1 ? "yesterday" : d + "d ago");
+      rc.dataset.s = d > 7 ? "error" : "synced";
+      rc.title = "Click to re-check which URLs redirect. Costs no SEMrush units.";
+    } else {
+      rc.querySelector(".rtxt").textContent = "Redirects never checked";
+      rc.dataset.s = "local";
+      rc.title = "Click to check which URLs redirect. Costs no SEMrush units.";
+    }
     chip.title = stale
       ? `This dataset was built ${age} days ago. Refresh only pulls what's been published to the repo — a new SEMrush pull has to be run and committed. Ask Claude to refresh the content map.`
       : "Age of the published dataset";
   }
 
+  const c0 = liveStats();
   $("#asof").textContent = S.generated;
-  $("#foot2").textContent = `${n0(S.total)} live URLs · ${n0(S.keywords)} ranking keywords · ${n0(S.traffic)} est. monthly organic visits · generated ${S.generated}`;
+  $("#foot2").textContent = `${n0(c0.total)} live URLs · ${n0(c0.keywords)} ranking keywords · ${n0(c0.traffic)} est. monthly organic visits · data generated ${S.generated}`;
   $("#c-attn").textContent = "(" + (DATA.groups.length - S.resolved_groups) + ")";
   $("#c-slug").textContent = "(" + DATA.slugs.length + ")";
-  $("#c-all").textContent = "(" + S.total + ")";
+  $("#c-all").textContent = "(" + c0.total + ")";
   $("#c-work").textContent = "(" + (S.review + S.remove) + ")";
 
   const c = liveStats();
   const TILES = [
-    ["Live pages", n0(S.total), `${c.transactional} transactional · ${c.core} pillar · ${c.fanout} fan-out`],
-    ["Verified redirects", n0(S.redirects), `of ${n0(S.crawled)} URLs crawled — excluded from all counts`],
-    ["Ranking keywords", n0(S.keywords), `across ${S.ranking} pages with at least one ranking`],
-    ["Est. monthly organic visits", n0(S.traffic), "SEMrush estimate, US database"],
+    ["Live pages", n0(c.total), `${c.transactional} transactional · ${c.core} pillar · ${c.fanout} fan-out`],
+    ["Redirects", n0(c.redirects), `of ${n0(P.length)} URLs known — excluded from all counts`],
+    ["Ranking keywords", n0(c.keywords), `across ${c.ranking} pages with at least one ranking`],
+    ["Est. monthly organic visits", n0(c.traffic), "SEMrush estimate, US database"],
   ];
   const tw = $("#tiles"); tw.innerHTML = "";
   TILES.forEach(([l, v, nt]) => {
@@ -604,6 +676,7 @@ function matchAnn(p) {
   if (F.ann === "__none") return !a || annIsEmpty(a);
   if (F.ann === "__comment") return !!a && (a.comments || []).length > 0;
   if (F.ann === "__moved") return isMoved(p);
+  if (F.ann === "__statuschanged") return !!statusChanged(p);
   if (F.ann.startsWith("s:")) return !!a && a.status === F.ann.slice(2);
   if (F.ann.startsWith("l:")) return effLabels(p).includes(F.ann.slice(2));
   return true;
@@ -644,6 +717,8 @@ function tipFor(p) {
     Keywords: <b>${n0(p.kw)}</b> · Est. traffic: <b>${n0(p.traffic)}</b><br>
     ${p.pkw ? `Top keyword: <b>${esc(p.pkw)}</b><br>Volume ${n0(p.vol)}/mo · position ${p.pos}${p.pkw_stale ? ' <span style="opacity:.7">(not re-pulled)</span>' : ''}<br>` : ''}
     ${p.trans || p.comm ? `Intent: ${p.trans} transactional / ${p.comm} commercial / ${p.info} informational<br>` : ''}
+    ${statusChanged(p) === "redirect" ? `<br><b>↳ Now redirects</b> <span style="opacity:.7">(checked ${esc(((liveOverride(p.path) || {}).at || "").slice(0, 10))}; the build still had it live)</span>` : ''}
+    ${statusChanged(p) === "live" ? `<br><b>↳ Serving content again</b> <span style="opacity:.7">(checked ${esc(((liveOverride(p.path) || {}).at || "").slice(0, 10))}; the build had it as a redirect)</span>` : ''}
     ${moved ? `<br>↔ Moved by you to <b>${esc(effCat(p))} · ${esc(TIERNAME[effTier(p)])}</b><br>
        <span style="opacity:.7">was ${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)}</span>` : ''}
     ${p.groups && p.groups.length ? `<br>⚠ Competes on: ${p.groups.map(esc).join('; ')}` : ''}
@@ -1194,6 +1269,225 @@ function renderAllViews() {
 
 
 /* =====================================================================
+   Part 4: keeping redirect status current without a SEMrush pull.
+
+   ⚠ WHY THERE IS NO AUTOMATIC SWEEP FROM GITHUB PAGES
+
+   Detecting whether a URL redirects means reading the response type, and the
+   browser will not allow that across origins. Both approaches were tried against
+   a real server that answers real 301s:
+
+     fetch(url, { mode:"no-cors", redirect:"manual" })
+         → TypeError before any request leaves the browser. no-cors REQUIRES
+           redirect:"follow". An earlier build did exactly this and reported all
+           332 URLs as unreachable.
+
+     fetch(url, { redirect:"manual" })          // cors mode
+         → a cross-origin 3xx with no Access-Control-Allow-Origin is stopped by
+           the CORS check. It does NOT surface as "opaqueredirect".
+
+   The `opaqueredirect` method in the project notes worked because that sweep ran
+   **same-origin, in a tab on 1031crowdfunding.com itself**. From
+   jennf000.github.io it cannot work, and no combination of fetch options fixes
+   it. Don't try again without re-reading this.
+
+   So there are three honest routes instead:
+
+     1. If the app is ever served from the site's own origin, the sweep becomes
+        possible and is offered automatically — `canSweep()` decides.
+     2. Paste the URLs you just redirected. You already know them; this applies
+        them in bulk in seconds, needs no crawl and no API units.
+     3. Flip a single page by hand from its panel.
+
+   All three write to the same `ANN.live` override, so they flow into the live
+   page count, the cluster columns, the tier bands and the CSV identically — and
+   survive every data rebuild.
+   ===================================================================== */
+
+const SWEEP = { running: false, abort: false, done: 0, total: 0, results: null };
+const CONCURRENCY = 8;
+
+/* The sweep is only possible when app and site share an origin. Offering it
+   anywhere else would be a lie. */
+function siteOrigin() {
+  const p = P && P.length ? P.find(x => x.url) : null;
+  try { return p ? new URL(p.url).origin : null; } catch (e) { return null; }
+}
+const canSweep = () => !!siteOrigin() && siteOrigin() === location.origin;
+
+async function probe(url) {
+  try {
+    const r = await fetch(url, { redirect: "manual", cache: "no-store", credentials: "omit" });
+    if (r.type === "opaqueredirect") return "redirect";
+    if (r.status >= 300 && r.status < 400) return "redirect";
+    if (r.status) return "live";
+  } catch (e) { /* fall through to the reachability probe */ }
+  try {
+    await fetch(url, { mode: "no-cors", redirect: "follow", cache: "no-store", credentials: "omit" });
+    return "live";                     // answered; could be 200, could be 404
+  } catch (e) { return "error"; }      // never treated as live
+}
+
+async function sweepAll(paths, onProgress) {
+  SWEEP.running = true; SWEEP.abort = false;
+  SWEEP.done = 0; SWEEP.total = paths.length;
+  const out = {};
+  let i = 0;
+  const worker = async () => {
+    while (i < paths.length && !SWEEP.abort) {
+      const path = paths[i++];
+      const p = byPath[path];
+      out[path] = await probe(p && p.url ? p.url : path);
+      SWEEP.done++;
+      if (onProgress) onProgress(SWEEP.done, SWEEP.total);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, paths.length) }, worker));
+  SWEEP.running = false;
+  return out;
+}
+
+/* --------------------------------------------------------- write path ---- */
+/* One function behind all three routes. */
+function setLiveStatus(paths, state) {
+  const at = nowISO();
+  ANN.live = ANN.live || {};
+  paths.forEach(p => { ANN.live[p] = { s: state, at }; });
+  ANN.updated = at;
+  saveLocal(); Sync.schedule();
+  refreshViews(); buildAnnFilters();
+}
+
+function clearLiveStatus(path) {
+  if (ANN.live) delete ANN.live[path];
+  ANN.updated = nowISO();
+  saveLocal(); Sync.schedule();
+  refreshViews();
+}
+
+function lastCheckedAt() {
+  const v = Object.values(ANN.live || {});
+  if (!v.length) return null;
+  return v.reduce((m, x) => (x.at > m ? x.at : m), "");
+}
+
+/* ---------------------------------------------------------------- UI ----- */
+function openCheck() {
+  $("#checkmodal").classList.add("on");
+  SWEEP.results = null;
+  $("#chkresult").innerHTML = "";
+  $("#chkprog").style.display = "none";
+  $("#chkapply").style.display = "none";
+  $("#chkstop").style.display = "none";
+  $("#chkstart").style.display = canSweep() ? "" : "none";
+  $("#chksweep").style.display = canSweep() ? "" : "none";
+  $("#chkurls").value = "";
+  renderCheckSummary();
+  setTimeout(() => $("#chkurls").focus(), 60);
+}
+const closeCheck = () => { SWEEP.abort = true; $("#checkmodal").classList.remove("on"); };
+
+function renderCheckSummary() {
+  const n = Object.keys(ANN.live || {}).length;
+  const changed = P.filter(p => statusChanged(p)).length;
+  $("#chksummary").innerHTML = n
+    ? `You've recorded a status for ${n0(n)} URL${n === 1 ? "" : "s"}${changed
+      ? `, ${changed} of which differ from the published build` : ""} — last updated ${esc((lastCheckedAt() || "").slice(0, 10))}.`
+    : `Nothing recorded yet, so the app is using the redirect map from the last data build.`;
+}
+
+/* Accepts full URLs or paths, one per line or comma separated, trailing slash
+   optional — whatever your redirect plugin happens to export. */
+function parseUrls(text) {
+  const wanted = [], missing = [];
+  text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).forEach(raw => {
+    let p = raw;
+    try { if (/^https?:\/\//i.test(raw)) p = new URL(raw).pathname; } catch (e) {}
+    if (!p.startsWith("/")) p = "/" + p;
+    const hit = [p, p.endsWith("/") ? p.slice(0, -1) : p + "/"].find(c => byPath[c]);
+    if (hit) { if (!wanted.includes(hit)) wanted.push(hit); }
+    else missing.push(raw);
+  });
+  return { wanted, missing };
+}
+
+function previewPaste() {
+  const state = document.querySelector('input[name="chkstate"]:checked').value;
+  const { wanted, missing } = parseUrls($("#chkurls").value);
+  const w = $("#chkresult");
+  if (!wanted.length && !missing.length) { w.innerHTML = ""; $("#chkapply").style.display = "none"; return; }
+
+  const changing = wanted.filter(p =>
+    (effTier(byPath[p]) === "redirect" ? "redirect" : "live") !== state);
+
+  let html = "";
+  if (changing.length) {
+    html += `<h4>${changing.length} will change to ${state === "redirect" ? "redirecting" : "serving content"}</h4>
+      <ul class="chklist">${changing.map(u =>
+      `<li class="${state === "redirect" ? "gone" : "back"}">${esc(u)}<span class="n">${byPath[u].kw ? n0(byPath[u].kw) + " kw" : "0 kw"}</span></li>`).join("")}</ul>`;
+  }
+  const already = wanted.length - changing.length;
+  if (already) html += `<div class="chknote">${already} already recorded that way — no change.</div>`;
+  if (missing.length) {
+    html += `<div class="chknote warn"><b>${missing.length} not in the inventory</b>, so ${missing.length === 1 ? "it was" : "they were"} skipped.
+      Either a typo, or the page is newer than the last data build:<br>${missing.slice(0, 12).map(esc).join("<br>")}</div>`;
+  }
+  w.innerHTML = html;
+  $("#chkapply").style.display = changing.length ? "" : "none";
+  $("#chkapply").textContent = `Apply ${changing.length} change${changing.length === 1 ? "" : "s"}`;
+  $("#chkapply").onclick = () => {
+    setLiveStatus(changing, state);
+    closeCheck();
+    toast(`${changing.length} URL${changing.length === 1 ? "" : "s"} marked as ${state === "redirect" ? "redirecting" : "serving content"}`);
+  };
+}
+
+/* ---------- the automatic sweep, only where it can actually work ---------- */
+async function runCheck() {
+  if (!canSweep()) return;
+  const paths = P.map(p => p.path);
+  $("#chkstart").style.display = "none";
+  $("#chkstop").style.display = "";
+  $("#chkprog").style.display = "";
+  const bar = $("#chkbar"), lab = $("#chklab");
+  bar.style.width = "0%";
+  lab.textContent = `Checking 0 of ${paths.length}…`;
+
+  const res = await sweepAll(paths, (d, t) => {
+    bar.style.width = (100 * d / t).toFixed(1) + "%";
+    lab.textContent = `Checking ${d} of ${t}…`;
+  });
+  $("#chkstop").style.display = "none";
+  SWEEP.results = res;
+
+  const errs = Object.keys(res).filter(k => res[k] === "error");
+  const changed = Object.keys(res).filter(k => {
+    if (res[k] === "error" || !byPath[k]) return false;
+    return res[k] !== (effTier(byPath[k]) === "redirect" ? "redirect" : "live");
+  });
+  let html = changed.length
+    ? `<h4>${changed.length} changed</h4><ul class="chklist">${changed.slice(0, 60).map(u =>
+      `<li class="${res[u] === "redirect" ? "gone" : "back"}">${esc(u)}<span class="n">${res[u] === "redirect" ? "now redirects" : "serving again"}</span></li>`).join("")}</ul>`
+    : `<div class="chknote ok">No changes — everything matches what the app shows.</div>`;
+  if (errs.length) html += `<div class="chknote warn">${errs.length} couldn't be reached; left untouched.</div>`;
+  $("#chkresult").innerHTML = html;
+
+  if (changed.length) {
+    $("#chkapply").style.display = "";
+    $("#chkapply").textContent = `Apply ${changed.length} change${changed.length === 1 ? "" : "s"}`;
+    $("#chkapply").onclick = () => {
+      const at = nowISO();
+      ANN.live = ANN.live || {};
+      Object.keys(res).forEach(p => { if (res[p] !== "error") ANN.live[p] = { s: res[p], at }; });
+      ANN.updated = at; saveLocal(); Sync.schedule();
+      closeCheck(); refreshViews(); buildAnnFilters();
+      toast(`Applied ${changed.length} status change${changed.length === 1 ? "" : "s"}`);
+    };
+  }
+}
+
+
+/* =====================================================================
    Part 3: annotation UI, label manager, notes tab, sync modal, PWA shell.
    ===================================================================== */
 
@@ -1245,6 +1539,7 @@ function openDrawer(path) {
       <div class="mn">${p.groups && p.groups.length ? "competes on " + p.groups.length + " term" + (p.groups.length > 1 ? "s" : "") : "no keyword overlap flagged"}</div></div>`;
 
   renderPlacement();
+  renderLive();
   renderStatusPicker();
   renderLabelPicker();
   const pa = annOf(path);
@@ -1299,6 +1594,32 @@ function renderPlacement() {
   };
   const dr = $("#dreset");
   if (dr) dr.onclick = () => { resetMove(openPath); renderPlacement(); openDrawer(openPath); refreshViews(); flashSaved("Reset"); };
+}
+
+/* ---------- live status: does this URL still serve a page? ---------- */
+function renderLive() {
+  const p = byPath[openPath];
+  const w = $("#dlive");
+  if (!p) { w.innerHTML = '<span class="emptyc">Not in the current inventory.</span>'; return; }
+  const cur = effTier(p) === "redirect" ? "redirect" : "live";
+  const ov = (ANN.live || {})[openPath];
+  const built = p.tier === "redirect" ? "a redirect" : "a live page";
+  w.innerHTML = `
+    <div class="statgrid" id="dlivebtns">
+      <button type="button" data-v="live" aria-pressed="${cur === "live"}">Serves a page</button>
+      <button type="button" data-v="redirect" aria-pressed="${cur === "redirect"}">Redirects</button>
+    </div>
+    <div class="phint">${ov
+      ? `You set this on ${esc((ov.at || "").slice(0, 10))}. The last data build had it as ${built}.
+         <button class="linkbtn" id="dliveclear" type="button">Use the build's value</button>`
+      : `From the last data build, which had it as ${built}.`}</div>`;
+  w.querySelectorAll("#dlivebtns button").forEach(b => b.onclick = () => {
+    setLiveStatus([openPath], b.dataset.v);
+    renderLive(); renderPlacement();
+    flashSaved(b.dataset.v === "redirect" ? "Marked as redirecting" : "Marked as serving");
+  });
+  const c = $("#dliveclear");
+  if (c) c.onclick = () => { clearLiveStatus(openPath); renderLive(); renderPlacement(); flashSaved("Reset"); };
 }
 
 /* ---------- status ---------- */
@@ -1638,9 +1959,9 @@ function renderNotes() {
   paths.forEach(p => { const s = ANN.pages[p].status; if (s) byStatus[s] = (byStatus[s] || 0) + 1; });
   const topStatus = Object.entries(byStatus).sort((a, b) => b[1] - a[1])[0];
   const kwCovered = paths.reduce((n, p) => n + ((byPath[p] || {}).kw || 0), 0);
-  [["Pages you've marked", n0(paths.length), `of ${n0(S.total)} live pages`],
+  [["Pages you've marked", n0(paths.length), `of ${n0(liveStats().total)} live pages`],
   ["Comments", n0(cCount), "across all pages"],
-  ["Keywords under management", n0(kwCovered), `${S.keywords ? Math.round(100 * kwCovered / S.keywords) : 0}% of your ranking keywords`],
+  ["Keywords under management", n0(kwCovered), `${liveStats().keywords ? Math.round(100 * kwCovered / liveStats().keywords) : 0}% of your ranking keywords`],
   ["Most common status", topStatus ? (statusById(topStatus[0]) || {}).name || "—" : "—",
     topStatus ? topStatus[1] + " page" + (topStatus[1] > 1 ? "s" : "") : "nothing marked yet", true],
   ].forEach(([l, v, n, isText]) => {
@@ -1781,11 +2102,13 @@ async function refreshData(manual) {
     if (manual) {
       const age = dataAgeDays();
       if (prev && prev === d.stats.generated) {
-        /* Don't say "up to date" when the newest *published* data is weeks old —
-           that's the one thing this message must not imply. */
+        /* This button fetches the published file. It says nothing about whether
+           that file still matches the site — that's what Check redirects is for,
+           so point at it rather than implying everything is current. */
         toast(age !== null && age > STALE_AFTER
-          ? `No newer data published. This build is ${age} days old — a fresh SEMrush pull needs running.`
-          : "No newer data published — this is the latest, from " + d.stats.generated);
+          ? `Nothing newer published — this build is ${age} days old. Shipped redirects since? Use Check redirects.`
+          : "Nothing newer published. Shipped redirects since? Use Check redirects.",
+          false, { label: "Check redirects", run: openCheck });
       } else {
         toast("Updated — data as of " + d.stats.generated);
       }
@@ -1829,7 +2152,8 @@ function wire() {
   $("#scrim").onclick = closeDrawer;
   addEventListener("keydown", e => {
     if (e.key === "Escape") {
-      if ($("#labelmodal").classList.contains("on")) closeLabels();
+      if ($("#checkmodal").classList.contains("on")) closeCheck();
+      else if ($("#labelmodal").classList.contains("on")) closeLabels();
       else if ($("#syncmodal").classList.contains("on")) closeSync();
       else if ($("#drawer").classList.contains("on")) closeDrawer();
     }
@@ -1937,6 +2261,15 @@ function wire() {
   };
 
   $("#refresh").onclick = () => refreshData(true);
+
+  $("#checkbtn").onclick = openCheck;
+  $("#chkclose").onclick = closeCheck;
+  $("#chkcancel").onclick = closeCheck;
+  $("#chkstart").onclick = runCheck;
+  $("#chkstop").onclick = () => { SWEEP.abort = true; };
+  $("#chkurls").oninput = previewPaste;
+  document.querySelectorAll('input[name="chkstate"]').forEach(r => r.onchange = previewPaste);
+  $("#dbulkstat").onclick = openCheck;
 
   /* sync modal */
   $("#syncchip").onclick = openSync;
@@ -2083,6 +2416,7 @@ function buildAnnFilters() {
     '<option value="__none">No notes</option>' +
     '<option value="__comment">Has comments</option>' +
     '<option value="__moved">Moved by me</option>' +
+    '<option value="__statuschanged">Redirect status changed by me</option>' +
     '<optgroup label="Status">' + visibleStatuses(false)
       .map(s => `<option value="s:${esc(s.id)}">${esc(s.name)}</option>`).join("") + '</optgroup>' +
     '<optgroup label="Label">' + ANN.labels.filter(l => !isHidden(l.id))

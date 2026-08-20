@@ -96,6 +96,12 @@ const emptyAnn = () => ({
   hiddenAt: new Date(0).toISOString(),
   hiddenS: [],           // status ids removed from the library
   hiddenSAt: new Date(0).toISOString(),
+  /* Results of the in-app redirect check, keyed by path:
+     { "/path/": { s: "redirect" | "live", at: ISO } }
+     This is deliberately separate from `pages` — it's an observation about the
+     site, not an annotation, and it is what lets the app reflect a redirect you
+     shipped an hour ago without waiting for a SEMrush rebuild. */
+  live: {},
   pages: {},
 });
 
@@ -170,6 +176,7 @@ function mergeAnn(a, b) {
     hiddenAt: (a.hiddenAt || "") >= (b.hiddenAt || "") ? (a.hiddenAt || "") : (b.hiddenAt || ""),
     hiddenS: ((a.hiddenSAt || "") >= (b.hiddenSAt || "") ? a.hiddenS : b.hiddenS) || [],
     hiddenSAt: (a.hiddenSAt || "") >= (b.hiddenSAt || "") ? (a.hiddenSAt || "") : (b.hiddenSAt || ""),
+    live: mergeLive(a.live, b.live),
     pages: {},
   };
   const paths = new Set([...Object.keys(a.pages || {}), ...Object.keys(b.pages || {})]);
@@ -215,6 +222,19 @@ function normPage(p) {
     o[k] = (k === "labels" || k === "offFlags") ? (p[k] || []) : (p[k] || "");
   });
   return o;
+}
+
+/* Per-URL last-write-wins on the observation timestamp: whichever device checked
+   most recently is the one telling the truth about that URL. */
+function mergeLive(x, y) {
+  const out = {};
+  new Set([...Object.keys(x || {}), ...Object.keys(y || {})]).forEach(k => {
+    const m = (x || {})[k], n = (y || {})[k];
+    if (!m) { out[k] = n; return; }
+    if (!n) { out[k] = m; return; }
+    out[k] = (m.at || "") >= (n.at || "") ? m : n;
+  });
+  return out;
 }
 
 /* Union two library arrays by id. Where both sides have an entry, the one with

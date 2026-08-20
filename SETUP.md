@@ -197,10 +197,43 @@ structure rather than detail.
 **Light or dark** follows your Mac's appearance setting — there's no toggle in the
 app. Say the word if you'd rather have one back.
 
-**The "Data as of" chip shows the dataset's age.** It turns amber once the build is
-more than 8 days old, which means a weekly rebuild was missed. **Refresh** only
-pulls what has been *published to the repo* — it can't run a SEMrush pull itself, so
-if the chip is amber, ask me for a fresh one.
+## Two different kinds of "current"
+
+The header carries two chips, because these move for different reasons.
+
+**Data as of …** is the SEMrush build — keyword counts, traffic, positions. It
+turns amber past 8 days. **Refresh** pulls whatever has been published to the repo;
+it can't run a SEMrush pull itself, so if the chip is amber, ask me for a fresh one.
+
+**Redirects checked …** is whether each URL still serves a page. This is the one
+that changes when *you* do work, and it needs no SEMrush at all.
+
+### Telling the app you've shipped redirects
+
+Click **Check redirects** in the header (or the chip). Paste the URLs you just
+redirected — full URLs or paths, one per line or comma separated, trailing slash
+optional, whatever your redirect plugin exports. You'll see exactly what will
+change before anything happens; anything not in the inventory is listed back to
+you rather than dropped. Apply, and those pages leave the live count and drop into
+the Redirect band immediately.
+
+For a single page, the panel now has a **Live status** control — *Serves a page* /
+*Redirects* — with a link back to whatever the last build said.
+
+Either way it sticks through every data rebuild, and **Redirect status changed by
+me** in the notes filter shows you everything you've overridden.
+
+### Why there's no "scan my site" button
+
+The app is on `github.io` and your site is on `1031crowdfunding.com`. Browsers
+don't let a page on one domain see whether a URL on another domain redirects — I
+tried both documented tricks against a real server and neither works. The original
+redirect map was built by running the scan in a tab *on your site*, which is
+same-origin and therefore allowed.
+
+So: ask me and I'll run a verified sweep that way. Or, if the app were ever served
+from your own domain, the scan button appears by itself and works natively — the
+code already checks for that.
 
 **Target keyword / prompt** is deliberately separate from the keyword the page
 currently ranks for — it's what you *intend* it to win, including AEO prompts.

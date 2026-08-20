@@ -57,11 +57,31 @@ function effCat(p) {
   const c = a && a.cluster;
   return (c && DATA.cats.includes(c)) ? c : p.cat;
 }
+/* The in-app redirect check outranks data.json on the question of whether a URL
+   is still a page — it is simply more recent. A URL the build listed as live but
+   that now 3xx-redirects drops out of the live counts immediately; one the build
+   listed as a redirect but that now serves content comes back as fan-out unless
+   you have given it a tier yourself. */
+const liveOverride = path => (ANN.live || {})[path];
+
 function effTier(p) {
+  const ov = liveOverride(p.path);
   const a = annOf(p.path);
-  if (p.tier === "redirect") return "redirect";     // redirects are not pages
   const t = a && a.tier;
+  if (ov && ov.s === "redirect") return "redirect";
+  if (p.tier === "redirect") {
+    if (ov && ov.s === "live") return (t && MOVABLE_TIERS.includes(t)) ? t : "fanout";
+    return "redirect";
+  }
   return (t && MOVABLE_TIERS.includes(t)) ? t : p.tier;
+}
+
+/* true when the check disagrees with the published build */
+function statusChanged(p) {
+  const ov = liveOverride(p.path);
+  if (!ov) return null;
+  const was = p.tier === "redirect" ? "redirect" : "live";
+  return ov.s === was ? null : ov.s;      // "redirect" = newly redirecting, "live" = back
 }
 const isMoved = p => {
   const a = annOf(p.path);
@@ -114,6 +134,14 @@ function liveStats() {
   const live = P.filter(p => effTier(p) !== "redirect");
   const c = { transactional: 0, core: 0, fanout: 0, utility: 0 };
   live.forEach(p => { const t = effTier(p); if (c[t] !== undefined) c[t]++; });
+  /* `total` has to come from here, not from stats.total — a page you marked as
+     redirecting is not a live page, and the headline must agree with the bands
+     underneath it. */
+  c.total = live.length;
+  c.redirects = P.length - live.length;
+  c.keywords = live.reduce((a, b) => a + b.kw, 0);
+  c.traffic = live.reduce((a, b) => a + b.traffic, 0);
+  c.ranking = live.filter(p => p.kw > 0).length;
   return c;
 }
 
@@ -151,24 +179,48 @@ function renderHeader() {
     let n = chip.querySelector(".age");
     if (!n) { n = el("span", "age"); chip.append(n); }
     n.textContent = age === null ? "" : age === 0 ? "· today" : `· ${age} day${age === 1 ? "" : "s"} old`;
+
+    /* The redirect picture has its own vintage — it changes when Jennifer ships,
+       not when SEMrush is re-pulled — so it gets its own chip. */
+    const lc = lastCheckedAt();
+    let rc = $("#redirchip");
+    if (!rc) {
+      rc = el("button", "syncchip");
+      rc.id = "redirchip"; rc.type = "button";
+      rc.innerHTML = '<span class="sdot"></span><span class="rtxt"></span>';
+      rc.onclick = () => openCheck();
+      chip.after(rc);
+    }
+    if (lc) {
+      const d = Math.floor((Date.now() - new Date(lc).getTime()) / 86400000);
+      rc.querySelector(".rtxt").textContent =
+        "Redirects checked " + (d <= 0 ? "today" : d === 1 ? "yesterday" : d + "d ago");
+      rc.dataset.s = d > 7 ? "error" : "synced";
+      rc.title = "Click to re-check which URLs redirect. Costs no SEMrush units.";
+    } else {
+      rc.querySelector(".rtxt").textContent = "Redirects never checked";
+      rc.dataset.s = "local";
+      rc.title = "Click to check which URLs redirect. Costs no SEMrush units.";
+    }
     chip.title = stale
       ? `This dataset was built ${age} days ago. Refresh only pulls what's been published to the repo — a new SEMrush pull has to be run and committed. Ask Claude to refresh the content map.`
       : "Age of the published dataset";
   }
 
+  const c0 = liveStats();
   $("#asof").textContent = S.generated;
-  $("#foot2").textContent = `${n0(S.total)} live URLs · ${n0(S.keywords)} ranking keywords · ${n0(S.traffic)} est. monthly organic visits · generated ${S.generated}`;
+  $("#foot2").textContent = `${n0(c0.total)} live URLs · ${n0(c0.keywords)} ranking keywords · ${n0(c0.traffic)} est. monthly organic visits · data generated ${S.generated}`;
   $("#c-attn").textContent = "(" + (DATA.groups.length - S.resolved_groups) + ")";
   $("#c-slug").textContent = "(" + DATA.slugs.length + ")";
-  $("#c-all").textContent = "(" + S.total + ")";
+  $("#c-all").textContent = "(" + c0.total + ")";
   $("#c-work").textContent = "(" + (S.review + S.remove) + ")";
 
   const c = liveStats();
   const TILES = [
-    ["Live pages", n0(S.total), `${c.transactional} transactional · ${c.core} pillar · ${c.fanout} fan-out`],
-    ["Verified redirects", n0(S.redirects), `of ${n0(S.crawled)} URLs crawled — excluded from all counts`],
-    ["Ranking keywords", n0(S.keywords), `across ${S.ranking} pages with at least one ranking`],
-    ["Est. monthly organic visits", n0(S.traffic), "SEMrush estimate, US database"],
+    ["Live pages", n0(c.total), `${c.transactional} transactional · ${c.core} pillar · ${c.fanout} fan-out`],
+    ["Redirects", n0(c.redirects), `of ${n0(P.length)} URLs known — excluded from all counts`],
+    ["Ranking keywords", n0(c.keywords), `across ${c.ranking} pages with at least one ranking`],
+    ["Est. monthly organic visits", n0(c.traffic), "SEMrush estimate, US database"],
   ];
   const tw = $("#tiles"); tw.innerHTML = "";
   TILES.forEach(([l, v, nt]) => {
@@ -194,6 +246,7 @@ function matchAnn(p) {
   if (F.ann === "__none") return !a || annIsEmpty(a);
   if (F.ann === "__comment") return !!a && (a.comments || []).length > 0;
   if (F.ann === "__moved") return isMoved(p);
+  if (F.ann === "__statuschanged") return !!statusChanged(p);
   if (F.ann.startsWith("s:")) return !!a && a.status === F.ann.slice(2);
   if (F.ann.startsWith("l:")) return effLabels(p).includes(F.ann.slice(2));
   return true;
@@ -234,6 +287,8 @@ function tipFor(p) {
     Keywords: <b>${n0(p.kw)}</b> · Est. traffic: <b>${n0(p.traffic)}</b><br>
     ${p.pkw ? `Top keyword: <b>${esc(p.pkw)}</b><br>Volume ${n0(p.vol)}/mo · position ${p.pos}${p.pkw_stale ? ' <span style="opacity:.7">(not re-pulled)</span>' : ''}<br>` : ''}
     ${p.trans || p.comm ? `Intent: ${p.trans} transactional / ${p.comm} commercial / ${p.info} informational<br>` : ''}
+    ${statusChanged(p) === "redirect" ? `<br><b>↳ Now redirects</b> <span style="opacity:.7">(checked ${esc(((liveOverride(p.path) || {}).at || "").slice(0, 10))}; the build still had it live)</span>` : ''}
+    ${statusChanged(p) === "live" ? `<br><b>↳ Serving content again</b> <span style="opacity:.7">(checked ${esc(((liveOverride(p.path) || {}).at || "").slice(0, 10))}; the build had it as a redirect)</span>` : ''}
     ${moved ? `<br>↔ Moved by you to <b>${esc(effCat(p))} · ${esc(TIERNAME[effTier(p)])}</b><br>
        <span style="opacity:.7">was ${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)}</span>` : ''}
     ${p.groups && p.groups.length ? `<br>⚠ Competes on: ${p.groups.map(esc).join('; ')}` : ''}

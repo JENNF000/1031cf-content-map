@@ -63,6 +63,7 @@ NEW_HDR = """  <div class="hdr-right">
     <button class="syncchip" id="syncchip" data-s="local" type="button">
       <span class="sdot"></span><span class="stxt">Local only</span></button>
     <button class="btn" id="refresh" type="button">Refresh</button>
+    <button class="btn" id="checkbtn" type="button">Check redirects</button>
     <button class="btn" id="density" type="button">Compact</button>
     <button class="btn" id="csv" type="button">Export CSV</button>
     <button class="btn primary hideinapp" id="install" type="button" style="display:none">Install app</button>
@@ -166,7 +167,7 @@ assert FOOT_MARK in head
 head = head.replace(FOOT_MARK, sections.strip() + "\n\n" + FOOT_MARK, 1)
 
 # --------------------------------------------------------------- script ----
-app_js = "\n\n".join([read("store.js"), read("dashboard.js"), read("ui.js")])
+app_js = "\n\n".join([read("store.js"), read("dashboard.js"), read("redirects.js"), read("ui.js")])
 app_hash = hashlib.sha256(app_js.encode()).hexdigest()[:10]
 
 tail = f"""

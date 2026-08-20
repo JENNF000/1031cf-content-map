@@ -45,6 +45,12 @@
     </div>
 
     <div class="sect">
+      <span class="slab">Live status
+        <button class="linkbtn" id="dbulkstat" type="button">Bulk update</button></span>
+      <div id="dlive"></div>
+    </div>
+
+    <div class="sect">
       <span class="slab">Status
         <button class="linkbtn" id="dmanagestat" type="button">Manage</button></span>
       <div class="statgrid" id="dstatus"></div>
@@ -123,6 +129,51 @@
     <div class="macts">
       <button class="btn" id="labrestoreall">Restore all defaults</button>
       <button class="btn primary" id="labdone">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ redirect status ============ -->
+<div class="modal" id="checkmodal">
+  <div class="mbox">
+    <button class="dclose" id="chkclose" aria-label="Close" style="position:absolute;top:14px;right:16px">✕</button>
+    <h2>Update redirect status</h2>
+    <p class="msub">For when you've just shipped redirects and want the map to reflect it now. Costs no SEMrush
+      units and waits for no rebuild.</p>
+    <div class="chknote" id="chksummary" style="margin-top:0"></div>
+
+    <div class="msect">
+      <span class="slab">Paste the URLs</span>
+      <p class="mnote">Full URLs or paths, one per line or comma separated, trailing slash optional — whatever your
+        redirect plugin exports. Anything not in the inventory is listed back to you rather than silently dropped.</p>
+      <textarea id="chkurls" rows="5" placeholder="/old-page/&#10;https://www.1031crowdfunding.com/another-old-page/"></textarea>
+      <div class="chkradios">
+        <label><input type="radio" name="chkstate" value="redirect" checked> These now <b>redirect</b></label>
+        <label><input type="radio" name="chkstate" value="live"> These <b>serve content</b> again</label>
+      </div>
+    </div>
+
+    <div class="msect" id="chksweep" style="display:none">
+      <span class="slab">Or check the whole site</span>
+      <p class="mnote">The app is being served from the site's own origin, so it can test every URL itself.</p>
+      <div id="chkprog" style="display:none">
+        <div class="chkbarwrap"><div class="chkbar" id="chkbar"></div></div>
+        <div class="chklab" id="chklab"></div>
+      </div>
+    </div>
+
+    <div id="chkresult"></div>
+
+    <div class="chknote quiet">Why isn't there a button to scan the site from here? Because the browser won't
+      allow it: the app is on github.io and your site is on 1031crowdfunding.com, and cross-origin requests can't
+      reveal whether a URL redirects. Ask me and I'll run a verified sweep in a tab on your own site — that's how
+      the current redirect map was built. Serving this app from your own domain would make the scan work natively.</div>
+
+    <div class="macts">
+      <button class="btn" id="chkstop" type="button" style="display:none">Stop</button>
+      <button class="btn" id="chkstart" type="button" style="display:none">Scan the site</button>
+      <button class="btn" id="chkcancel" type="button">Close</button>
+      <button class="btn primary" id="chkapply" type="button" style="display:none">Apply</button>
     </div>
   </div>
 </div>
