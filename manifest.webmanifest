@@ -1,45 +1,14 @@
 {
-  "name": "1031 CF Content Map",
+  "name": "1031CF Content Map",
   "short_name": "Content Map",
-  "description": "Organic page inventory, topic clusters and SEO/AEO workflow for 1031crowdfunding.com.",
-  "start_url": ".",
-  "scope": ".",
+  "description": "1031 Crowdfunding organic content topic map — clusters, tiers, SEO/AEO workflow.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#f9f9f7",
-  "theme_color": "#f9f9f7",
-  "categories": [
-    "business",
-    "productivity"
-  ],
+  "background_color": "#f4f5f2",
+  "theme_color": "#0f4c46",
   "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "icons/icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "My notes",
-      "url": "./#notes"
-    },
-    {
-      "name": "Needs attention",
-      "url": "./#attn"
-    }
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }

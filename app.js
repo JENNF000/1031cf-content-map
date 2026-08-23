@@ -1,2428 +1,938 @@
-/* =====================================================================
-   1031 Crowdfunding — Content Topic Map (PWA)
-   Part 1: local store, annotation model, GitHub sync.
-   ===================================================================== */
-"use strict";
+/* 1031CF Content Map — v2 app (fresh build 2026-08-23).
+   Board: 14 clusters × 4 tiers (Transactional / Pillar / Fan-out / Redirect).
+   data.json is machine-owned; annotations.json is Jennifer's and merges over it. */
+'use strict';
 
-/* ------------------------------------------------------------ IndexedDB -- */
-const IDB = (() => {
-  let p;
-  const open = () => p || (p = new Promise((res, rej) => {
-    const r = indexedDB.open("1031cf-content-map", 1);
-    r.onupgradeneeded = () => { if (!r.result.objectStoreNames.contains("kv")) r.result.createObjectStore("kv"); };
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  }));
-  const run = (mode, fn) => open().then(db => new Promise((res, rej) => {
-    const t = db.transaction("kv", mode);
-    const req = fn(t.objectStore("kv"));
-    t.onerror = () => rej(t.error);
-    t.onabort = () => rej(t.error);
-    t.oncomplete = () => res(req ? req.result : undefined);
-  }));
-  return {
-    get: k => run("readonly", s => s.get(k)),
-    set: (k, v) => run("readwrite", s => s.put(v, k)),
-    del: k => run("readwrite", s => s.delete(k)),
-  };
-})();
-
-/* Fallback for private-mode browsers where IndexedDB throws. */
-const STORE = (() => {
-  let broken = false;
-  const ls = {
-    get: k => { try { const v = localStorage.getItem("1031cf:" + k); return Promise.resolve(v ? JSON.parse(v) : undefined); } catch (e) { return Promise.resolve(undefined); } },
-    set: (k, v) => { try { localStorage.setItem("1031cf:" + k, JSON.stringify(v)); } catch (e) {} return Promise.resolve(); },
-    del: k => { try { localStorage.removeItem("1031cf:" + k); } catch (e) {} return Promise.resolve(); },
-  };
-  const wrap = name => (...a) => (broken ? ls[name](...a) : IDB[name](...a).catch(e => { broken = true; return ls[name](...a); }));
-  return { get: wrap("get"), set: wrap("set"), del: wrap("del") };
-})();
-
-/* --------------------------------------------------------- annotations -- */
-/* `none` is the clear-the-status button, not a status: it can't be renamed,
-   recoloured or removed. `o` is the display order, which is meaningful here in a
-   way it isn't for labels — these are the steps of a workflow. */
+/* ============================== constants ============================== */
+const TIERS = ['transactional', 'pillar', 'fanout', 'redirect'];
+const TIERNAME = { transactional: 'Transactional', pillar: 'Pillar', fanout: 'Fan-out', redirect: 'Redirect' };
+const COLORS = { slate:'#64748b', amber:'#b45309', red:'#b91c1c', green:'#15803d', blue:'#2563eb',
+                 purple:'#7c3aed', teal:'#0f766e', pink:'#be185d' };
+const PAGE_FIELDS = ['status', 'labels', 'target', 'cluster', 'tier', 'offFlags'];
 const DEFAULT_STATUSES = [
-  { id: "none",       name: "No status",     color: "slate",  fixed: true, o: -1 },
-  { id: "todo",       name: "To do",         color: "slate",  o: 0 },
-  { id: "inprogress", name: "In progress",   color: "amber",  o: 1 },
-  { id: "drafted",    name: "Drafted",       color: "purple", o: 2 },
-  { id: "published",  name: "Published",     color: "green",  o: 3 },
-  { id: "monitoring", name: "Monitoring",    color: "blue",   o: 4 },
-  { id: "blocked",    name: "Blocked",       color: "red",    o: 5 },
-  { id: "wontdo",     name: "Won't do",      color: "slate",  o: 6 },
+  { id:'none', name:'No status', color:'slate', fixed:true, o:-1 },
+  { id:'todo', name:'To do', color:'slate', o:0 },
+  { id:'inprogress', name:'In progress', color:'amber', o:1 },
+  { id:'drafted', name:'Drafted', color:'purple', o:2 },
+  { id:'published', name:'Published', color:'green', o:3 },
+  { id:'monitoring', name:'Monitoring', color:'blue', o:4 },
+  { id:'blocked', name:'Blocked', color:'red', o:5 },
+  { id:'wontdo', name:"Won't do", color:'slate', o:6 },
 ];
-
-/* Labels the build computes for you. Their ids match the flag keys in
-   data.json, so a page carrying flag "slug" automatically wears the "Slug fix"
-   label. They are ordinary labels otherwise: rename them, recolour them, take
-   them off a page, or delete them from the library entirely. */
-const DERIVED_LABELS = [
-  { id: "review",       name: "Review",         color: "amber",  derived: true },
-  { id: "remove",       name: "Remove",         color: "red",    derived: true },
-  { id: "consolidate",  name: "Consolidate",    color: "red",    derived: true },
-  { id: "slug",         name: "Slug fix",       color: "amber",  derived: true },
-  { id: "underperform", name: "Underperformer", color: "pink",   derived: true },
-  { id: "tiermismatch", name: "Tier ≠ yours",   color: "blue",   derived: true },
-  { id: "untracked",    name: "Untracked",      color: "slate",  derived: true },
-  { id: "nokw",         name: "No keywords",    color: "slate",  derived: true },
-  { id: "redirect",     name: "301 redirect",   color: "green",  derived: true },
-];
-
 const DEFAULT_LABELS = [
-  { id: "rewrite",    name: "Rewrite",            color: "red"    },
-  { id: "refresh",    name: "Refresh content",    color: "amber"  },
-  { id: "titlemeta",  name: "Title / meta",       color: "amber"  },
-  { id: "schema",     name: "Add schema",         color: "purple" },
-  { id: "aeo-answer", name: "AEO: direct answer", color: "teal"   },
-  { id: "aeo-faq",    name: "AEO: FAQ block",     color: "teal"   },
-  { id: "intlinks",   name: "Internal links",     color: "blue"   },
-  { id: "eeat",       name: "E-E-A-T / author",   color: "purple" },
-  { id: "needs301",   name: "Needs 301",          color: "red"    },
-  { id: "keep",       name: "Keep as-is",         color: "green"  },
-  { id: "priority",   name: "Priority",           color: "pink"   },
+  { id:'rewrite', name:'Rewrite', color:'amber' },
+  { id:'refresh', name:'Refresh content', color:'amber' },
+  { id:'titlemeta', name:'Title / meta', color:'amber' },
+  { id:'schema', name:'Add schema', color:'purple' },
+  { id:'aeo-answer', name:'AEO: direct answer', color:'teal' },
+  { id:'aeo-faq', name:'AEO: FAQ block', color:'teal' },
+  { id:'intlinks', name:'Internal links', color:'blue' },
+  { id:'eeat', name:'E-E-A-T / author', color:'purple' },
+  { id:'needs301', name:'Needs 301', color:'red' },
+  { id:'keep', name:'Keep as-is', color:'green' },
+  { id:'priority', name:'Priority', color:'pink' },
+  /* derived from build flags — outlined rendering, still editable */
+  { id:'consolidate', name:'Consolidate', color:'red', derived:true },
+  { id:'slug', name:'Slug fix', color:'amber', derived:true },
+  { id:'underperform', name:'Underperformer', color:'pink', derived:true },
+  { id:'nokw', name:'No keywords', color:'slate', derived:true },
+  { id:'newpage', name:'New (no data yet)', color:'blue', derived:true },
+  { id:'redirect', name:'301 redirect', color:'blue', derived:true },
 ];
+const INTENTS = [['trans','Transactional'],['comm','Commercial'],['info','Informational']];
 
-const ALL_DEFAULT_LABELS = () => DERIVED_LABELS.concat(DEFAULT_LABELS).map(l => ({ ...l }));
-
-const emptyAnn = () => ({
-  version: 2,
-  updated: new Date(0).toISOString(),
-  author: "",
-  statuses: DEFAULT_STATUSES.map(s => ({ ...s })),
-  labels: ALL_DEFAULT_LABELS(),
-  hidden: [],            // label ids removed from the library
-  hiddenAt: new Date(0).toISOString(),
-  hiddenS: [],           // status ids removed from the library
-  hiddenSAt: new Date(0).toISOString(),
-  /* Results of the in-app redirect check, keyed by path:
-     { "/path/": { s: "redirect" | "live", at: ISO } }
-     This is deliberately separate from `pages` — it's an observation about the
-     site, not an annotation, and it is what lets the app reflect a redirect you
-     shipped an hour ago without waiting for a SEMrush rebuild. */
-  live: {},
-  pages: {},
-});
-
-let ANN = emptyAnn();
-
+/* ============================== tiny utils ============================== */
+const $ = (s, el) => (el || document).querySelector(s);
+const $$ = (s, el) => [...(el || document).querySelectorAll(s)];
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nowISO = () => new Date().toISOString();
-const uid = () => (crypto.randomUUID ? crypto.randomUUID()
-  : "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 9));
+const fmt = n => (n == null ? '—' : Number(n).toLocaleString('en-US'));
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : 'c' + Math.random().toString(36).slice(2) + Date.now());
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
-/* Fields that carry their own clock so two devices can edit different
-   properties of the same page without clobbering each other. */
-const PAGE_FIELDS = ["status", "labels", "target", "cluster", "tier", "offFlags"];
+/* ============================== storage ============================== */
+const Store = (() => {
+  let db = null, useLS = false;
+  const open = () => new Promise(res => {
+    let rq;
+    try { rq = indexedDB.open('cm2', 1); } catch (e) { useLS = true; return res(); }
+    rq.onupgradeneeded = () => rq.result.createObjectStore('kv');
+    rq.onsuccess = () => { db = rq.result; res(); };
+    rq.onerror = () => { useLS = true; res(); };
+  });
+  const get = k => new Promise(res => {
+    if (useLS || !db) { try { const v = localStorage.getItem('cm2:' + k); res(v ? JSON.parse(v) : null); } catch (e) { res(null); } return; }
+    const t = db.transaction('kv').objectStore('kv').get(k);
+    t.onsuccess = () => res(t.result == null ? null : t.result); t.onerror = () => res(null);
+  });
+  const set = (k, v) => new Promise(res => {
+    if (useLS || !db) { try { localStorage.setItem('cm2:' + k, JSON.stringify(v)); } catch (e) {} return res(); }
+    const t = db.transaction('kv', 'readwrite').objectStore('kv').put(v, k);
+    t.onsuccess = () => res(); t.onerror = () => res();
+  });
+  return { open, get, set };
+})();
 
-function pageAnn(path, create) {
-  let a = ANN.pages[path];
-  if (!a && create) {
-    a = ANN.pages[path] = {
-      status: "", labels: [], target: "", cluster: "", tier: "",
-      offFlags: [], comments: [], delc: [], f: {}, updated: nowISO(),
-    };
-  }
-  if (a) {
-    if (!a.f) a.f = {};
-    if (!a.labels) a.labels = [];
-    if (!a.offFlags) a.offFlags = [];
-    if (!a.comments) a.comments = [];
-    if (!a.delc) a.delc = [];
+/* ============================== annotations ============================== */
+let DATA = null;      // machine build (never mutated)
+let ANN = null;       // hers
+let PAGE = {};        // path -> page record from DATA
+
+function blankAnn() {
+  return { version: 2, updated: nowISO(), author: 'Jennifer',
+    statuses: JSON.parse(JSON.stringify(DEFAULT_STATUSES)),
+    labels: JSON.parse(JSON.stringify(DEFAULT_LABELS)),
+    hidden: [], hiddenAt: '', hiddenS: [], hiddenSAt: '', pages: {}, live: {} };
+}
+function normAnn(a) {
+  if (!a || typeof a !== 'object') return blankAnn();
+  a.version = 2;
+  a.statuses = (a.statuses && a.statuses.length) ? a.statuses : JSON.parse(JSON.stringify(DEFAULT_STATUSES));
+  if (!a.statuses.some(s => s.id === 'none')) a.statuses.unshift(JSON.parse(JSON.stringify(DEFAULT_STATUSES[0])));
+  a.labels = (a.labels && a.labels.length) ? a.labels : JSON.parse(JSON.stringify(DEFAULT_LABELS));
+  // seed any missing defaults (new derived ids like newpage) without clobbering hers
+  for (const d of DEFAULT_LABELS) if (!a.labels.some(l => l.id === d.id) && !(a.hidden||[]).includes(d.id)) a.labels.push(JSON.parse(JSON.stringify(d)));
+  for (const d of DEFAULT_STATUSES) if (d.id==='none' && !a.statuses.some(s=>s.id==='none')) a.statuses.unshift(JSON.parse(JSON.stringify(d)));
+  a.hidden = a.hidden || []; a.hiddenS = a.hiddenS || [];
+  a.pages = a.pages || {}; a.live = a.live || {};
+  for (const p of Object.values(a.pages)) {
+    p.comments = p.comments || []; p.delc = p.delc || []; p.f = p.f || {};
+    p.labels = p.labels || []; p.offFlags = p.offFlags || [];
+    if (p.status == null) p.status = ''; if (p.cluster == null) p.cluster = '';
+    if (p.tier == null) p.tier = ''; if (p.target == null) p.target = '';
   }
   return a;
 }
-
-function annIsEmpty(a) {
-  return !a || (!a.status && !(a.labels || []).length && !(a.target || "").trim() &&
-    !(a.cluster || "") && !(a.tier || "") && !(a.offFlags || []).length &&
-    !(a.comments || []).length);
+/* ---- merge (field-level LWW; see project notes — do not simplify) ---- */
+function fieldStamp(e, f) {
+  if (e.f && e.f[f]) return e.f[f];
+  const has = f === 'labels' || f === 'offFlags' ? (e[f] && e[f].length) : !!e[f];
+  return has ? (e.updated || '') : '';
 }
-
-/* `field` is one of PAGE_FIELDS. Comments carry their own ids and tombstones,
-   so they don't need a field clock. */
-function touch(path, field) {
-  const a = pageAnn(path, true);
-  a.updated = nowISO();
-  if (field) a.f[field] = a.updated;
-  ANN.updated = a.updated;
-  if (annIsEmpty(a) && !(a.delc || []).length) delete ANN.pages[path];
-  saveLocal();
-  Sync.schedule();
-}
-
-function touchLibrary() {
-  ANN.updated = nowISO();
-  saveLocal();
-  Sync.schedule();
-}
-
-function saveLocal() { return STORE.set("annotations", ANN); }
-
-/* Merge two annotation documents.
-
-   Fields resolve independently on their own timestamps, so commenting on a
-   laptop can't wipe a status set on a phone. Comments are unioned by id with
-   tombstones honoured; the status and label libraries are unioned by id, each
-   entry resolving on its own `u` stamp so a rename propagates. */
-function mergeAnn(a, b) {
-  const out = {
-    version: 2,
-    updated: (a.updated > b.updated ? a.updated : b.updated),
-    author: a.author || b.author || "",
-    statuses: unionById(a.statuses, b.statuses),
-    labels: unionById(a.labels, b.labels),
-    hidden: ((a.hiddenAt || "") >= (b.hiddenAt || "") ? a.hidden : b.hidden) || [],
-    hiddenAt: (a.hiddenAt || "") >= (b.hiddenAt || "") ? (a.hiddenAt || "") : (b.hiddenAt || ""),
-    hiddenS: ((a.hiddenSAt || "") >= (b.hiddenSAt || "") ? a.hiddenS : b.hiddenS) || [],
-    hiddenSAt: (a.hiddenSAt || "") >= (b.hiddenSAt || "") ? (a.hiddenSAt || "") : (b.hiddenSAt || ""),
-    live: mergeLive(a.live, b.live),
-    pages: {},
-  };
-  const paths = new Set([...Object.keys(a.pages || {}), ...Object.keys(b.pages || {})]);
-  paths.forEach(p => {
-    const x = (a.pages || {})[p], y = (b.pages || {})[p];
-    if (!x) { out.pages[p] = normPage(y); return; }
-    if (!y) { out.pages[p] = normPage(x); return; }
-    const delc = [...new Set([...(x.delc || []), ...(y.delc || [])])];
-    const seen = new Map();
-    [...(x.comments || []), ...(y.comments || [])].forEach(c => { if (c && c.id && !seen.has(c.id)) seen.set(c.id, c); });
-    const comments = [...seen.values()]
-      .filter(c => !delc.includes(c.id))
-      .sort((m, n) => String(m.ts).localeCompare(String(n.ts)));
-
-    /* Per-field clock. Documents written before `f` existed fall back to the
-       page clock, but only for fields that actually hold a value — otherwise a
-       page created just to hold a comment would "win" every empty field and
-       silently wipe a status set on another device. Explicitly clearing a
-       field stamps `f`, so clearing still propagates. */
-    const isSet = (o, k) => Array.isArray(o[k]) ? o[k].length > 0 : !!String(o[k] || "").trim();
-    const fts = (o, k) => (o.f && o.f[k]) || (isSet(o, k) ? (o.updated || "") : "");
-    const pick = k => (fts(x, k) >= fts(y, k) ? x : y);
-
-    const merged = { comments, delc, f: {} };
-    PAGE_FIELDS.forEach(k => {
-      const src = pick(k);
-      merged[k] = Array.isArray(src[k]) ? (src[k] || []) : (src[k] || "");
-      const t = fts(x, k) >= fts(y, k) ? fts(x, k) : fts(y, k);
-      if (t) merged.f[k] = t;
-    });
-    merged.updated = (x.updated || "") >= (y.updated || "") ? x.updated : y.updated;
-    out.pages[p] = merged;
-  });
-  return out;
-}
-
-function normPage(p) {
-  const o = {
-    comments: (p.comments || []).filter(c => !(p.delc || []).includes(c.id)),
-    delc: p.delc || [], f: p.f || {}, updated: p.updated || "",
-  };
-  PAGE_FIELDS.forEach(k => {
-    o[k] = (k === "labels" || k === "offFlags") ? (p[k] || []) : (p[k] || "");
-  });
-  return o;
-}
-
-/* Per-URL last-write-wins on the observation timestamp: whichever device checked
-   most recently is the one telling the truth about that URL. */
-function mergeLive(x, y) {
+function mergePages(a, b) {
   const out = {};
-  new Set([...Object.keys(x || {}), ...Object.keys(y || {})]).forEach(k => {
-    const m = (x || {})[k], n = (y || {})[k];
-    if (!m) { out[k] = n; return; }
-    if (!n) { out[k] = m; return; }
-    out[k] = (m.at || "") >= (n.at || "") ? m : n;
-  });
+  for (const path of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    const x = a[path], y = b[path];
+    if (!x || !y) { out[path] = JSON.parse(JSON.stringify(x || y)); continue; }
+    const m = { comments: [], delc: [...new Set([...(x.delc||[]), ...(y.delc||[])])], f: {}, updated: (x.updated||'') > (y.updated||'') ? x.updated : y.updated };
+    const seen = new Set();
+    for (const c of [...(x.comments||[]), ...(y.comments||[])]) if (!seen.has(c.id) && !m.delc.includes(c.id)) { seen.add(c.id); m.comments.push(c); }
+    m.comments.sort((p, q) => (p.ts||'') < (q.ts||'') ? -1 : 1);
+    for (const f of PAGE_FIELDS) {
+      const sx = fieldStamp(x, f), sy = fieldStamp(y, f);
+      const w = sy > sx ? y : x;
+      m[f] = JSON.parse(JSON.stringify(w[f] == null ? (f==='labels'||f==='offFlags'?[]:'') : w[f]));
+      const s = sy > sx ? sy : sx; if (s) m.f[f] = s;
+    }
+    out[path] = m;
+  }
   return out;
 }
-
-/* Union two library arrays by id. Where both sides have an entry, the one with
-   the later `u` stamp wins, so renaming a label on one device propagates. */
-function unionById(x, y) {
-  const m = new Map();
-  [...(y || []), ...(x || [])].forEach(o => {
-    if (!o || !o.id) return;
-    const prev = m.get(o.id);
-    if (!prev || (o.u || "") >= (prev.u || "")) m.set(o.id, o);
-  });
-  return [...m.values()];
+function unionById(a, b) {
+  const map = new Map();
+  for (const e of [...(a||[]), ...(b||[])]) {
+    const prev = map.get(e.id);
+    if (!prev) map.set(e.id, JSON.parse(JSON.stringify(e)));
+    else if ((e.u||'') > (prev.u||'')) map.set(e.id, JSON.parse(JSON.stringify(e)));
+  }
+  return [...map.values()];
 }
-
-/* ---------------------------------------------------------- GitHub sync -- */
-const Sync = (() => {
-  let cfg = null;          // {owner, repo, branch, path, token, author}
-  let sha = null;
-  let state = "local";     // local | synced | pending | error | offline
-  let msg = "Notes are saved in this browser only — click to sync them to GitHub";
-  let timer = null;
-  let inflight = false;
-  let dirty = false;
-  const listeners = [];
-
-  const b64encode = s => {
-    const bytes = new TextEncoder().encode(s);
-    let bin = "";
-    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-    return btoa(bin);
-  };
-  const b64decode = b => {
-    const bin = atob(String(b).replace(/\s/g, ""));
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-  };
-
-  function set(s, m) { state = s; msg = m; listeners.forEach(f => f(s, m)); }
-  function on(f) { listeners.push(f); f(state, msg); }
-
-  const api = (path, opts = {}) => fetch("https://api.github.com" + path, {
-    ...opts,
-    headers: {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      Authorization: "Bearer " + cfg.token,
-      ...(opts.body ? { "Content-Type": "application/json" } : {}),
-      ...(opts.headers || {}),
-    },
-  });
-
-  const contentsUrl = () =>
-    `/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${cfg.path
-      .split("/").map(encodeURIComponent).join("/")}`;
-
-  async function load() {
-    cfg = (await STORE.get("sync")) || null;
-    if (cfg && cfg.token) { set("pending", "Connecting…"); }
-    return cfg;
+function mergeAnn(a, b) {
+  a = normAnn(JSON.parse(JSON.stringify(a))); b = normAnn(JSON.parse(JSON.stringify(b)));
+  const m = blankAnn();
+  m.updated = (a.updated||'') > (b.updated||'') ? a.updated : b.updated;
+  m.statuses = unionById(a.statuses, b.statuses);
+  m.labels = unionById(a.labels, b.labels);
+  const hA = (a.hiddenAt||''), hB = (b.hiddenAt||'');
+  m.hidden = hB > hA ? b.hidden : a.hidden; m.hiddenAt = hB > hA ? hB : hA;
+  const sA = (a.hiddenSAt||''), sB = (b.hiddenSAt||'');
+  m.hiddenS = sB > sA ? b.hiddenS : a.hiddenS; m.hiddenSAt = sB > sA ? sB : sA;
+  m.pages = mergePages(a.pages, b.pages);
+  m.live = {};
+  for (const k of new Set([...Object.keys(a.live), ...Object.keys(b.live)])) {
+    const x = a.live[k], y = b.live[k];
+    m.live[k] = (!x) ? y : (!y) ? x : ((y.at||'') > (x.at||'') ? y : x);
   }
-
-  function config() { return cfg; }
-  function connected() { return !!(cfg && cfg.token && cfg.owner && cfg.repo); }
-
-  async function save(newCfg) {
-    cfg = newCfg;
-    await STORE.set("sync", cfg);
-    sha = null;
-    if (!connected()) { set("local", "Notes are saved in this browser only — click to sync them to GitHub"); return; }
-    await pull(true);
-  }
-
-  async function disconnect() {
-    cfg = null; sha = null;
-    await STORE.del("sync");
-    set("local", "Notes are saved in this browser only — click to sync them to GitHub");
-  }
-
-  async function test(c) {
-    const saved = cfg; cfg = c;
-    try {
-      const r = await api(`/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}`);
-      if (r.status === 404) throw new Error("Repository not found, or the token can't see it.");
-      if (r.status === 401) throw new Error("Token rejected (401). Check it was copied in full.");
-      if (!r.ok) throw new Error("GitHub returned " + r.status + ".");
-      const repo = await r.json();
-      if (repo.permissions && !repo.permissions.push) {
-        throw new Error("Token can read but not write. It needs Contents: Read and write.");
-      }
-      return { ok: true, repo: repo.full_name, priv: repo.private };
-    } finally { cfg = saved; }
-  }
-
-  /* Read remote annotations. Uses the API when a token exists, otherwise the
-     static file served alongside the app (read-only). */
-  async function fetchRemote() {
-    if (connected()) {
-      const r = await api(contentsUrl() + "?ref=" + encodeURIComponent(cfg.branch || "main"));
-      if (r.status === 404) { sha = null; return null; }
-      if (!r.ok) throw new Error("GitHub read failed (" + r.status + ")");
-      const j = await r.json();
-      sha = j.sha;
-      return JSON.parse(b64decode(j.content || ""));
-    }
-    const r = await fetch("annotations.json", { cache: "no-store" });
-    if (!r.ok) return null;
-    return r.json();
-  }
-
-  async function pull(quiet) {
-    if (!navigator.onLine) { set("offline", "Offline — changes are queued"); return; }
-    try {
-      if (connected()) set("pending", "Syncing…");
-      const remote = await fetchRemote();
-      if (remote && remote.pages) {
-        ANN = mergeAnn(ANN, remote);
-        await saveLocal();
-      }
-      if (connected()) {
-        if (dirty) { await push(); } else { set("synced", "Synced " + timeStr()); }
-      } else {
-        set("local", "Notes are saved in this browser only — click to sync them to GitHub");
-      }
-      if (!quiet && typeof window.onAnnotationsChanged === "function") window.onAnnotationsChanged();
-      return true;
-    } catch (e) {
-      set("error", e.message || "Sync failed");
-      return false;
-    }
-  }
-
-  async function push() {
-    if (!connected()) { dirty = false; return; }
-    if (!navigator.onLine) { dirty = true; set("offline", "Offline — changes are queued"); return; }
-    if (inflight) { dirty = true; return; }
-    inflight = true;
-    set("pending", "Saving…");
-    try {
-      for (let attempt = 0; attempt < 2; attempt++) {
-        const remote = await fetchRemote().catch(() => null);
-        if (remote && remote.pages) ANN = mergeAnn(ANN, remote);
-        ANN.author = (cfg.author || ANN.author || "");
-        await saveLocal();
-        const body = {
-          message: "Update content-map annotations",
-          content: b64encode(JSON.stringify(ANN, null, 1)),
-          branch: cfg.branch || "main",
-        };
-        if (sha) body.sha = sha;
-        const r = await api(contentsUrl(), { method: "PUT", body: JSON.stringify(body) });
-        if (r.ok) {
-          const j = await r.json();
-          sha = j.content && j.content.sha;
-          dirty = false;
-          set("synced", "Synced " + timeStr());
-          /* the push merged the remote in first, so the other device's edits may
-             have landed — let the UI redraw against them */
-          if (typeof window.onAnnotationsChanged === "function") window.onAnnotationsChanged();
-          return true;
-        }
-        if (r.status === 409 || r.status === 422) { sha = null; continue; }  // stale sha, retry
-        const t = await r.text().catch(() => "");
-        throw new Error("GitHub write failed (" + r.status + ")" + (t.includes("Resource not accessible") ? " — token lacks Contents: write" : ""));
-      }
-      throw new Error("Conflicted twice — try again");
-    } catch (e) {
-      dirty = true;
-      set("error", e.message || "Save failed");
-      return false;
-    } finally { inflight = false; }
-  }
-
-  function schedule() {
-    dirty = true;
-    if (!connected()) { set("local", "Notes are saved in this browser only — click to sync them to GitHub"); return; }
-    set("pending", "Unsaved changes…");
-    clearTimeout(timer);
-    timer = setTimeout(() => push(), 2200);
-  }
-
-  function flush() { clearTimeout(timer); if (dirty) return push(); }
-  function timeStr() { return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
-  function getState() { return { state, msg }; }
-
-  addEventListener("online", () => { if (dirty) push(); else pull(true); });
-  addEventListener("offline", () => set("offline", "Offline — changes are queued"));
-  addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
-
-  return { load, save, disconnect, test, pull, push, schedule, flush, on, config, connected, getState };
-})();
-
-
-/* =====================================================================
-   Part 2: dashboard rendering.
-
-   Two ideas run through this file:
-
-   1. "Effective" values. `data.json` says what cluster and tier a page was
-      classified into; your annotations may override either. Every view reads
-      effCat()/effTier(), never p.cat/p.tier directly, so a page you dragged
-      somewhere stays there through a data refresh.
-
-   2. One kind of chip. The flags the build computes (Review, Consolidate,
-      Slug fix …) and the labels you apply by hand are the same thing — entries
-      in one library, rendered the same way, editable and removable alike.
-   ===================================================================== */
-
-const $ = s => document.querySelector(s);
-const el = (t, c, h) => { const n = document.createElement(t); if (c) n.className = c; if (h !== undefined) n.innerHTML = h; return n; };
-const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const n0 = v => (v || 0).toLocaleString('en-US');
-
-const TIERS = [
-  ["transactional", "Transactional"],
-  ["core", "Pillar"],
-  ["fanout", "Fan-out"],
-  ["utility", "Site / utility"],
-  ["redirect", "Redirect"],
-];
-const TIERNAME = Object.fromEntries(TIERS);
-/* the three tiers you can move a page between */
-const MOVABLE_TIERS = ["transactional", "core", "fanout"];
-
-let DATA = null, P = [], S = {}, CAL = [], byPath = {};
-
-function bindData(d) {
-  DATA = d;
-  P = DATA.pages; S = DATA.stats; CAL = DATA.calendar || [];
-  byPath = Object.fromEntries(P.map(p => [p.path, p]));
+  return m;
 }
-
-/* ---------------------------------------------------------- effective ---- */
+/* ---- effective values — every view reads THESE ---- */
+const isHiddenL = id => (ANN.hidden||[]).includes(id);
+const isHiddenS = id => (ANN.hiddenS||[]).includes(id);
 const annOf = path => ANN.pages[path];
-const statusById = id => (ANN.statuses || []).find(s => s.id === id);
-const labelById = id => (ANN.labels || []).find(l => l.id === id);
-const isHidden = id => (ANN.hidden || []).includes(id);
-const isHiddenS = id => (ANN.hiddenS || []).includes(id);
-
-/* Statuses in display order, minus any you've removed. `none` stays first — it is
-   the clear button, not a status. */
-function visibleStatuses(withNone) {
-  return (ANN.statuses || [])
-    .filter(s => (withNone || s.id !== "none") && !isHiddenS(s.id))
-    .sort((a, b) => (a.o ?? 99) - (b.o ?? 99));
-}
-
-function effCat(p) {
-  const a = annOf(p.path);
-  const c = a && a.cluster;
-  return (c && DATA.cats.includes(c)) ? c : p.cat;
-}
-/* The in-app redirect check outranks data.json on the question of whether a URL
-   is still a page — it is simply more recent. A URL the build listed as live but
-   that now 3xx-redirects drops out of the live counts immediately; one the build
-   listed as a redirect but that now serves content comes back as fan-out unless
-   you have given it a tier yourself. */
-const liveOverride = path => (ANN.live || {})[path];
-
+const liveOverride = path => (ANN.live[path] || {}).s || '';
 function effTier(p) {
-  const ov = liveOverride(p.path);
-  const a = annOf(p.path);
-  const t = a && a.tier;
-  if (ov && ov.s === "redirect") return "redirect";
-  if (p.tier === "redirect") {
-    if (ov && ov.s === "live") return (t && MOVABLE_TIERS.includes(t)) ? t : "fanout";
-    return "redirect";
-  }
-  return (t && MOVABLE_TIERS.includes(t)) ? t : p.tier;
+  const lo = liveOverride(p.path);
+  const e = annOf(p.path);
+  if (lo === 'redirect') return 'redirect';
+  if (p.tier === 'redirect' && lo !== 'live') return 'redirect';
+  return (e && e.tier) || (p.tier === 'redirect' ? 'fanout' : p.tier);
 }
-
-/* true when the check disagrees with the published build */
-function statusChanged(p) {
-  const ov = liveOverride(p.path);
-  if (!ov) return null;
-  const was = p.tier === "redirect" ? "redirect" : "live";
-  return ov.s === was ? null : ov.s;      // "redirect" = newly redirecting, "live" = back
-}
-const isMoved = p => {
-  const a = annOf(p.path);
-  return !!(a && ((a.cluster && a.cluster !== p.cat) || (a.tier && a.tier !== p.tier)));
-};
-
-/* Label ids in effect on a page: build-computed flags you haven't switched off,
-   plus the ones you applied yourself. Hidden library entries drop out. */
+function effCat(p) { const e = annOf(p.path); return (e && e.cluster && DATA.cats.includes(e.cluster)) ? e.cluster : p.cat; }
 function effLabels(p) {
-  const a = annOf(p.path) || {};
-  const off = a.offFlags || [];
+  const e = annOf(p.path) || {};
+  const off = new Set(e.offFlags || []);
   const out = [];
-  (p.flags || []).forEach(f => { if (!off.includes(f) && !isHidden(f) && !out.includes(f)) out.push(f); });
-  (a.labels || []).forEach(l => { if (!isHidden(l) && !out.includes(l)) out.push(l); });
+  const t = effTier(p);
+  const buildFlags = t === 'redirect' ? ['redirect'] : (p.flags || []).filter(f => f !== 'redirect');
+  for (const f of buildFlags) if (!off.has(f) && !isHiddenL(f)) out.push(f);
+  for (const l of (e.labels || [])) if (!isHiddenL(l) && !out.includes(l)) out.push(l);
   return out;
 }
-const isDerivedOn = (p, id) => (p.flags || []).includes(id);
+function statusChanged(p) {
+  const lo = liveOverride(p.path);
+  return lo && ((lo === 'redirect') !== (p.tier === 'redirect'));
+}
+function labelDef(id) { return ANN.labels.find(l => l.id === id); }
+function visibleStatuses(withNone) {
+  return ANN.statuses.filter(s => !isHiddenS(s.id) && (withNone || s.id !== 'none')).sort((a, b) => (a.o||0) - (b.o||0));
+}
+function liveStats() {
+  const s = { total:0, redirects:0, keywords:0, traffic:0, ranking:0, byTier:{transactional:0,pillar:0,fanout:0,redirect:0} };
+  for (const p of DATA.pages) {
+    const t = effTier(p);
+    s.byTier[t]++;
+    if (t === 'redirect') { s.redirects++; continue; }
+    s.total++; s.keywords += p.kw; s.traffic += p.traffic; if (p.kw > 0) s.ranking++;
+  }
+  return s;
+}
 
+/* ============================== persistence + sync ============================== */
+let SYNC = { token:'', owner:'', repo:'', sha:null, state:'off', queued:false, busy:false };
+async function saveAnnLocal() { await Store.set('ann', ANN); }
+const pushSoon = debounce(() => Sync.push(), 1200);
+function annChanged() {
+  ANN.updated = nowISO();
+  saveAnnLocal();
+  if (SYNC.token) pushSoon();
+  if (window.onAnnotationsChanged) window.onAnnotationsChanged();
+}
+const Sync = {
+  api(path, opts) {
+    return fetch('https://api.github.com/repos/' + SYNC.owner + '/' + SYNC.repo + '/contents/' + path, Object.assign({
+      headers: { Authorization: 'Bearer ' + SYNC.token, Accept: 'application/vnd.github+json' } }, opts || {}));
+  },
+  async pullPublished() { // public read — no token needed
+    try {
+      const r = await fetch('annotations.json?ts=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return false;
+      const remote = await r.json();
+      if (remote && remote.pages) { ANN = mergeAnn(ANN, remote); await saveAnnLocal(); return true; }
+    } catch (e) {}
+    return false;
+  },
+  async push(retry) {
+    if (!SYNC.token || SYNC.busy) { SYNC.queued = !!SYNC.token; return; }
+    SYNC.busy = true; setSyncChip('saving…');
+    try {
+      const g = await this.api('annotations.json?ref=main');
+      let sha = null;
+      if (g.ok) {
+        const j = await g.json(); sha = j.sha;
+        try { const remote = JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g, ''))))); ANN = mergeAnn(ANN, remote); } catch (e) {}
+      }
+      const body = JSON.stringify(ANN, null, 1);
+      const put = await this.api('annotations.json', { method:'PUT', body: JSON.stringify({
+        message: 'annotations: ' + ANN.updated, branch: 'main', sha: sha || undefined,
+        content: btoa(unescape(encodeURIComponent(body))) }) });
+      if (put.status === 409 || put.status === 422) { if (!retry) { SYNC.busy = false; return this.push(true); } }
+      if (put.ok) { setSyncChip('synced'); await saveAnnLocal(); if (window.onAnnotationsChanged) window.onAnnotationsChanged(); }
+      else if (put.status === 401 || put.status === 403) setSyncChip('bad token');
+      else setSyncChip('offline — queued');
+    } catch (e) { SYNC.queued = true; setSyncChip('offline — queued'); }
+    SYNC.busy = false;
+    if (SYNC.queued) { SYNC.queued = false; pushSoon(); }
+  },
+};
+function setSyncChip(t) { $('#chip-sync').textContent = 'Sync: ' + (t || (SYNC.token ? 'on' : 'off')); }
+
+/* ============================== boot ============================== */
+let TAB = 'map';
+const FILTER = { q:'', cluster:'', tier:'', status:'', label:'', notes:'', compact:false };
+async function boot() {
+  await Store.open();
+  const [annL, dataL, syncL] = [await Store.get('ann'), await Store.get('data'), await Store.get('sync')];
+  if (syncL) Object.assign(SYNC, syncL, { busy:false, queued:false });
+  let dataR = null;
+  try { const r = await fetch('data.json?ts=' + Date.now(), { cache:'no-store' }); if (r.ok) dataR = await r.json(); } catch (e) {}
+  DATA = dataR || dataL;
+  if (!DATA) { $('#main').innerHTML = '<p style="padding:30px">Could not load data.json (offline and no cached copy yet). Connect once, then the app works offline.</p>'; return; }
+  if (dataR) Store.set('data', dataR);
+  PAGE = {}; for (const p of DATA.pages) PAGE[p.path] = p;
+  ANN = normAnn(annL || blankAnn());
+  if (!annL) { await Sync.pullPublished(); }         // first run on a device: adopt published notes
+  else Sync.pullPublished().then(ok => { if (ok) redraw(); });
+  setSyncChip(); updateChips();
+  renderTabs(); redraw();
+  window.onAnnotationsChanged = () => { updateChips(); redraw(); };
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      if (reg.waiting) showUpdate(reg);
+      reg.addEventListener('updatefound', () => {
+        const w = reg.installing;
+        w && w.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) showUpdate(reg); });
+      });
+    }).catch(() => {});
+  }
+  $('#btn-refresh').addEventListener('click', doRefresh);
+  $('#btn-sync').addEventListener('click', syncModal);
+  $('#btn-check').addEventListener('click', checkRedirectsModal);
+  $('#chip-redir').addEventListener('click', checkRedirectsModal);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeModal(); if (DRAG.active) endDrag(true); } });
+}
+function showUpdate(reg) {
+  $('#updatebar').classList.remove('hidden');
+  $('#btn-reload').onclick = () => { (reg.waiting || {}).postMessage && reg.waiting.postMessage('skip'); setTimeout(() => location.reload(), 250); };
+}
+function daysAgo(iso) { if (!iso) return 999; return Math.floor((Date.now() - new Date(iso).getTime()) / 864e5); }
+function updateChips() {
+  $('#chip-data').textContent = 'Data as of ' + (DATA.stats.generated || '—');
+  if (DATA.stats.partial) $('#chip-data').classList.add('amber');
+  const at = Object.values(ANN.live).map(v => v.at).sort().pop() || DATA.stats.crawl_date + 'T00:00:00Z';
+  const d = daysAgo(at);
+  const el = $('#chip-redir');
+  el.textContent = 'Redirects checked ' + (d <= 0 ? 'today' : d + 'd ago');
+  el.classList.toggle('amber', d > 7);
+}
+async function doRefresh() {
+  const b = $('#btn-refresh'); b.classList.add('spin'); b.disabled = true;
+  let msg = 'Nothing newer published. Shipped redirects since? Use Check redirects.';
+  try {
+    const r = await fetch('data.json?ts=' + Date.now(), { cache:'no-store' });
+    if (r.ok) {
+      const fresh = await r.json();
+      if (fresh.stats.generated !== DATA.stats.generated) { msg = 'Updated to build of ' + fresh.stats.generated + '.'; }
+      DATA = fresh; PAGE = {}; for (const p of DATA.pages) PAGE[p.path] = p;
+      Store.set('data', fresh);
+    } else msg = 'Could not reach the published data (HTTP ' + r.status + ').';
+  } catch (e) { msg = 'Offline — showing the cached build.'; }
+  await Sync.pullPublished();
+  updateChips(); redraw(); toast(msg);
+  b.classList.remove('spin'); b.disabled = false;
+}
+
+/* ============================== chrome: tabs, toast, tooltip ============================== */
+function renderTabs() {
+  const t = [['map','Topic map'],['pages','All pages'],['insights','Audit insights'],['redirects','Redirects'],['notes','My notes']];
+  $('#tabs').innerHTML = t.map(([id, name]) => {
+    let n = '';
+    if (id === 'insights') n = '<span class="n">' + DATA.insights.filter(i => ['critical','serious'].includes(i.sev)).length + '</span>';
+    if (id === 'redirects') n = '<span class="n">' + liveStats().byTier.redirect + '</span>';
+    return '<button data-tab="' + id + '" class="' + (TAB === id ? 'on' : '') + '">' + name + n + '</button>';
+  }).join('');
+  $$('#tabs button').forEach(b => b.addEventListener('click', () => { TAB = b.dataset.tab; renderTabs(); redraw(); }));
+}
+let toastT = null;
+function toast(msg, undo) {
+  $$('.toast').forEach(e => e.remove());
+  const el = document.createElement('div'); el.className = 'toast';
+  el.innerHTML = '<span>' + esc(msg) + '</span>' + (undo ? '<button>Undo</button>' : '');
+  if (undo) $('button', el).addEventListener('click', () => { undo(); el.remove(); });
+  document.body.appendChild(el);
+  clearTimeout(toastT); toastT = setTimeout(() => el.remove(), undo ? 6000 : 3500);
+}
+/* tooltip */
+const tipEl = () => { let e = $('#tooltip'); if (!e) { e = document.createElement('div'); e.id = 'tooltip'; document.body.appendChild(e); } return e; };
+function tipHTML(p) {
+  const e = annOf(p.path) || {};
+  const intents = INTENTS.filter(([k]) => p[k] > 0).map(([k, n]) => n + ' ' + p[k]).join(' · ') || (p.kw ? '—' : '');
+  let rows;
+  if (p.no_metrics) rows = '<tr><td colspan="2" class="nodata">No SEMrush data yet — new or never-ranking page. Next refresh with API units will fill this in.</td></tr>';
+  else rows = [
+    ['Keywords', fmt(p.kw)],
+    ['Top keyword', p.pkw ? esc(p.pkw) : '—'],
+    ['Est. traffic / mo', fmt(p.traffic)],
+    ['Volume (top kw)', p.pkw ? fmt(p.vol) : '—'],
+    ['Position (top kw)', p.pos != null ? '#' + p.pos : '—'],
+    ['Intent (positions)', intents || '—'],
+  ].map(([k, v]) => '<tr><td>' + k + '</td><td>' + v + '</td></tr>').join('');
+  const extra = [];
+  if (p.pkw_stale && !p.no_metrics) extra.push('Top keyword / position from Aug 3 pull (not re-pulled — API units).');
+  if (p.tier === 'redirect') extra.push('301 → ' + p.redirects_to);
+  if (statusChanged(p)) extra.push('Redirect status changed by you (' + (liveOverride(p.path) === 'redirect' ? 'now redirects' : 'marked live') + ').');
+  if (e.target) extra.push('Target: ' + esc(e.target));
+  return '<div class="t">' + esc(p.label) + '</div><table>' + rows + '</table>' +
+    (extra.length ? '<div class="stale">' + extra.map(esc).join('<br>') + '</div>' : '');
+}
+function bindTips(root) {
+  $$('[data-tip]', root).forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      const p = PAGE[el.dataset.tip]; if (!p || DRAG.active) return;
+      const t = tipEl(); t.innerHTML = tipHTML(p); t.style.display = 'block';
+      const r = el.getBoundingClientRect();
+      t.style.left = Math.min(window.innerWidth - t.offsetWidth - 10, Math.max(8, r.left)) + 'px';
+      t.style.top = (r.bottom + 8 + t.offsetHeight > window.innerHeight ? r.top - t.offsetHeight - 8 : r.bottom + 8) + 'px';
+    });
+    el.addEventListener('mouseleave', () => { tipEl().style.display = 'none'; });
+  });
+}
+
+/* ============================== views ============================== */
+function redraw() {
+  tipEl().style.display = 'none';
+  const m = $('#main');
+  if (TAB === 'map') m.innerHTML = viewMap();
+  else if (TAB === 'pages') m.innerHTML = viewPages();
+  else if (TAB === 'insights') m.innerHTML = viewInsights();
+  else if (TAB === 'redirects') m.innerHTML = viewRedirects();
+  else m.innerHTML = viewNotes();
+  wire(m);
+  renderTabs();
+}
+function pageMatches(p) {
+  const e = annOf(p.path) || {};
+  if (FILTER.q) {
+    const q = FILTER.q.toLowerCase();
+    if (!(p.path.toLowerCase().includes(q) || p.label.toLowerCase().includes(q) || (p.pkw || '').toLowerCase().includes(q) || (e.target || '').toLowerCase().includes(q))) return false;
+  }
+  if (FILTER.cluster && effCat(p) !== FILTER.cluster) return false;
+  if (FILTER.tier && effTier(p) !== FILTER.tier) return false;
+  if (FILTER.status && (e.status || 'none') !== FILTER.status) return false;
+  if (FILTER.label && !effLabels(p).includes(FILTER.label)) return false;
+  if (FILTER.notes === 'any' && !(e.status || (e.labels||[]).length || (e.comments||[]).filter(c=>!(e.delc||[]).includes(c.id)).length || e.target || e.cluster || e.tier)) return false;
+  if (FILTER.notes === 'comments' && !((e.comments||[]).filter(c=>!(e.delc||[]).includes(c.id)).length)) return false;
+  if (FILTER.notes === 'nodata' && !p.no_metrics) return false;
+  if (FILTER.notes === 'moved' && !((e.cluster && e.cluster !== p.cat) || (e.tier && e.tier !== p.tier) || statusChanged(p))) return false;
+  return true;
+}
+function toolbarHTML(hideTier) {
+  const statuses = visibleStatuses(true);
+  const labels = ANN.labels.filter(l => !isHiddenL(l.id));
+  return '<div class="toolbar">' +
+    '<input type="search" id="f-q" placeholder="Search pages, slugs, keywords…" value="' + esc(FILTER.q) + '">' +
+    '<select id="f-cluster"><option value="">All clusters</option>' + DATA.cats.map(c => '<option ' + (FILTER.cluster === c ? 'selected' : '') + '>' + esc(c) + '</option>').join('') + '</select>' +
+    (hideTier ? '' : '<select id="f-tier"><option value="">All tiers</option>' + TIERS.map(t => '<option value="' + t + '" ' + (FILTER.tier === t ? 'selected' : '') + '>' + TIERNAME[t] + '</option>').join('') + '</select>') +
+    '<select id="f-status"><option value="">Any status</option>' + statuses.map(s => '<option value="' + s.id + '" ' + (FILTER.status === s.id ? 'selected' : '') + '>' + esc(s.name) + '</option>').join('') + '</select>' +
+    '<select id="f-label"><option value="">Any label</option>' + labels.map(l => '<option value="' + l.id + '" ' + (FILTER.label === l.id ? 'selected' : '') + '>' + esc(l.name) + (l.derived ? ' (auto)' : '') + '</option>').join('') + '</select>' +
+    '<select id="f-notes"><option value="">Everything</option><option value="any" ' + (FILTER.notes === 'any' ? 'selected' : '') + '>Any of my notes</option><option value="comments" ' + (FILTER.notes === 'comments' ? 'selected' : '') + '>Has comments</option><option value="moved" ' + (FILTER.notes === 'moved' ? 'selected' : '') + '>Pages I moved / re-checked</option><option value="nodata" ' + (FILTER.notes === 'nodata' ? 'selected' : '') + '>No data yet</option></select>' +
+    '<label class="tog"><input type="checkbox" id="f-compact" ' + (FILTER.compact ? 'checked' : '') + '> Compact</label>' +
+    '<span class="count" id="f-count"></span></div>';
+}
+function statusPill(p) {
+  const e = annOf(p.path); if (!e || !e.status || isHiddenS(e.status)) return '';
+  const s = ANN.statuses.find(x => x.id === e.status); if (!s) return '';
+  return '<span class="spill" style="background:' + COLORS[s.color] + '">' + esc(s.name) + '</span>';
+}
 function labelPills(p, max) {
   const ids = effLabels(p);
-  const out = ids.map(id => {
-    const l = labelById(id);
-    if (!l) return "";
-    /* build-applied labels read lighter than the ones you put there yourself */
-    const auto = isDerivedOn(p, id) ? " auto-l" : "";
-    return `<span class="apill${auto}" data-c="${esc(l.color || 'slate')}">${esc(l.name)}</span>`;
-  }).filter(Boolean);
-  if (max && out.length > max) return out.slice(0, max).join("") + `<span class="apill" data-c="slate">+${out.length - max}</span>`;
-  return out.join("");
+  return ids.slice(0, max).map(id => {
+    const d = labelDef(id); if (!d) return '';
+    return d.derived
+      ? '<span class="apill auto-l" style="color:' + COLORS[d.color] + '">' + esc(d.name) + '</span>'
+      : '<span class="apill mine" style="background:' + COLORS[d.color] + '">' + esc(d.name) + '</span>';
+  }).join('') + (ids.length > max ? '<span class="apill auto-l" style="color:#64748b">+' + (ids.length - max) + '</span>' : '');
 }
-
-function statusPill(path) {
-  const a = annOf(path);
-  if (!a || !a.status || isHiddenS(a.status)) return "";
-  const st = statusById(a.status);
-  if (!st) return "";
-  return `<span class="apill st" data-c="${esc(st.color)}"><span class="adot"></span>${esc(st.name)}</span>`;
+function cellHTML(p) {
+  const e = annOf(p.path) || {};
+  const nc = (e.comments || []).filter(c => !(e.delc || []).includes(c.id)).length;
+  const t = effTier(p);
+  const kwn = p.no_metrics ? '<span class="kwn">·no data</span>' : (p.kw ? '<span class="kwn">' + fmt(p.kw) + ' kw</span>' : '');
+  return '<a class="cell' + (t === 'redirect' ? ' redir-cell' : '') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-drag="' + esc(p.path) + '" data-tip="' + esc(p.path) + '">' +
+    esc(p.label) + kwn + (nc ? ' <span class="cmt">💬' + nc + '</span>' : '') +
+    (t === 'redirect' ? '<span class="to">→ ' + esc((liveOverride(p.path) === 'redirect' && !p.redirects_to) ? '(marked by you)' : p.redirects_to || '') + '</span>' : '') +
+    '<span class="pills">' + statusPill(p) + labelPills(p, 3) + '</span>' +
+    '<button class="edit" data-open="' + esc(p.path) + '" title="Open details">✎</button></a>';
 }
-
-function noteBtnHTML(path) {
-  const a = annOf(path);
-  const n = a ? (a.comments || []).length : 0;
-  const has = a && !annIsEmpty(a);
-  return `<button class="notebtn${has ? " has" : ""}" data-note="${esc(path)}" type="button"
-    title="Labels and comments">✎${n ? " " + n : ""}</button>`;
-}
-
-/* Tier counts have to be recomputed — you may have re-tiered pages yourself. */
-function liveStats() {
-  const live = P.filter(p => effTier(p) !== "redirect");
-  const c = { transactional: 0, core: 0, fanout: 0, utility: 0 };
-  live.forEach(p => { const t = effTier(p); if (c[t] !== undefined) c[t]++; });
-  /* `total` has to come from here, not from stats.total — a page you marked as
-     redirecting is not a live page, and the headline must agree with the bands
-     underneath it. */
-  c.total = live.length;
-  c.redirects = P.length - live.length;
-  c.keywords = live.reduce((a, b) => a + b.kw, 0);
-  c.traffic = live.reduce((a, b) => a + b.traffic, 0);
-  c.ranking = live.filter(p => p.kw > 0).length;
-  return c;
-}
-
-/* ---------- header / tiles ---------- */
-/* How old is the dataset? The Refresh button only re-fetches what has been
-   published to the repo, so "nothing new" and "this data is three weeks old" are
-   different statements and the header has to make that distinction. */
-function dataAgeDays() {
-  const m = /(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(S.generated || "");
-  if (!m) return null;
-  const t = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
-  return Math.floor((Date.now() - t) / 86400000);
-}
-const STALE_AFTER = 8;   // the rebuild runs weekly, so 8 days means one was missed
-
-function renderHeader() {
-  $("#topbanner").innerHTML = `Every live page mapped to a topic cluster and a page tier, with SEMrush organic
-    keyword volume per page. Keyword counts, positions and volumes come from a weekly SEMrush and sitemap pull;
-    statuses, labels, comments and any page you move are yours, keyed to the URL, so a refresh changes the numbers
-    underneath without touching your work.`;
-
-  /* A build can be fresh in some fields and carried over in others — say so
-     rather than letting one timestamp imply everything was re-pulled. */
-  const pn = $("#partialnote");
-  if (pn) {
-    pn.textContent = S.partial || "";
-    pn.classList.toggle("on", !!S.partial);
-  }
-
-  const age = dataAgeDays();
-  const chip = $("#asof").closest(".fresh");
-  if (chip) {
-    const stale = age !== null && age > STALE_AFTER;
-    chip.classList.toggle("stale", stale);
-    let n = chip.querySelector(".age");
-    if (!n) { n = el("span", "age"); chip.append(n); }
-    n.textContent = age === null ? "" : age === 0 ? "· today" : `· ${age} day${age === 1 ? "" : "s"} old`;
-
-    /* The redirect picture has its own vintage — it changes when Jennifer ships,
-       not when SEMrush is re-pulled — so it gets its own chip. */
-    const lc = lastCheckedAt();
-    let rc = $("#redirchip");
-    if (!rc) {
-      rc = el("button", "syncchip");
-      rc.id = "redirchip"; rc.type = "button";
-      rc.innerHTML = '<span class="sdot"></span><span class="rtxt"></span>';
-      rc.onclick = () => openCheck();
-      chip.after(rc);
+function viewMap() {
+  const s = liveStats();
+  const tiles =
+    '<div class="tiles">' +
+    '<div class="tile"><div class="v">' + fmt(s.total) + '</div><div class="l">Live pages</div></div>' +
+    '<div class="tile t-trans"><div class="v">' + fmt(s.byTier.transactional) + '</div><div class="l">Transactional</div></div>' +
+    '<div class="tile t-pillar"><div class="v">' + fmt(s.byTier.pillar) + '</div><div class="l">Pillar</div></div>' +
+    '<div class="tile t-fanout"><div class="v">' + fmt(s.byTier.fanout) + '</div><div class="l">Fan-out</div></div>' +
+    '<div class="tile t-redir"><div class="v">' + fmt(s.byTier.redirect) + '</div><div class="l">Redirects</div></div>' +
+    '<div class="tile"><div class="v">' + fmt(s.keywords) + '</div><div class="l">Ranking keywords</div></div>' +
+    '<div class="tile"><div class="v">' + fmt(s.traffic) + '</div><div class="l">Est. monthly visits</div></div>' +
+    '</div>';
+  const strip = DATA.stats.partial ? '<div class="note-strip">⚠ ' + esc(DATA.stats.partial) + '</div>' : '';
+  let cols = '';
+  for (const c of DATA.cats) {
+    const inCat = DATA.pages.filter(p => effCat(p) === c);
+    const kw = inCat.filter(p => effTier(p) !== 'redirect').reduce((a, p) => a + p.kw, 0);
+    let bands = '';
+    for (const t of TIERS) {
+      const all = inCat.filter(p => effTier(p) === t).sort((a, b) => b.kw - a.kw || (a.path < b.path ? -1 : 1));
+      const vis = all.filter(pageMatches);
+      bands += '<div class="band b-' + t + '" data-drop="' + esc(c) + '|' + t + '"><div class="bh"><span>' + TIERNAME[t] + '</span><span class="bn">' + all.length + '</span></div>' +
+        '<div class="cells">' + vis.map(cellHTML).join('') + '</div></div>';
     }
-    if (lc) {
-      const d = Math.floor((Date.now() - new Date(lc).getTime()) / 86400000);
-      rc.querySelector(".rtxt").textContent =
-        "Redirects checked " + (d <= 0 ? "today" : d === 1 ? "yesterday" : d + "d ago");
-      rc.dataset.s = d > 7 ? "error" : "synced";
-      rc.title = "Click to re-check which URLs redirect. Costs no SEMrush units.";
-    } else {
-      rc.querySelector(".rtxt").textContent = "Redirects never checked";
-      rc.dataset.s = "local";
-      rc.title = "Click to check which URLs redirect. Costs no SEMrush units.";
-    }
-    chip.title = stale
-      ? `This dataset was built ${age} days ago. Refresh only pulls what's been published to the repo — a new SEMrush pull has to be run and committed. Ask Claude to refresh the content map.`
-      : "Age of the published dataset";
+    cols += '<div class="col"><div class="head" data-drop="' + esc(c) + '|">' + esc(c) + ' <span class="k">' + fmt(kw) + ' kw</span></div>' + bands + '</div>';
   }
-
-  const c0 = liveStats();
-  $("#asof").textContent = S.generated;
-  $("#foot2").textContent = `${n0(c0.total)} live URLs · ${n0(c0.keywords)} ranking keywords · ${n0(c0.traffic)} est. monthly organic visits · data generated ${S.generated}`;
-  $("#c-attn").textContent = "(" + (DATA.groups.length - S.resolved_groups) + ")";
-  $("#c-slug").textContent = "(" + DATA.slugs.length + ")";
-  $("#c-all").textContent = "(" + c0.total + ")";
-  $("#c-work").textContent = "(" + (S.review + S.remove) + ")";
-
-  const c = liveStats();
-  const TILES = [
-    ["Live pages", n0(c.total), `${c.transactional} transactional · ${c.core} pillar · ${c.fanout} fan-out`],
-    ["Redirects", n0(c.redirects), `of ${n0(P.length)} URLs known — excluded from all counts`],
-    ["Ranking keywords", n0(c.keywords), `across ${c.ranking} pages with at least one ranking`],
-    ["Est. monthly organic visits", n0(c.traffic), "SEMrush estimate, US database"],
-  ];
-  const tw = $("#tiles"); tw.innerHTML = "";
-  TILES.forEach(([l, v, nt]) => {
-    const t = el("div", "tile");
-    t.append(el("div", "lab", esc(l)), el("div", "val", v), el("div", "note", esc(nt)));
-    tw.append(t);
+  return strip + tiles + toolbarHTML() + '<div id="matrix">' + cols + '</div>' +
+    '<p class="intro">Hover a page for its SEMrush metrics. Drag a card between clusters or tiers to re-categorize (long-press on touch), or use ✎ for the full editor. Counts on each band are the full count for that tier; search and filters hide cards without changing counts.</p>';
+}
+function intentTop(p) {
+  const parts = INTENTS.map(([k, n]) => [n, p[k]]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
+  return parts.length ? parts[0][0] : '—';
+}
+let SORT = { k:'kw', dir:-1 };
+function viewPages() {
+  const rows = DATA.pages.filter(pageMatches).sort((a, b) => {
+    let va, vb;
+    if (SORT.k === 'path') { va = a.path; vb = b.path; }
+    else if (SORT.k === 'cat') { va = effCat(a); vb = effCat(b); }
+    else if (SORT.k === 'tier') { va = TIERS.indexOf(effTier(a)); vb = TIERS.indexOf(effTier(b)); }
+    else if (SORT.k === 'pkw') { va = a.pkw || ''; vb = b.pkw || ''; }
+    else { va = a[SORT.k] || 0; vb = b[SORT.k] || 0; }
+    return (va < vb ? -1 : va > vb ? 1 : 0) * SORT.dir;
   });
+  const th = (k, n, num) => '<th class="' + (num ? 'num' : '') + '" data-sort="' + k + '">' + n + (SORT.k === k ? (SORT.dir < 0 ? ' ▾' : ' ▴') : '') + '</th>';
+  return toolbarHTML() +
+    '<div style="margin:-4px 0 10px"><button class="btn sub" id="btn-csv">Export CSV</button></div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr>' +
+    th('path', 'Page') + th('cat', 'Cluster') + th('tier', 'Tier') +
+    th('kw', 'Keywords', 1) + th('traffic', 'Est. traffic', 1) + th('pkw', 'Top keyword') + th('vol', 'Volume', 1) + th('pos', 'Position', 1) +
+    '<th>Intent</th><th>Status / labels</th>' +
+    '</tr></thead><tbody>' +
+    rows.map(p => {
+      const t = effTier(p);
+      return '<tr><td><a href="#" data-open="' + esc(p.path) + '">' + esc(p.label) + '</a><div class="mini">' + esc(p.path) + '</div></td>' +
+      '<td>' + esc(effCat(p)) + '</td><td><span class="badge tier-' + t + '">' + TIERNAME[t] + '</span>' + (t === 'redirect' && p.redirects_to ? '<div class="mini">→ ' + esc(p.redirects_to) + '</div>' : '') + '</td>' +
+      (p.no_metrics ? '<td colspan="5" class="mini">no SEMrush data yet</td>' :
+        '<td class="num">' + fmt(p.kw) + '</td><td class="num">' + fmt(p.traffic) + '</td><td>' + esc(p.pkw || '—') + (p.pkw_stale && p.pkw ? ' <span class="badge stale" title="top keyword/position from Aug 3">Aug 3</span>' : '') + '</td><td class="num">' + (p.pkw ? fmt(p.vol) : '—') + '</td><td class="num">' + (p.pos != null ? p.pos : '—') + '</td>') +
+      '<td>' + (p.no_metrics ? '—' : intentTop(p)) + '</td><td>' + statusPill(p) + ' ' + labelPills(p, 4) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+function viewInsights() {
+  const sevRank = { critical:0, serious:1, warning:2, info:3, ok:4 };
+  const ins = [...DATA.insights].sort((a, b) => sevRank[a.sev] - sevRank[b.sev]);
+  let html = '<p class="intro">Findings from the ' + esc(DATA.stats.vintages.crawl) + '. Regenerated on every crawl; your labels and statuses live on top and survive refreshes.</p>';
+  html += ins.map(i => '<div class="insight ' + i.sev + '"><span class="sev">' + i.sev + '</span><h3>' + esc(i.title) + '</h3><p>' + esc(i.body) + '</p>' +
+    (i.items ? '<ul>' + i.items.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '</div>').join('');
+  html += '<h2 style="font-size:16px;margin:22px 0 10px">Consolidation groups (' + DATA.groups.filter(g => g.sev !== 'resolved').length + ' open)</h2>';
+  const gRank = { critical:0, serious:1, warning:2, partial:3, resolved:4 };
+  html += [...DATA.groups].sort((a, b) => gRank[a.sev] - gRank[b.sev]).map(g => {
+    const tag = u => u === g.keep ? '<span class="tag keep">KEEP</span>' : g.redirected.includes(u) ? '<span class="tag done">301 ✓</span>' : (g.gone||[]).includes(u) ? '<span class="tag gone">404</span>' : '<span class="tag live">LIVE</span>';
+    return '<div class="group"><h4>' + esc(g.topic) + ' <span class="badge ' + (g.sev === 'resolved' ? 'tier-pillar' : g.sev === 'partial' ? 'tier-redirect' : 'soft') + '">' + g.sev + '</span></h4>' +
+      '<div class="meta">' + esc(g.cat) + ' · "' + esc(g.kw) + '" (' + fmt(g.vol) + '/mo) · ' + g.still_live.length + ' still competing</div>' +
+      '<div>' + g.urls.map(u => '<div class="u">' + tag(u) + '<a href="#" data-open="' + esc(u) + '">' + esc(u) + '</a></div>').join('') + '</div>' +
+      '<p style="font-size:12.5px;color:#3d4a46;margin:6px 0 0">' + esc(g.note) + '</p></div>';
+  }).join('');
+  const slugs = DATA.slugs.filter(s => PAGE[s.url] && effTier(PAGE[s.url]) !== 'redirect');
+  html += '<h2 style="font-size:16px;margin:22px 0 10px">Slug-update candidates (' + slugs.length + ' live)</h2>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>URL</th><th>Ranking kw</th><th class="num">Vol</th><th>Suggested</th><th>Why</th></tr></thead><tbody>' +
+    slugs.map(s => '<tr><td><a href="#" data-open="' + esc(s.url) + '">' + esc(s.url) + '</a></td><td>' + esc(s.kw) + '</td><td class="num">' + fmt(s.vol) + '</td><td><code style="font-size:12px">' + esc(s.suggest) + '</code></td><td style="font-size:12px">' + esc(s.reason) + '</td></tr>').join('') +
+    '</tbody></table></div>';
+  return html;
+}
+function viewRedirects() {
+  const manual = Object.entries(ANN.live).filter(([path, v]) => v.s === 'redirect' && !(PAGE[path] && PAGE[path].tier === 'redirect'));
+  const rows = DATA.redirects.map(r => ({ ...r, manual:false }))
+    .concat(manual.map(([path, v]) => ({ old: path, to: '(not verified yet — the next crawl records the destination)', cat: PAGE[path] ? effCat(PAGE[path]) : '—', kw_old: PAGE[path] ? PAGE[path].kw : 0, pkw_old: PAGE[path] ? PAGE[path].pkw : null, kw_new: null, pkw_new: null, to_listing:false, in_sitemap: PAGE[path] ? PAGE[path].in_sitemap : false, manual:true, at: v.at })))
+    .filter(r => !FILTER.q || r.old.includes(FILTER.q.toLowerCase()) || (r.to || '').includes(FILTER.q.toLowerCase()))
+    .filter(r => !FILTER.cluster || r.cat === FILTER.cluster);
+  const relive = Object.entries(ANN.live).filter(([path, v]) => v.s === 'live' && PAGE[path] && PAGE[path].tier === 'redirect');
+  return '<p class="intro">Every verified redirect: <b>' + DATA.redirects.length + '</b> confirmed server-level 301/302s from the ' + esc(DATA.stats.crawl_date) + ' same-origin crawl' + (manual.length ? ', plus <b>' + manual.length + '</b> you marked by hand since' : '') + '. Keyword columns show what SEMrush still credits to each URL (old URL keywords normally migrate to the target within weeks of a correct 301). KW data: ' + esc(DATA.stats.vintages.semrush_pages.split(' — ')[0]) + '.</p>' +
+    toolbarHTML(true) +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Old slug</th><th>Redirects to</th><th>Cluster</th><th class="num">KW on old URL</th><th>Top kw (old)</th><th class="num">KW on target</th><th>Top kw (target)</th><th>Flags</th></tr></thead><tbody>' +
+    rows.map(r => '<tr><td>' + (PAGE[r.old] ? '<a href="#" data-open="' + esc(r.old) + '">' + esc(r.old) + '</a>' : esc(r.old)) + '</td>' +
+      '<td>' + esc(r.to) + '</td><td>' + esc(r.cat) + '</td>' +
+      '<td class="num">' + fmt(r.kw_old) + '</td><td>' + esc(r.pkw_old || '—') + '</td>' +
+      '<td class="num">' + (r.kw_new == null ? '—' : fmt(r.kw_new)) + '</td><td>' + esc(r.pkw_new || '—') + '</td>' +
+      '<td>' + (r.to_listing ? '<span class="badge soft" title="redirects into a listing page — passes no topical relevance (soft-404 pattern)">soft-404</span> ' : '') +
+      (r.in_sitemap ? '<span class="badge sm" title="this redirecting URL is still advertised in the sitemap">in sitemap</span> ' : '') +
+      (r.manual ? '<span class="badge tier-redirect" title="marked by you, not yet verified by a crawl">yours · ' + esc((r.at || '').slice(0, 10)) + '</span>' : '') + '</td></tr>').join('') +
+    '</tbody></table></div>' +
+    (relive.length ? '<h3 style="font-size:14px;margin:16px 0 6px">Marked live by you (build says redirect)</h3>' + relive.map(([path]) => '<div class="u" style="font-size:13px"><span class="tag live">LIVE (yours)</span> <a href="#" data-open="' + esc(path) + '">' + esc(path) + '</a></div>').join('') : '');
+}
+function viewNotes() {
+  const entries = DATA.pages.filter(p => { const e = annOf(p.path); return e && (e.status || (e.labels||[]).length || (e.comments||[]).filter(c => !(e.delc||[]).includes(c.id)).length || e.target || e.cluster || e.tier); });
+  const orphans = Object.keys(ANN.pages).filter(path => !PAGE[path] && (() => { const e = ANN.pages[path]; return e.status || (e.labels||[]).length || (e.comments||[]).filter(c => !(e.delc||[]).includes(c.id)).length || e.target; })());
+  const groups = visibleStatuses(true).map(s => ({ s, list: entries.filter(p => ((annOf(p.path)||{}).status || 'none') === s.id) })).filter(g => g.list.length);
+  return '<p class="intro">' + entries.length + ' pages carry your notes (status, labels, placement, target keyword or comments). <button class="btn sub" id="btn-libs" style="padding:3px 10px;font-size:12px">Manage statuses &amp; labels</button></p>' +
+    (groups.map(g => '<h3 style="font-size:14px;margin:14px 0 6px">' + esc(g.s.name) + ' <span class="mini">' + g.list.length + '</span></h3>' +
+      g.list.map(p => { const e = annOf(p.path); const nc = (e.comments||[]).filter(c => !(e.delc||[]).includes(c.id));
+        return '<div class="group" style="padding:9px 12px"><div class="u"><a href="#" data-open="' + esc(p.path) + '"><b>' + esc(p.label) + '</b></a> <span class="mini">' + esc(effCat(p)) + ' · ' + TIERNAME[effTier(p)] + '</span> ' + labelPills(p, 8) + '</div>' +
+        (e.target ? '<div class="mini">Target: ' + esc(e.target) + '</div>' : '') +
+        nc.map(c => '<div class="comment"><div class="m"><span>' + esc(c.author || '') + ' · ' + esc((c.ts||'').slice(0,10)) + '</span></div>' + esc(c.text) + '</div>').join('') + '</div>'; }).join('')).join('')) +
+    (orphans.length ? '<h3 style="font-size:14px;margin:16px 0 6px">Notes on pages no longer in the inventory</h3>' + orphans.map(path => '<div class="u" style="font-size:13px"><span class="tag gone">not in inventory</span> <a href="#" data-open="' + esc(path) + '">' + esc(path) + '</a></div>').join('') : '');
 }
 
-function renderFilters() {
-  const fc = $("#fcat"), fc2 = $("#fcat2");
-  if (fc.options.length <= 1) DATA.cats.forEach(c => [fc, fc2].forEach(s => s.append(el("option", null, esc(c)))));
-  if ($("#ftype2").options.length <= 1)
-    [...new Set(P.map(p => p.type))].sort().forEach(t => $("#ftype2").append(el("option", null, esc(t))));
-}
-
-let F = { q: "", cat: "", ann: "" };
-
-function matchAnn(p) {
-  if (!F.ann) return true;
-  const a = annOf(p.path);
-  if (F.ann === "__any") return !!a && !annIsEmpty(a);
-  if (F.ann === "__none") return !a || annIsEmpty(a);
-  if (F.ann === "__comment") return !!a && (a.comments || []).length > 0;
-  if (F.ann === "__moved") return isMoved(p);
-  if (F.ann === "__statuschanged") return !!statusChanged(p);
-  if (F.ann.startsWith("s:")) return !!a && a.status === F.ann.slice(2);
-  if (F.ann.startsWith("l:")) return effLabels(p).includes(F.ann.slice(2));
-  return true;
-}
-
-function match(p) {
-  if (F.cat && effCat(p) !== F.cat) return false;
-  if (!matchAnn(p)) return false;
-  if (F.q) {
-    const q = F.q.toLowerCase();
-    const a = annOf(p.path);
-    const inNotes = a && ((a.target || "").toLowerCase().includes(q) ||
-      (a.comments || []).some(c => (c.text || "").toLowerCase().includes(q)));
-    if (!(p.path.toLowerCase().includes(q) || p.label.toLowerCase().includes(q) ||
-      (p.pkw || "").toLowerCase().includes(q) || effCat(p).toLowerCase().includes(q) || inNotes)) return false;
+/* ============================== wiring ============================== */
+function wire(root) {
+  const q = $('#f-q', root);
+  if (q) {
+    q.addEventListener('input', debounce(() => { FILTER.q = q.value.trim(); redrawKeepFocus('f-q'); }, 220));
+    const bind = (id, key) => { const el = $('#' + id, root); el && el.addEventListener('change', () => { FILTER[key] = el.value; redraw(); }); };
+    bind('f-cluster', 'cluster'); bind('f-tier', 'tier'); bind('f-status', 'status'); bind('f-label', 'label'); bind('f-notes', 'notes');
+    const c = $('#f-compact', root); c && c.addEventListener('change', () => { FILTER.compact = c.checked; document.body.classList.toggle('compact', c.checked); });
+    document.body.classList.toggle('compact', FILTER.compact);
+    const n = DATA.pages.filter(pageMatches).length;
+    const fc = $('#f-count', root); if (fc) fc.textContent = n + ' of ' + DATA.pages.length + ' pages';
   }
-  return true;
+  $$('[data-open]', root).forEach(el => el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openDrawer(el.dataset.open); }));
+  $$('th[data-sort]', root).forEach(th => th.addEventListener('click', () => {
+    const k = th.dataset.sort; if (SORT.k === k) SORT.dir *= -1; else { SORT.k = k; SORT.dir = k === 'path' || k === 'cat' || k === 'pkw' ? 1 : -1; } redraw();
+  }));
+  const csv = $('#btn-csv', root); csv && csv.addEventListener('click', exportCSV);
+  const libs = $('#btn-libs', root); libs && libs.addEventListener('click', libraryModal);
+  bindTips(root);
+  bindDrag(root);
 }
-
-/* ---------- tooltip ---------- */
-const tipEl = () => $("#tip");
-function bindTip(node, html) {
-  const tip = tipEl();
-  node.addEventListener("mouseenter", () => { tip.innerHTML = html; tip.classList.add("on"); });
-  node.addEventListener("mousemove", e => {
-    const w = tip.offsetWidth, h = tip.offsetHeight;
-    tip.style.left = Math.min(e.clientX + 13, innerWidth - w - 10) + "px";
-    tip.style.top = Math.max(8, e.clientY - h - 11) + "px";
-  });
-  node.addEventListener("mouseleave", () => tip.classList.remove("on"));
-}
-
-function tipFor(p) {
-  const a = annOf(p.path);
-  const moved = isMoved(p);
-  return `<b>${esc(p.label)}</b><br><span style="opacity:.7">${esc(p.path)}</span><br>
-    <span style="opacity:.7">${esc(p.type)}</span><br><br>
-    Keywords: <b>${n0(p.kw)}</b> · Est. traffic: <b>${n0(p.traffic)}</b><br>
-    ${p.pkw ? `Top keyword: <b>${esc(p.pkw)}</b><br>Volume ${n0(p.vol)}/mo · position ${p.pos}${p.pkw_stale ? ' <span style="opacity:.7">(not re-pulled)</span>' : ''}<br>` : ''}
-    ${p.trans || p.comm ? `Intent: ${p.trans} transactional / ${p.comm} commercial / ${p.info} informational<br>` : ''}
-    ${statusChanged(p) === "redirect" ? `<br><b>↳ Now redirects</b> <span style="opacity:.7">(checked ${esc(((liveOverride(p.path) || {}).at || "").slice(0, 10))}; the build still had it live)</span>` : ''}
-    ${statusChanged(p) === "live" ? `<br><b>↳ Serving content again</b> <span style="opacity:.7">(checked ${esc(((liveOverride(p.path) || {}).at || "").slice(0, 10))}; the build had it as a redirect)</span>` : ''}
-    ${moved ? `<br>↔ Moved by you to <b>${esc(effCat(p))} · ${esc(TIERNAME[effTier(p)])}</b><br>
-       <span style="opacity:.7">was ${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)}</span>` : ''}
-    ${p.groups && p.groups.length ? `<br>⚠ Competes on: ${p.groups.map(esc).join('; ')}` : ''}
-    ${p.slug_suggest ? `<br>✎ Suggested slug: <b>${esc(p.slug_suggest)}</b>` : ''}
-    ${a && a.target ? `<br>◎ Your target: <b>${esc(a.target)}</b>` : ''}
-    ${a && (a.comments || []).length ? `<br>💬 ${(a.comments || []).length} comment${(a.comments || []).length > 1 ? 's' : ''}` : ''}`;
-}
-
-/* ---------- matrix ---------- */
-function renderMatrix() {
-  const m = $("#matrix"); m.innerHTML = "";
-  const maxkw = Math.max(...P.map(p => p.kw), 1);
-  const dense = document.body.dataset.density === "compact";
-
-  DATA.cats.forEach(cat => {
-    const all = P.filter(p => effCat(p) === cat);
-    const inCat = all.filter(p => match(p));
-    const col = el("div", "col");
-    col.dataset.cluster = cat;
-
-    const h = el("div", "col-h");
-    h.dataset.drop = "cluster";
-    h.innerHTML = `<div class="nm">${esc(cat)}</div>
-      <div class="mt">${all.length} page${all.length === 1 ? "" : "s"} · ${n0(all.reduce((a, b) => a + b.kw, 0))} keywords</div>
-      <div class="dhint">drop to move here</div>`;
-    col.append(h);
-
-    let shown = 0;
-    TIERS.forEach(([tk, tl]) => {
-      const rows = inCat.filter(p => effTier(p) === tk)
-        .sort((a, b) => b.kw - a.kw || a.label.localeCompare(b.label));
-      const movable = MOVABLE_TIERS.includes(tk);
-      if (!rows.length && !movable) return;         // never show empty utility/redirect
-
-      const g = el("div", "tiergroup " + tk);
-      if (movable) { g.dataset.drop = "tier"; g.dataset.tier = tk; }
-      if (!rows.length) g.classList.add("empty");
-
-      g.append(el("div", "tierlab " + tk,
-        `<span class="tname">${esc(tl)}</span><span class="tcount">${rows.length}</span>`));
-
-      rows.forEach(p => {
-        shown++;
-        const a = el("a", "cell" + (tk === "redirect" ? " isredir" : "") + (isMoved(p) ? " moved" : ""));
-        a.href = p.url; a.target = "_blank"; a.rel = "noopener";
-        a.dataset.path = p.path;
-        if (tk !== "redirect") a.dataset.drag = "1";
-        const chips = dense ? "" : `${statusPill(p.path)}${labelPills(p, 3)}`;
-        a.innerHTML = `<div class="ttl"><span class="txt">${esc(p.label)}</span>
-            <span class="kw${p.kw ? '' : ' zero'}">${p.kw ? n0(p.kw) : '—'}</span></div>
-          <div class="bar${p.kw ? '' : ' empty'}" style="width:${p.kw ? Math.max(3, Math.round(100 * Math.sqrt(p.kw) / Math.sqrt(maxkw))) : 100}%"></div>
-          ${chips ? `<div class="meta">${chips}</div>` : ""}
-          ${noteBtnHTML(p.path)}`;
-        bindTip(a, tipFor(p));
-        g.append(a);
-      });
-
-      if (!rows.length) g.append(el("div", "dropzone", "Drop a page here"));
-      col.append(g);
-    });
-
-    if (!shown) col.append(el("div", "empty-col", "No pages match the current filter."));
-    m.append(col);
-  });
-
-  wireDrag();
-}
-
-/* ---------- drag to re-classify ----------------------------------------------
-
-   Deliberately NOT the HTML5 drag-and-drop API. These cells are <a> elements, so
-   native DnD fights the browser's own link-dragging; it also can't auto-scroll the
-   horizontally scrolling matrix, and does nothing at all on touch. Pointer events
-   give one code path for mouse, pen and long-press, and are testable with real
-   input rather than synthesised DragEvents.
-   ------------------------------------------------------------------------- */
-
-const DRAG = {
-  path: null, cell: null, id: null, active: false, moved: false,
-  sx: 0, sy: 0, ghost: null, zone: null, lp: null, raf: 0,
-  vx: 0, vy: 0, lastX: null, lastY: null, suppress: false,
-};
-
-const THRESHOLD = 6;      // px of movement before a mouse drag begins
-const LONGPRESS = 380;    // ms of stillness before a touch drag begins
-
-/* Called after every renderMatrix(). Listeners are delegated and installed once,
-   so re-rendering can't leave stale handlers behind. */
-function wireDrag() {
-  if (wireDrag.done) return;
-  wireDrag.done = true;
-
-  /* kill the browser's native link drag outright */
-  document.addEventListener("dragstart", e => {
-    if (e.target.closest && e.target.closest(".matrix .cell")) e.preventDefault();
-  });
-
-  document.addEventListener("pointerdown", e => {
-    if (e.pointerType === "mouse" && e.button !== 0) return;
-    const cell = e.target.closest && e.target.closest(".matrix .cell[data-drag]");
-    if (!cell) return;
-    if (e.target.closest("[data-note]")) return;        // the ✎ is not a drag handle
-    DRAG.suppress = false;
-    DRAG.path = cell.dataset.path;
-    DRAG.cell = cell;
-    DRAG.id = e.pointerId;
-    DRAG.sx = e.clientX; DRAG.sy = e.clientY;
-    DRAG.active = false; DRAG.moved = false;
-    if (e.pointerType === "touch") {
-      const x = e.clientX, y = e.clientY;
-      clearTimeout(DRAG.lp);
-      DRAG.lp = setTimeout(() => { if (DRAG.path && !DRAG.moved) beginDrag(x, y); }, LONGPRESS);
-    }
-  }, true);
-
-  addEventListener("pointermove", e => {
-    if (DRAG.path === null || e.pointerId !== DRAG.id) return;
-    const dx = e.clientX - DRAG.sx, dy = e.clientY - DRAG.sy;
-    if (!DRAG.active) {
-      if (Math.abs(dx) + Math.abs(dy) > THRESHOLD) {
-        DRAG.moved = true;
-        clearTimeout(DRAG.lp);
-        if (e.pointerType === "touch") { endDrag(false); return; }   // let the page scroll
-        beginDrag(e.clientX, e.clientY);
-      }
-      if (!DRAG.active) return;
-    }
-    e.preventDefault();
-    moveDrag(e.clientX, e.clientY);
-  }, { passive: false });
-
-  addEventListener("pointerup", e => {
-    if (DRAG.path === null || e.pointerId !== DRAG.id) return;
-    if (DRAG.active) { e.preventDefault(); dropDrag(); } else { endDrag(false); }
-  });
-  addEventListener("pointercancel", () => endDrag(false));
-
-  /* a drag must not also follow the link */
-  document.addEventListener("click", e => {
-    if (!DRAG.suppress) return;
-    DRAG.suppress = false;
-    e.preventDefault(); e.stopPropagation();
-  }, true);
-
-  addEventListener("keydown", e => {
-    if (e.key === "Escape" && DRAG.active) { endDrag(false); toast("Move cancelled"); }
-  });
-}
-
-function beginDrag(x, y) {
-  if (!DRAG.cell) return;
-  DRAG.active = true;
-  document.body.classList.add("dragging");
-  DRAG.cell.classList.add("dragsrc");
-  const label = DRAG.cell.querySelector(".ttl .txt");
-  DRAG.ghost = el("div", "dragghost", esc(label ? label.textContent : DRAG.path));
-  document.body.append(DRAG.ghost);
-  /* while a touch drag is live, stop the page scrolling under it */
-  DRAG.blockTouch = ev => ev.preventDefault();
-  addEventListener("touchmove", DRAG.blockTouch, { passive: false });
-  moveDrag(x, y);
-}
-
-function moveDrag(x, y) {
-  DRAG.lastX = x; DRAG.lastY = y;
-  if (DRAG.ghost) { DRAG.ghost.style.left = x + "px"; DRAG.ghost.style.top = y + "px"; }
-  const z = zoneAt(x, y);
-  if (z !== DRAG.zone) {
-    if (DRAG.zone) DRAG.zone.classList.remove("dropok");
-    DRAG.zone = z;
-    if (z) z.classList.add("dropok");
+function redrawKeepFocus(id) { redraw(); const el = $('#' + id); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+function exportCSV() {
+  const head = ['path','cluster','tier','status','labels','keywords','est_traffic','top_keyword','volume','position','intent_trans','intent_comm','intent_info','target_keyword','redirects_to','comments'];
+  const lines = [head.join(',')];
+  for (const p of DATA.pages.filter(pageMatches)) {
+    const e = annOf(p.path) || {};
+    const st = ANN.statuses.find(s => s.id === e.status);
+    const cm = (e.comments||[]).filter(c => !(e.delc||[]).includes(c.id)).map(c => c.text).join(' | ');
+    const cell = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    lines.push([p.path, effCat(p), TIERNAME[effTier(p)], st ? st.name : '', effLabels(p).map(id => (labelDef(id)||{}).name).join('; '), p.kw, p.traffic, p.pkw || '', p.vol, p.pos == null ? '' : p.pos, p.trans, p.comm, p.info, e.target || '', p.redirects_to || '', cm].map(cell).join(','));
   }
-  autoScroll(x, y);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type:'text/csv' }));
+  a.download = 'content-map-' + DATA.stats.generated + '.csv'; a.click();
 }
 
-function zoneAt(x, y) {
-  const n = document.elementFromPoint(x, y);      // the ghost is pointer-events:none
-  return n && n.closest ? n.closest("[data-drop]") : null;
+/* ============================== drawer ============================== */
+let DRAWER = null;
+function closeDrawer() { $$('.drawer,.drawer-scrim').forEach(e => e.remove()); DRAWER = null; }
+function ensurePageAnn(path) {
+  if (!ANN.pages[path]) ANN.pages[path] = { comments:[], delc:[], f:{}, status:'', labels:[], target:'', cluster:'', tier:'', offFlags:[], updated:'' };
+  return ANN.pages[path];
 }
-
-/* A drag has to be able to reach a target that isn't currently on screen. The
-   matrix scrolls sideways and rarely fits 12 clusters; columns are also taller
-   than the viewport, so the Transactional band at the top of a column can be
-   well above a fan-out page near the bottom of another. Both axes auto-scroll
-   when the pointer nears an edge. */
-function autoScroll(x, y) {
-  const m = $("#matrix");
-  const HEDGE = 70, VEDGE = 60, SPEED = 22;
-  let vx = 0, vy = 0;
-
-  if (m) {
-    const r = m.getBoundingClientRect();
-    if (x < r.left + HEDGE) vx = -SPEED * Math.min(1, (r.left + HEDGE - x) / HEDGE);
-    else if (x > r.right - HEDGE) vx = SPEED * Math.min(1, (x - (r.right - HEDGE)) / HEDGE);
-  }
-  /* Only scroll vertically when the pointer is NOT over a drop target. A column
-     header sits near the top of the screen, so scrolling up on approach would
-     slide the very thing being aimed at out from under the cursor. */
-  if (!DRAG.zone) {
-    if (y < VEDGE) vy = -SPEED * Math.min(1, (VEDGE - y) / VEDGE);
-    else if (y > innerHeight - VEDGE) vy = SPEED * Math.min(1, (y - (innerHeight - VEDGE)) / VEDGE);
-  }
-
-  DRAG.vx = vx; DRAG.vy = vy;
-  if ((vx || vy) && !DRAG.raf) {
-    const step = () => {
-      if (!DRAG.active || (!DRAG.vx && !DRAG.vy)) { DRAG.raf = 0; return; }
-      if (DRAG.vx && m) m.scrollLeft += DRAG.vx;
-      if (DRAG.vy) scrollBy(0, DRAG.vy);
-      /* the pointer hasn't moved but the page under it has, so re-test the zone */
-      if (DRAG.lastX != null) {
-        const z = zoneAt(DRAG.lastX, DRAG.lastY);
-        if (z !== DRAG.zone) {
-          if (DRAG.zone) DRAG.zone.classList.remove("dropok");
-          DRAG.zone = z;
-          if (z) z.classList.add("dropok");
-        }
-        if (z) DRAG.vy = 0;      // a target is under the cursor — stop chasing it away
-      }
-      DRAG.raf = requestAnimationFrame(step);
-    };
-    DRAG.raf = requestAnimationFrame(step);
-  }
-}
-
-function dropDrag() {
-  const zone = DRAG.zone, path = DRAG.path;
-  const col = zone && zone.closest(".col");
-  endDrag(true);
-  if (!zone || !col) return;
-  movePage(path, col.dataset.cluster, zone.dataset.drop === "tier" ? zone.dataset.tier : null);
-}
-
-function endDrag(wasDrag) {
-  clearTimeout(DRAG.lp);
-  if (DRAG.raf) { cancelAnimationFrame(DRAG.raf); DRAG.raf = 0; }
-  if (DRAG.blockTouch) { removeEventListener("touchmove", DRAG.blockTouch); DRAG.blockTouch = null; }
-  if (DRAG.ghost) { DRAG.ghost.remove(); DRAG.ghost = null; }
-  if (DRAG.zone) { DRAG.zone.classList.remove("dropok"); DRAG.zone = null; }
-  if (DRAG.cell) DRAG.cell.classList.remove("dragsrc");
-  document.body.classList.remove("dragging");
-  document.querySelectorAll(".dropok").forEach(n => n.classList.remove("dropok"));
-  DRAG.suppress = !!(wasDrag || DRAG.active);
-  /* The click that a drag suppresses may never arrive — the pointer can come up
-     over a different element entirely. Expire the flag so it can't swallow an
-     unrelated click later on. */
-  if (DRAG.suppress) setTimeout(() => { DRAG.suppress = false; }, 350);
-  DRAG.active = false; DRAG.moved = false;
-  DRAG.path = null; DRAG.cell = null; DRAG.id = null;
-  DRAG.vx = 0; DRAG.vy = 0; DRAG.lastX = null; DRAG.lastY = null;
-}
-
-/* Apply a manual move. `tier` null means "cluster only, keep the tier". */
-function movePage(path, cluster, tier) {
-  const p = byPath[path];
-  if (!p) return;
-  const a = pageAnn(path, true);
-  let changed = false;
-
-  if (cluster && cluster !== effCat(p)) {
-    a.cluster = cluster === p.cat ? "" : cluster;
-    touch(path, "cluster");
-    changed = true;
-  }
-  if (tier && tier !== effTier(p)) {
-    a.tier = tier === p.tier ? "" : tier;
-    touch(path, "tier");
-    changed = true;
-  }
-  if (!changed) return;
-
-  refreshViews();
-  const back = isMoved(p) ? "" : " (back to where the build had it)";
-  toast(`${p.label} → ${effCat(p)} · ${TIERNAME[effTier(p)]}${back}`, false, {
-    label: "Undo",
-    run: () => { resetMove(path); refreshViews(); },
+function stampField(e, f) { e.f = e.f || {}; e.f[f] = nowISO(); e.updated = e.f[f]; }
+function openDrawer(path) {
+  closeDrawer();
+  const p = PAGE[path];
+  const e = annOf(path) || {};
+  const scrim = document.createElement('div'); scrim.className = 'drawer-scrim'; scrim.addEventListener('click', closeDrawer);
+  const d = document.createElement('div'); d.className = 'drawer';
+  const t = p ? effTier(p) : null;
+  const nc = (e.comments || []).filter(c => !(e.delc || []).includes(c.id));
+  const orphan = !p;
+  d.innerHTML = '<div class="dh"><button class="dx">✕</button><h2>' + esc(p ? p.label : path) + '</h2><div class="p">' + esc(path) + (orphan ? ' · <b>not in inventory</b>' : '') + ' · <a href="https://www.1031crowdfunding.com' + esc(path) + '" target="_blank" rel="noopener">open ↗</a></div></div>' +
+  '<div class="body">' +
+  (p ? '<div class="sec"><h5>SEMrush</h5>' + (p.no_metrics ? '<p class="mini">No data yet — new or never-ranking page.</p>' :
+    '<div class="kv"><span class="k">Keywords</span><span>' + fmt(p.kw) + '</span>' +
+    '<span class="k">Top keyword</span><span>' + esc(p.pkw || '—') + (p.pkw_stale && p.pkw ? ' <span class="badge stale">Aug 3</span>' : '') + '</span>' +
+    '<span class="k">Est. traffic / mo</span><span>' + fmt(p.traffic) + '</span>' +
+    '<span class="k">Volume (top kw)</span><span>' + (p.pkw ? fmt(p.vol) : '—') + '</span>' +
+    '<span class="k">Position</span><span>' + (p.pos != null ? '#' + p.pos : '—') + '</span>' +
+    '<span class="k">Intent positions</span><span>' + (INTENTS.map(([k, n]) => p[k] ? n + ' ' + p[k] : '').filter(Boolean).join(' · ') || '—') + '</span></div>') + '</div>' : '') +
+  (p ? '<div class="sec"><h5>Placement</h5><div class="row2">' +
+    '<select id="d-cluster"><option value="">' + esc(p.cat) + ' (build)</option>' + DATA.cats.map(c => '<option ' + (e.cluster === c ? 'selected' : '') + '>' + esc(c) + '</option>').join('') + '</select>' +
+    '<select id="d-tier" ' + (t === 'redirect' ? 'disabled title="a redirecting URL stays in the Redirect band — change its live status below to re-tier it"' : '') + '><option value="">' + TIERNAME[p.tier === 'redirect' ? 'fanout' : p.tier] + ' (build)</option>' + TIERS.filter(x => x !== 'redirect').map(x => '<option value="' + x + '" ' + (e.tier === x ? 'selected' : '') + '>' + TIERNAME[x] + '</option>').join('') + '</select></div>' +
+    ((e.cluster && e.cluster !== p.cat) || (e.tier && e.tier !== p.tier) ? '<p class="mini">Build has this as ' + esc(p.cat) + ' / ' + TIERNAME[p.tier] + '. <a href="#" id="d-resetplace">Reset to build</a></p>' : '') + '</div>' : '') +
+  (p ? '<div class="sec"><h5>Live status</h5>' + (() => {
+      const lo = liveOverride(path);
+      if (p.tier === 'redirect') return '<p class="mini">Verified redirect → <b>' + esc(p.redirects_to || '') + '</b>' + (lo === 'live' ? ' — <b>you marked it live</b>.' : '') + '</p><button class="btn sub" id="d-live">' + (lo === 'live' ? 'Use build value (redirect)' : 'Mark as live (build is wrong / page restored)') + '</button>';
+      return '<p class="mini">Crawled live (200, index,follow)' + (lo === 'redirect' ? ' — <b>you marked it as redirecting</b>.' : '') + '</p><button class="btn sub" id="d-live">' + (lo === 'redirect' ? 'Use build value (live)' : 'Mark as redirecting (I shipped a 301)') + '</button>';
+    })() + '</div>' : '') +
+  '<div class="sec"><h5>Status</h5><div class="pillrow">' + visibleStatuses(true).map(s => '<span class="apill mine ' + (((e.status || 'none') === s.id) ? '' : 'off') + '" data-st="' + s.id + '" style="background:' + COLORS[s.color] + '">' + esc(s.name) + '</span>').join('') + '</div></div>' +
+  '<div class="sec"><h5>Labels <a href="#" id="d-libs" style="font-weight:400;font-size:11px">manage</a></h5><div class="pillrow">' +
+    ANN.labels.filter(l => !isHiddenL(l.id)).map(l => {
+      const on = p ? effLabels(p).includes(l.id) : (e.labels || []).includes(l.id);
+      const style = l.derived ? 'class="apill auto-l ' + (on ? '' : 'off') + '" style="color:' + COLORS[l.color] + '"' : 'class="apill mine ' + (on ? '' : 'off') + '" style="background:' + COLORS[l.color] + '"';
+      return '<span ' + style + ' data-lb="' + l.id + '">' + esc(l.name) + '</span>';
+    }).join('') + '</div><p class="mini">Outlined labels are computed by the build — click to switch off for this page. Solid ones are yours.</p></div>' +
+  '<div class="sec"><h5>Target keyword</h5><input type="text" id="d-target" placeholder="e.g. what is a dst 1031 exchange" value="' + esc(e.target || '') + '"></div>' +
+  '<div class="sec"><h5>Comments</h5><div id="d-comments">' + nc.map(c => '<div class="comment" data-c="' + c.id + '"><div class="m"><span>' + esc(c.author || '') + ' · ' + esc((c.ts || '').slice(0, 16).replace('T', ' ')) + '</span><button data-delc="' + c.id + '">delete</button></div>' + esc(c.text) + '</div>').join('') + '</div>' +
+    '<div class="addc"><input type="text" id="d-newc" placeholder="Add a comment…"><button class="btn" id="d-addc">Add</button></div></div>' +
+  '</div>';
+  document.body.appendChild(scrim); document.body.appendChild(d);
+  DRAWER = path;
+  $('.dx', d).addEventListener('click', closeDrawer);
+  const rewire = () => { redraw(); openDrawer(path); };
+  const dc = $('#d-cluster', d); dc && dc.addEventListener('change', () => { const a = ensurePageAnn(path); a.cluster = dc.value; stampField(a, 'cluster'); annChanged(); });
+  const dt = $('#d-tier', d); dt && dt.addEventListener('change', () => { const a = ensurePageAnn(path); a.tier = dt.value; stampField(a, 'tier'); annChanged(); });
+  const rp = $('#d-resetplace', d); rp && rp.addEventListener('click', ev => { ev.preventDefault(); const a = ensurePageAnn(path); a.cluster = ''; a.tier = ''; stampField(a, 'cluster'); stampField(a, 'tier'); annChanged(); openDrawer(path); });
+  const dl = $('#d-live', d); dl && dl.addEventListener('click', () => {
+    const cur = liveOverride(path);
+    if (cur) delete ANN.live[path];
+    else ANN.live[path] = { s: p.tier === 'redirect' ? 'live' : 'redirect', at: nowISO() };
+    if (!cur && p.tier !== 'redirect') toast('Marked as redirecting. Tip: paste the destination in Check redirects so it shows in the table.');
+    annChanged(); openDrawer(path);
   });
-}
-
-function resetMove(path) {
-  const a = pageAnn(path, true);
-  a.cluster = ""; touch(path, "cluster");
-  const b = pageAnn(path, true);
-  b.tier = ""; touch(path, "tier");
-}
-
-/* ---------- groups ---------- */
-const SEVW = { critical: 0, serious: 1, warning: 2, partial: 3, resolved: 4 };
-const SEVCLS = { critical: "crit", serious: "ser", warning: "warn", partial: "partial", resolved: "resolved" };
-function renderGroups() {
-  const g = $("#groups"); g.innerHTML = "";
-  [...DATA.groups].sort((a, b) => SEVW[a.sev] - SEVW[b.sev] || b.urls.length - a.urls.length).forEach(gr => {
-    const c = el("div", "card " + SEVCLS[gr.sev]);
-    c.append(el("h3", null, `${esc(gr.topic)} <span class="sevtag ${gr.sev}">${gr.sev === "resolved" ? "done" : gr.sev}</span>`));
-    c.append(el("div", "kv", `${esc(gr.cat)} · <b>${(gr.still_live || []).length + 1} still competing</b> of ${gr.urls.length} · ${(gr.redirected || []).length} already redirected · shared term “${esc(gr.kw)}”${gr.vol ? ` (${n0(gr.vol)}/mo)` : ''}`));
-    const w = gr.work;
-    if (w) {
-      const done = w.state === "done";
-      c.append(el("div", "workbar " + (done ? (w.remaining.length ? "partial" : "done") : "partial"),
-        `${done ? "✓" : "◷"} <b>Your calendar: ${esc(w.status)}${w.ctype ? " — " + esc(w.ctype) : ""}</b>
-         ${w.date ? ` (${esc(w.date)})` : ''} · “${esc(w.topic)}”<br>
-         ${w.merged.length ? `Absorbed ${w.merged.length} page${w.merged.length > 1 ? 's' : ''} from this group.` : ''}
-         ${w.remaining.length ? ` <b>${w.remaining.length} still live</b> and competing.` : ` Group looks closed out.`}`));
-    }
-    c.append(el("p", null, esc(gr.note)));
-    const ul = el("ul", "urls");
-    gr.urls.forEach(u => {
-      const p = byPath[u];
-      const gone = w && w.merged.includes(u);
-      const li = el("li", (u === gr.keep ? "keep" : "") + (gone ? " gone" : ""));
-      li.innerHTML = `${u === gr.keep ? '<span class="kp">keep</span>' : ''}
-        ${gone ? `<span class="kp" style="color:var(--good-text)">${(gr.redirected || []).includes(u) ? '301' : 'merged'}</span>` : ''}
-        <a class="u" href="https://www.1031crowdfunding.com${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>
-        ${p ? statusPill(u) + labelPills(p, 2) + noteBtnHTML(u) : ''}
-        <span class="n">${p && p.kw ? n0(p.kw) + ' kw' : '0 kw'}${p && p.pos ? ' · #' + p.pos : ''}</span>`;
-      ul.append(li);
-    });
-    c.append(ul); g.append(c);
-  });
-}
-
-/* ---------- workflow ---------- */
-function liFor(p, extra) {
-  const li = el("li");
-  li.innerHTML = `<a class="u" href="${p.url}" target="_blank" rel="noopener">${esc(p.path)}</a>
-    ${extra || ''}${statusPill(p.path)}${noteBtnHTML(p.path)}<span class="n">${p.kw ? n0(p.kw) + ' kw' : '0 kw'}${p.pos ? ' · #' + p.pos : ''}</span>`;
-  bindTip(li, tipFor(p));
-  return li;
-}
-
-function renderRedir() {
-  const RD = DATA.redirects || { map: {}, anomalies: [] };
-  const m = Object.entries(RD.map || {});
-  $("#c-redir").textContent = "(" + m.length + ")";
-  $("#n-redir").textContent = "(" + m.length + ")";
-  $("#redirintro").innerHTML = `<b>${m.length} of ${n0(S.crawled)} crawled URLs are redirects, not pages.</b>
-    They carry ${n0(S.redirect_kw)} SEMrush keywords between them, and every one of them appeared in the
-    sitemap crawl — which is why earlier builds counted them as live content. They are now excluded from the
-    live page count, the cluster columns, and every label.<br><br>
-    <b>Method:</b> ${esc(RD.method || '')}`;
-  const al = $("#anomlist"); al.innerHTML = "";
-  (RD.anomalies || []).forEach(a => {
-    const li = el("li");
-    li.innerHTML = `<span class="u" style="font-family:inherit;font-size:12.5px">${esc(a)}</span>`; al.append(li);
-  });
-  const t = $("#redirtbl");
-  t.innerHTML = `<thead><tr><th>Old URL</th><th>Redirects to</th><th>Cluster</th>
-    <th class="num">Kw on old URL</th><th class="num">Pos</th></tr></thead><tbody></tbody>`;
-  const tb = t.querySelector("tbody");
-  m.map(([u, d]) => ({ u, d, p: byPath[u] }))
-    .sort((a, b) => ((b.p && b.p.kw) || 0) - ((a.p && a.p.kw) || 0))
-    .forEach(({ u, d, p }) => {
-      const tr = el("tr");
-      tr.innerHTML = `<td class="mono"><a href="https://www.1031crowdfunding.com${esc(u)}" target="_blank" rel="noopener" class="old">${esc(u)}</a></td>
-       <td class="mono new">${esc(d)}</td><td>${esc(p ? effCat(p) : '—')}</td>
-       <td class="num">${p && p.kw ? n0(p.kw) : '—'}</td><td class="num">${(p && p.pos) ?? '—'}</td>`;
-      tb.append(tr);
-    });
-}
-
-function renderWork() {
-  const wt = $("#worktiles"); wt.innerHTML = "";
-  const pub = CAL.filter(c => c.status === "Published").length, out = CAL.length - pub;
-  [["Redirects verified", n0(S.redirects), `${S.resolved_by_redirect} groups closed by work you already did`],
-  ["Your pipeline", CAL.length, `${pub} published · ${out} in outline`],
-  ["Marked Review", n0(S.review), "imported from your workbook"],
-  ["Marked Remove", n0(S.remove), "imported from your workbook"],
-  ["Pages you've moved", n0(P.filter(isMoved).length), "manually re-clustered or re-tiered"],
-  ["Pages you've marked", n0(Object.keys(ANN.pages).filter(k => !annIsEmpty(ANN.pages[k])).length),
-    "status, labels or comments"],
-  ].forEach(([l, v, nt]) => {
-    const t = el("div", "tile");
-    t.append(el("div", "lab", esc(l)), el("div", "val", v), el("div", "note", esc(nt))); wt.append(t);
-  });
-
-  const RD = DATA.redirects || { map: {}, anomalies: [] }, rg = $("#redirgap"); rg.innerHTML = "";
-  const box = el("div", "card resolved"); box.style.marginBottom = "12px";
-  box.append(el("h3", null, `Redirect check — verified in Chrome
-    <span class="sevtag resolved">${n0(S.redirects)} redirects confirmed</span>`));
-  box.append(el("div", "kv", `Every URL in the inventory tested ${esc(RD.verified || '')} · ${S.resolved_by_redirect} consolidation groups partly or fully closed by redirects you already shipped`));
-  const stillOpen = (RD.confirmed_live || []).filter(u => byPath[u]);
-  if (stillOpen.length) {
-    const d = el("div", "workbar partial"); d.style.borderColor = "var(--serious)";
-    const k401 = byPath["/use-401k-for-real-estate-investing/"], n401 = byPath["/how-to-use-401k-to-invest-in-real-estate/"];
-    d.innerHTML = `<b>One genuine gap survived the re-check.</b><br>
-      <span style="font-family:ui-monospace,monospace">/use-401k-for-real-estate-investing/</span>
-      returns <b>200, not a redirect</b> — confirmed twice. It holds
-      <b>${k401 ? n0(k401.kw) : '?'} keywords${k401 && k401.pos ? ' at #' + k401.pos : ''}</b> while the newer
-      <span style="font-family:ui-monospace,monospace">/how-to-use-401k-to-invest-in-real-estate/</span>
-      has ${n401 ? n0(n401.kw) : '?'}. Two live pages, near-identical titles.<br><br>
-      <b>Next:</b> 301 the old URL to the new one to move those keywords across.`;
-    box.append(d);
-  }
-  rg.append(box);
-
-  const ct = el("table");
-  ct.innerHTML = `<thead><tr><th>Status</th><th>Type</th><th>Topic</th><th class="num">Vol</th><th class="num">KD</th>
-    <th>Published URL</th><th>Absorbed</th></tr></thead><tbody>${CAL.map(c => `<tr><td><span class="sevtag ${c.status === "Published" ? "resolved" : "partial"}">${esc(c.status)}</span></td>
-      <td>${esc(c.ctype || '—')}</td><td>${esc(c.topic || '—')}</td>
-      <td class="num">${c.vol ? n0(c.vol) : '—'}</td><td class="num">${c.kd ?? '—'}</td>
-      <td class="mono">${c.url ? `<a href="https://www.1031crowdfunding.com${esc(c.url)}" target="_blank" rel="noopener">${esc(c.url)}</a>` : '<span style="color:var(--muted)">not published</span>'}</td>
-      <td class="mono" style="color:var(--muted)">${c.orig.length ? c.orig.map(esc).join("<br>") : '—'}</td></tr>`).join("")}</tbody>`;
-  $("#caltbl").innerHTML = ""; $("#caltbl").append(ct);
-
-  const rev = P.filter(p => effLabels(p).includes("review")).sort((a, b) => b.kw - a.kw);
-  const rem = P.filter(p => effLabels(p).includes("remove")).sort((a, b) => b.kw - a.kw);
-  const mv = P.filter(isMoved).sort((a, b) => b.kw - a.kw);
-  const un = P.filter(p => effLabels(p).includes("untracked")).sort((a, b) => b.kw - a.kw).slice(0, 40);
-  $("#n-rev").textContent = "(" + rev.length + ")"; $("#n-rem").textContent = "(" + rem.length + ")";
-  $("#n-mm").textContent = "(" + mv.length + ")"; $("#n-un").textContent = "(top 40 of " + S.untracked + ")";
-  $("#mmnote").innerHTML = mv.length
-    ? `Pages you dragged into a different cluster or tier. These stick through every data refresh.
-       Open one and use <b>Reset to build default</b> to undo.`
-    : `Nothing moved yet. Drag any page on the <b>Topic map</b> into another cluster column or tier band and it
-       will be listed here.`;
-  const fill = (sel, arr, ex) => { const u = $(sel); u.innerHTML = ""; arr.forEach(p => u.append(liFor(p, ex ? ex(p) : ''))); };
-  fill("#revlist", rev, p => `<span class="apill" data-c="slate">${esc(effCat(p))}</span>`);
-  fill("#remlist", rem);
-  fill("#mmlist", mv, p => `<span class="apill" data-c="blue">${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)} → ${esc(effCat(p))} · ${esc(TIERNAME[effTier(p)])}</span>`);
-  fill("#unlist", un, p => `<span class="apill" data-c="slate">${esc(effCat(p))}</span>`);
-  const tb = $("#tbclist"); tb.innerHTML = "";
-  (DATA.to_be_created || []).forEach(t => {
-    const li = el("li");
-    li.innerHTML = `<span class="u">${esc(t.topic)}</span><span class="n">${esc(t.cluster)}</span>`; tb.append(li);
-  });
-  if (!(DATA.to_be_created || []).length) tb.innerHTML = '<li style="color:var(--muted)">None flagged.</li>';
-}
-
-/* ---------- slug table ---------- */
-function renderSlugs() {
-  const t = $("#slugtbl");
-  t.innerHTML = `<thead><tr><th>Current slug</th><th>Suggested</th><th class="num">Its top keyword</th>
-    <th class="num">Vol</th><th>Why</th></tr></thead><tbody></tbody>`;
-  const tb = t.querySelector("tbody");
-  [...DATA.slugs].sort((a, b) => b.vol - a.vol).forEach(s => {
-    const tr = el("tr");
-    tr.innerHTML = `<td class="mono"><a href="https://www.1031crowdfunding.com${esc(s.url)}" target="_blank" rel="noopener" class="old">${esc(s.url)}</a></td>
-      <td class="mono new">${esc(s.suggest)}</td>
-      <td>${esc(s.kw)}</td><td class="num">${s.vol ? n0(s.vol) : '—'}</td>
-      <td style="color:var(--ink-2)">${esc(s.reason)}</td>`;
-    tb.append(tr);
-  });
-}
-
-/* ---------- all pages table ---------- */
-let sortK = "kw", sortD = -1;
-function renderAll() {
-  const t = $("#alltbl");
-  const q = ($("#q2").value || "").toLowerCase(), c = $("#fcat2").value, ti = $("#ftier2").value, ty = $("#ftype2").value;
-  const an = $("#fann2") ? $("#fann2").value : "";
-  let rows = P.filter(p => {
-    if (c && effCat(p) !== c) return false;
-    if (ti && effTier(p) !== ti) return false;
-    if (ty && p.type !== ty) return false;
-    if (an) { const save = F.ann; F.ann = an; const ok = matchAnn(p); F.ann = save; if (!ok) return false; }
-    if (q) {
-      const a = annOf(p.path);
-      const inNotes = a && ((a.target || "").toLowerCase().includes(q) ||
-        (a.comments || []).some(x => (x.text || "").toLowerCase().includes(q)));
-      if (!(p.path.toLowerCase().includes(q) || p.label.toLowerCase().includes(q) ||
-        (p.pkw || "").toLowerCase().includes(q) || inNotes)) return false;
-    }
-    return true;
-  });
-  const key = (p, k) => {
-    if (k === "cat") return effCat(p);
-    if (k === "tier") return TIERNAME[effTier(p)] || effTier(p);
-    if (k === "status") return (statusById((annOf(p.path) || {}).status) || {}).name || "";
-    if (k === "labels") return effLabels(p).length;
-    if (k === "notes") return (annOf(p.path) || {}).updated || "";
-    return p[k];
+  $$('[data-st]', d).forEach(el => el.addEventListener('click', () => {
+    const a = ensurePageAnn(path); a.status = el.dataset.st === 'none' ? '' : el.dataset.st; stampField(a, 'status'); annChanged(); openDrawer(path);
+  }));
+  $$('[data-lb]', d).forEach(el => el.addEventListener('click', () => {
+    const a = ensurePageAnn(path); const id = el.dataset.lb;
+    const def = labelDef(id);
+    const isBuildFlag = p && def && def.derived && (p.flags || []).includes(id);
+    if (isBuildFlag) { const off = new Set(a.offFlags || []); off.has(id) ? off.delete(id) : off.add(id); a.offFlags = [...off]; stampField(a, 'offFlags'); }
+    else { const ls = new Set(a.labels || []); ls.has(id) ? ls.delete(id) : ls.add(id); a.labels = [...ls]; stampField(a, 'labels'); }
+    annChanged(); openDrawer(path);
+  }));
+  const tg = $('#d-target', d); tg.addEventListener('change', () => { const a = ensurePageAnn(path); a.target = tg.value.trim(); stampField(a, 'target'); annChanged(); });
+  const add = () => {
+    const inp = $('#d-newc', d); const v = inp.value.trim(); if (!v) return;
+    const a = ensurePageAnn(path);
+    a.comments.push({ id: uuid(), ts: nowISO(), author: ANN.author || 'Jennifer', text: v });
+    a.updated = nowISO(); annChanged(); openDrawer(path);
   };
-  rows.sort((a, b) => {
-    let x = key(a, sortK), y = key(b, sortK);
-    if (x === null || x === undefined) x = sortK === "pos" ? 999 : "";
-    if (y === null || y === undefined) y = sortK === "pos" ? 999 : "";
-    return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * sortD;
+  $('#d-addc', d).addEventListener('click', add);
+  $('#d-newc', d).addEventListener('keydown', ev => { if (ev.key === 'Enter') add(); });
+  $$('[data-delc]', d).forEach(el => el.addEventListener('click', () => {
+    const a = ensurePageAnn(path); a.delc.push(el.dataset.delc); a.updated = nowISO(); annChanged(); openDrawer(path);
+  }));
+  const lb = $('#d-libs', d); lb && lb.addEventListener('click', ev => { ev.preventDefault(); libraryModal(); });
+}
+
+/* ============================== modals ============================== */
+function closeModal() { $$('.modal-scrim').forEach(e => e.remove()); }
+function modal(html) {
+  closeModal();
+  const s = document.createElement('div'); s.className = 'modal-scrim';
+  s.innerHTML = '<div class="modal">' + html + '</div>';
+  s.addEventListener('click', e => { if (e.target === s) closeModal(); });
+  document.body.appendChild(s);
+  return $('.modal', s);
+}
+function syncModal() {
+  const m = modal('<h2>Sync setup</h2>' +
+    '<p style="font-size:13px">Your notes save on this device automatically. To sync them across devices (and back to the repo), paste a fine-grained GitHub token with <b>Contents: Read and write</b> on the <code>' + esc(SYNC.repo || '1031cf-content-map') + '</code> repo only. The token stays in your browser.</p>' +
+    '<div class="row2" style="margin-bottom:8px"><input type="text" id="m-owner" placeholder="GitHub user" value="' + esc(SYNC.owner || 'JENNF000') + '" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:7px"><input type="text" id="m-repo" placeholder="repo" value="' + esc(SYNC.repo || '1031cf-content-map') + '" style="flex:1;padding:7px 10px;border:1px solid var(--line);border-radius:7px"></div>' +
+    '<input type="text" id="m-token" placeholder="github_pat_…" value="' + esc(SYNC.token || '') + '" style="width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:7px">' +
+    '<div class="foot">' + (SYNC.token ? '<button class="btn danger" id="m-disc">Disconnect</button>' : '') + '<button class="btn sub" id="m-cancel">Cancel</button><button class="btn" id="m-save">Save &amp; test</button></div>');
+  $('#m-cancel', m).addEventListener('click', closeModal);
+  const disc = $('#m-disc', m); disc && disc.addEventListener('click', async () => { SYNC.token = ''; await Store.set('sync', { token:'', owner:SYNC.owner, repo:SYNC.repo }); setSyncChip(); closeModal(); });
+  $('#m-save', m).addEventListener('click', async () => {
+    SYNC.owner = $('#m-owner', m).value.trim(); SYNC.repo = $('#m-repo', m).value.trim(); SYNC.token = $('#m-token', m).value.trim();
+    await Store.set('sync', { token:SYNC.token, owner:SYNC.owner, repo:SYNC.repo });
+    if (!SYNC.token) { setSyncChip(); return closeModal(); }
+    setSyncChip('testing…');
+    const r = await Sync.api('annotations.json?ref=main').catch(() => null);
+    if (r && (r.ok || r.status === 404)) { setSyncChip('on'); toast('Sync connected.'); Sync.push(); }
+    else setSyncChip(r && (r.status === 401 || r.status === 403) ? 'bad token' : 'error');
+    closeModal();
   });
-  const cols = [["label", "Page"], ["cat", "Cluster"], ["tier", "Tier"], ["status", "Status"],
-  ["type", "Type"], ["kw", "Keywords", 1], ["traffic", "Traffic", 1], ["pkw", "Top keyword"],
-  ["vol", "Vol", 1], ["pos", "Pos", 1], ["labels", "Labels"], ["notes", "Notes"]];
-  t.innerHTML = `<thead><tr>${cols.map(([k, l, n]) => `<th data-k="${k}" class="${n ? 'num' : ''}">${l}${sortK === k ? (sortD < 0 ? ' ↓' : ' ↑') : ''}</th>`).join("")}</tr></thead><tbody></tbody>`;
-  t.querySelectorAll("th").forEach(th => th.onclick = () => {
-    const k = th.dataset.k; if (sortK === k) sortD *= -1; else { sortK = k; sortD = (k === "pos") ? 1 : -1; } renderAll();
-  });
-  const tb = t.querySelector("tbody");
-  rows.forEach(p => {
-    const tr = el("tr");
-    tr.innerHTML = `<td><a href="${p.url}" target="_blank" rel="noopener">${esc(p.label)}</a>
-        <div class="mono" style="color:var(--muted);margin-top:2px">${esc(p.path)}</div></td>
-      <td>${esc(effCat(p))}${isMoved(p) ? ' <span class="movedot" title="moved by you">↔</span>' : ''}</td>
-      <td>${esc(TIERNAME[effTier(p)] || effTier(p))}</td>
-      <td>${statusPill(p.path) || '<span style="color:var(--muted)">—</span>'}</td>
-      <td>${esc(p.type)}</td>
-      <td class="num">${p.kw ? n0(p.kw) : '—'}</td><td class="num">${p.traffic ? n0(p.traffic) : '—'}</td>
-      <td>${esc(p.pkw || '—')}</td><td class="num">${p.vol ? n0(p.vol) : '—'}</td>
-      <td class="num">${p.pos ?? '—'}</td>
-      <td>${labelPills(p, 3) || ''}</td>
-      <td style="white-space:nowrap">${noteBtnHTML(p.path)}</td>`;
-    tb.append(tr);
-  });
 }
-
-/* ---------- coverage ---------- */
-function renderCov() {
-  const rows = DATA.cats.map(c => {
-    const ps = P.filter(p => effCat(p) === c);
-    return {
-      c, kw: ps.reduce((a, b) => a + b.kw, 0), n: ps.length,
-      t: ps.filter(p => effTier(p) === "transactional").length,
-      co: ps.filter(p => effTier(p) === "core").length,
-      f: ps.filter(p => effTier(p) === "fanout").length
-    };
-  }).sort((a, b) => b.kw - a.kw);
-  const max = Math.max(...rows.map(r => r.kw), 1);
-  const ch = $("#chart"); ch.innerHTML = "";
-  ch.append(el("div", "hbar head", `<span class="nm">Cluster</span><span></span><span class="v">Keywords</span><span class="v2">Pages</span>`));
-  rows.forEach(r => {
-    const d = el("div", "hbar");
-    d.innerHTML = `<span class="nm">${esc(r.c)}</span>
-      <span class="track"><span class="fill" style="width:${Math.max(1, 100 * r.kw / max)}%"></span></span>
-      <span class="v">${n0(r.kw)}</span><span class="v2">${r.n}</span>`;
-    bindTip(d, `<b>${esc(r.c)}</b><br>${n0(r.kw)} ranking keywords across ${r.n} pages<br>
-      ${r.t} transactional · ${r.co} pillar · ${r.f} fan-out`);
-    ch.append(d);
-  });
-
-  const st = $("#struct"); st.innerHTML = "";
-  const tb = el("table");
-  tb.innerHTML = `<thead><tr><th>Cluster</th><th class="num">Transactional</th><th class="num">Pillar</th>
-    <th class="num">Fan-out</th><th>Structure</th></tr></thead><tbody>${rows.map(r => {
-    let v, col;
-    if (!r.co && r.f > 3) { v = "No pillar page — fan-out has nothing to point at"; col = "var(--critical)"; }
-    else if (!r.t && r.co) { v = "No transactional page in this cluster"; col = "var(--serious)"; }
-    else if (!r.co) { v = "No pillar page"; col = "var(--warning)"; }
-    else v = "Complete", col = "var(--good-text)";
-    return `<tr><td>${esc(r.c)}</td><td class="num">${r.t || '—'}</td><td class="num">${r.co || '—'}</td>
-        <td class="num">${r.f || '—'}</td><td style="color:${col};font-weight:600">${v}</td></tr>`;
-  }).join("")}</tbody>`;
-  st.append(tb);
-}
-
-function renderAllViews() {
-  renderHeader(); renderFilters();
-  renderMatrix(); renderGroups(); renderWork(); renderRedir(); renderSlugs(); renderAll(); renderCov();
-  renderNotes();
-}
-
-
-/* =====================================================================
-   Part 4: keeping redirect status current without a SEMrush pull.
-
-   ⚠ WHY THERE IS NO AUTOMATIC SWEEP FROM GITHUB PAGES
-
-   Detecting whether a URL redirects means reading the response type, and the
-   browser will not allow that across origins. Both approaches were tried against
-   a real server that answers real 301s:
-
-     fetch(url, { mode:"no-cors", redirect:"manual" })
-         → TypeError before any request leaves the browser. no-cors REQUIRES
-           redirect:"follow". An earlier build did exactly this and reported all
-           332 URLs as unreachable.
-
-     fetch(url, { redirect:"manual" })          // cors mode
-         → a cross-origin 3xx with no Access-Control-Allow-Origin is stopped by
-           the CORS check. It does NOT surface as "opaqueredirect".
-
-   The `opaqueredirect` method in the project notes worked because that sweep ran
-   **same-origin, in a tab on 1031crowdfunding.com itself**. From
-   jennf000.github.io it cannot work, and no combination of fetch options fixes
-   it. Don't try again without re-reading this.
-
-   So there are three honest routes instead:
-
-     1. If the app is ever served from the site's own origin, the sweep becomes
-        possible and is offered automatically — `canSweep()` decides.
-     2. Paste the URLs you just redirected. You already know them; this applies
-        them in bulk in seconds, needs no crawl and no API units.
-     3. Flip a single page by hand from its panel.
-
-   All three write to the same `ANN.live` override, so they flow into the live
-   page count, the cluster columns, the tier bands and the CSV identically — and
-   survive every data rebuild.
-   ===================================================================== */
-
-const SWEEP = { running: false, abort: false, done: 0, total: 0, results: null };
-const CONCURRENCY = 8;
-
-/* The sweep is only possible when app and site share an origin. Offering it
-   anywhere else would be a lie. */
-function siteOrigin() {
-  const p = P && P.length ? P.find(x => x.url) : null;
-  try { return p ? new URL(p.url).origin : null; } catch (e) { return null; }
-}
-const canSweep = () => !!siteOrigin() && siteOrigin() === location.origin;
-
-async function probe(url) {
-  try {
-    const r = await fetch(url, { redirect: "manual", cache: "no-store", credentials: "omit" });
-    if (r.type === "opaqueredirect") return "redirect";
-    if (r.status >= 300 && r.status < 400) return "redirect";
-    if (r.status) return "live";
-  } catch (e) { /* fall through to the reachability probe */ }
-  try {
-    await fetch(url, { mode: "no-cors", redirect: "follow", cache: "no-store", credentials: "omit" });
-    return "live";                     // answered; could be 200, could be 404
-  } catch (e) { return "error"; }      // never treated as live
-}
-
-async function sweepAll(paths, onProgress) {
-  SWEEP.running = true; SWEEP.abort = false;
-  SWEEP.done = 0; SWEEP.total = paths.length;
-  const out = {};
-  let i = 0;
-  const worker = async () => {
-    while (i < paths.length && !SWEEP.abort) {
-      const path = paths[i++];
-      const p = byPath[path];
-      out[path] = await probe(p && p.url ? p.url : path);
-      SWEEP.done++;
-      if (onProgress) onProgress(SWEEP.done, SWEEP.total);
-    }
-  };
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, paths.length) }, worker));
-  SWEEP.running = false;
+function parseUrls(text) {
+  const out = { matched: [], unmatched: [] };
+  const norm = new Map();
+  for (const p of DATA.pages) norm.set(p.path.replace(/\/$/, ''), p.path);
+  for (let raw of text.split(/[\n,]+/)) {
+    raw = raw.trim(); if (!raw) continue;
+    let path = raw;
+    try { if (/^https?:\/\//i.test(raw)) path = new URL(raw).pathname; } catch (e) {}
+    if (!path.startsWith('/')) path = '/' + path;
+    const hit = norm.get(path.replace(/\/$/, ''));
+    if (hit) out.matched.push(hit); else out.unmatched.push(raw);
+  }
+  out.matched = [...new Set(out.matched)];
   return out;
 }
-
-/* --------------------------------------------------------- write path ---- */
-/* One function behind all three routes. */
-function setLiveStatus(paths, state) {
-  const at = nowISO();
-  ANN.live = ANN.live || {};
-  paths.forEach(p => { ANN.live[p] = { s: state, at }; });
-  ANN.updated = at;
-  saveLocal(); Sync.schedule();
-  refreshViews(); buildAnnFilters();
-}
-
-function clearLiveStatus(path) {
-  if (ANN.live) delete ANN.live[path];
-  ANN.updated = nowISO();
-  saveLocal(); Sync.schedule();
-  refreshViews();
-}
-
-function lastCheckedAt() {
-  const v = Object.values(ANN.live || {});
-  if (!v.length) return null;
-  return v.reduce((m, x) => (x.at > m ? x.at : m), "");
-}
-
-/* ---------------------------------------------------------------- UI ----- */
-function openCheck() {
-  $("#checkmodal").classList.add("on");
-  SWEEP.results = null;
-  $("#chkresult").innerHTML = "";
-  $("#chkprog").style.display = "none";
-  $("#chkapply").style.display = "none";
-  $("#chkstop").style.display = "none";
-  $("#chkstart").style.display = canSweep() ? "" : "none";
-  $("#chksweep").style.display = canSweep() ? "" : "none";
-  $("#chkurls").value = "";
-  renderCheckSummary();
-  setTimeout(() => $("#chkurls").focus(), 60);
-}
-const closeCheck = () => { SWEEP.abort = true; $("#checkmodal").classList.remove("on"); };
-
-function renderCheckSummary() {
-  const n = Object.keys(ANN.live || {}).length;
-  const changed = P.filter(p => statusChanged(p)).length;
-  $("#chksummary").innerHTML = n
-    ? `You've recorded a status for ${n0(n)} URL${n === 1 ? "" : "s"}${changed
-      ? `, ${changed} of which differ from the published build` : ""} — last updated ${esc((lastCheckedAt() || "").slice(0, 10))}.`
-    : `Nothing recorded yet, so the app is using the redirect map from the last data build.`;
-}
-
-/* Accepts full URLs or paths, one per line or comma separated, trailing slash
-   optional — whatever your redirect plugin happens to export. */
-function parseUrls(text) {
-  const wanted = [], missing = [];
-  text.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).forEach(raw => {
-    let p = raw;
-    try { if (/^https?:\/\//i.test(raw)) p = new URL(raw).pathname; } catch (e) {}
-    if (!p.startsWith("/")) p = "/" + p;
-    const hit = [p, p.endsWith("/") ? p.slice(0, -1) : p + "/"].find(c => byPath[c]);
-    if (hit) { if (!wanted.includes(hit)) wanted.push(hit); }
-    else missing.push(raw);
+function checkRedirectsModal() {
+  const m = modal('<h2>Check redirects</h2>' +
+    '<p style="font-size:13px">Just shipped 301s? Paste the old URLs (full URLs or paths, one per line or comma-separated). They will be moved to the Redirect band and stamped as checked today. A browser on this domain cannot verify cross-origin redirects itself — the weekly crawl confirms them properly.</p>' +
+    '<textarea id="m-urls" placeholder="/old-slug/\nhttps://www.1031crowdfunding.com/another-old-page/"></textarea>' +
+    '<div id="m-diff"></div>' +
+    '<div class="foot"><button class="btn sub" id="m-cancel">Cancel</button><button class="btn" id="m-prev">Preview</button><button class="btn hidden" id="m-apply">Apply</button></div>');
+  $('#m-cancel', m).addEventListener('click', closeModal);
+  let parsed = null;
+  $('#m-prev', m).addEventListener('click', () => {
+    parsed = parseUrls($('#m-urls', m).value);
+    const already = parsed.matched.filter(p => effTier(PAGE[p]) === 'redirect');
+    const toMark = parsed.matched.filter(p => effTier(PAGE[p]) !== 'redirect');
+    $('#m-diff', m).innerHTML = '<div class="diff">' +
+      (toMark.length ? '<b>' + toMark.length + ' will be marked as redirecting:</b><br>' + toMark.map(esc).join('<br>') + '<br>' : '<b>Nothing new to mark.</b><br>') +
+      (already.length ? '<span style="color:#64748b">' + already.length + ' already shown as redirects (no change).</span><br>' : '') +
+      (parsed.unmatched.length ? '<span style="color:#b91c1c"><b>Not in the inventory (ignored):</b><br>' + parsed.unmatched.map(esc).join('<br>') + '</span>' : '') + '</div>';
+    $('#m-apply', m).classList.toggle('hidden', !toMark.length);
   });
-  return { wanted, missing };
+  $('#m-apply', m).addEventListener('click', () => {
+    const at = nowISO();
+    let n = 0;
+    for (const p of parsed.matched) if (effTier(PAGE[p]) !== 'redirect') { ANN.live[p] = { s:'redirect', at }; n++; }
+    annChanged(); closeModal(); toast(n + ' pages moved to Redirect.');
+  });
 }
-
-function previewPaste() {
-  const state = document.querySelector('input[name="chkstate"]:checked').value;
-  const { wanted, missing } = parseUrls($("#chkurls").value);
-  const w = $("#chkresult");
-  if (!wanted.length && !missing.length) { w.innerHTML = ""; $("#chkapply").style.display = "none"; return; }
-
-  const changing = wanted.filter(p =>
-    (effTier(byPath[p]) === "redirect" ? "redirect" : "live") !== state);
-
-  let html = "";
-  if (changing.length) {
-    html += `<h4>${changing.length} will change to ${state === "redirect" ? "redirecting" : "serving content"}</h4>
-      <ul class="chklist">${changing.map(u =>
-      `<li class="${state === "redirect" ? "gone" : "back"}">${esc(u)}<span class="n">${byPath[u].kw ? n0(byPath[u].kw) + " kw" : "0 kw"}</span></li>`).join("")}</ul>`;
-  }
-  const already = wanted.length - changing.length;
-  if (already) html += `<div class="chknote">${already} already recorded that way — no change.</div>`;
-  if (missing.length) {
-    html += `<div class="chknote warn"><b>${missing.length} not in the inventory</b>, so ${missing.length === 1 ? "it was" : "they were"} skipped.
-      Either a typo, or the page is newer than the last data build:<br>${missing.slice(0, 12).map(esc).join("<br>")}</div>`;
-  }
-  w.innerHTML = html;
-  $("#chkapply").style.display = changing.length ? "" : "none";
-  $("#chkapply").textContent = `Apply ${changing.length} change${changing.length === 1 ? "" : "s"}`;
-  $("#chkapply").onclick = () => {
-    setLiveStatus(changing, state);
-    closeCheck();
-    toast(`${changing.length} URL${changing.length === 1 ? "" : "s"} marked as ${state === "redirect" ? "redirecting" : "serving content"}`);
+function libraryModal() {
+  const swatches = sel => Object.entries(COLORS).map(([k, v]) => '<div class="swatch" data-c="' + k + '" style="background:' + v + ';outline:' + (sel === k ? '2px solid #1c2523' : 'none') + '"></div>').join('');
+  const m = modal('<h2>Statuses &amp; labels</h2>' +
+    '<h3 style="font-size:13px;margin:10px 0 4px">Statuses</h3><div id="m-sts"></div>' +
+    '<div class="addc" style="margin-top:6px"><input type="text" id="m-news" placeholder="New status…"><button class="btn sub" id="m-adds">Add status</button></div>' +
+    '<h3 style="font-size:13px;margin:16px 0 4px">Labels</h3><div id="m-lbs"></div>' +
+    '<div class="addc" style="margin-top:6px"><input type="text" id="m-newl" placeholder="New label…"><button class="btn sub" id="m-addl">Add label</button></div>' +
+    '<div class="foot"><button class="btn sub" id="m-restore">Restore removed</button><button class="btn" id="m-done">Done</button></div>');
+  const usage = id => DATA.pages.filter(p => { const e = annOf(p.path); return e && e.status === id; }).length;
+  const usageL = id => DATA.pages.filter(p => effLabels(p).includes(id)).length;
+  const draw = () => {
+    const sts = visibleStatuses(false);
+    $('#m-sts', m).innerHTML = sts.map((s, i) =>
+      '<div class="libitem" data-id="' + s.id + '"><div class="swatch" style="background:' + COLORS[s.color] + '" data-pick="s"></div>' +
+      '<input type="text" value="' + esc(s.name) + '" data-rn="s"><span class="use">' + usage(s.id) + ' pages</span>' +
+      '<button data-mv="-1" ' + (i === 0 ? 'disabled' : '') + '>↑</button><button data-mv="1" ' + (i === sts.length - 1 ? 'disabled' : '') + '>↓</button><button data-rm="s" title="remove">✕</button></div>').join('');
+    $('#m-lbs', m).innerHTML = ANN.labels.filter(l => !isHiddenL(l.id)).map(l =>
+      '<div class="libitem" data-id="' + l.id + '"><div class="swatch" style="background:' + COLORS[l.color] + '" data-pick="l"></div>' +
+      '<input type="text" value="' + esc(l.name) + '" data-rn="l"><span class="use">' + usageL(l.id) + ' pages' + (l.derived ? ' · auto' : '') + '</span><button data-rm="l" title="remove">✕</button></div>').join('');
+    wireLib();
   };
-}
-
-/* ---------- the automatic sweep, only where it can actually work ---------- */
-async function runCheck() {
-  if (!canSweep()) return;
-  const paths = P.map(p => p.path);
-  $("#chkstart").style.display = "none";
-  $("#chkstop").style.display = "";
-  $("#chkprog").style.display = "";
-  const bar = $("#chkbar"), lab = $("#chklab");
-  bar.style.width = "0%";
-  lab.textContent = `Checking 0 of ${paths.length}…`;
-
-  const res = await sweepAll(paths, (d, t) => {
-    bar.style.width = (100 * d / t).toFixed(1) + "%";
-    lab.textContent = `Checking ${d} of ${t}…`;
-  });
-  $("#chkstop").style.display = "none";
-  SWEEP.results = res;
-
-  const errs = Object.keys(res).filter(k => res[k] === "error");
-  const changed = Object.keys(res).filter(k => {
-    if (res[k] === "error" || !byPath[k]) return false;
-    return res[k] !== (effTier(byPath[k]) === "redirect" ? "redirect" : "live");
-  });
-  let html = changed.length
-    ? `<h4>${changed.length} changed</h4><ul class="chklist">${changed.slice(0, 60).map(u =>
-      `<li class="${res[u] === "redirect" ? "gone" : "back"}">${esc(u)}<span class="n">${res[u] === "redirect" ? "now redirects" : "serving again"}</span></li>`).join("")}</ul>`
-    : `<div class="chknote ok">No changes — everything matches what the app shows.</div>`;
-  if (errs.length) html += `<div class="chknote warn">${errs.length} couldn't be reached; left untouched.</div>`;
-  $("#chkresult").innerHTML = html;
-
-  if (changed.length) {
-    $("#chkapply").style.display = "";
-    $("#chkapply").textContent = `Apply ${changed.length} change${changed.length === 1 ? "" : "s"}`;
-    $("#chkapply").onclick = () => {
-      const at = nowISO();
-      ANN.live = ANN.live || {};
-      Object.keys(res).forEach(p => { if (res[p] !== "error") ANN.live[p] = { s: res[p], at }; });
-      ANN.updated = at; saveLocal(); Sync.schedule();
-      closeCheck(); refreshViews(); buildAnnFilters();
-      toast(`Applied ${changed.length} status change${changed.length === 1 ? "" : "s"}`);
-    };
-  }
-}
-
-
-/* =====================================================================
-   Part 3: annotation UI, label manager, notes tab, sync modal, PWA shell.
-   ===================================================================== */
-
-/* ---------------------------------------------------------- toasts ------ */
-function toast(msg, bad, action) {
-  const t = el("div", "toast" + (bad ? " bad" : ""));
-  t.append(el("span", null, esc(msg)));
-  if (action) {
-    const b = el("button", "tact", esc(action.label));
-    b.type = "button";
-    b.onclick = () => { action.run(); t.remove(); };
-    t.append(b);
-    t.style.pointerEvents = "auto";
-  }
-  $("#toasts").append(t);
-  setTimeout(() => { t.style.transition = "opacity .25s"; t.style.opacity = "0"; setTimeout(() => t.remove(), 260); },
-    bad ? 5200 : (action ? 5200 : 2600));
-}
-
-/* ---------------------------------------------------------- drawer ------ */
-let openPath = null;
-
-function openDrawer(path) {
-  /* A page can vanish from the inventory (removed, renamed, 301'd) while your
-     notes on it survive. Open the drawer anyway with a placeholder. */
-  const p = byPath[path] || {
-    label: path, path, url: "https://www.1031crowdfunding.com" + path,
-    tier: "fanout", cat: DATA.cats[0], type: "Not in the current inventory", flags: [],
-    kw: 0, traffic: 0, pkw: null, vol: 0, pos: null,
-    trans: 0, comm: 0, info: 0, groups: [], missing: true,
+  const pickColor = (kind, id) => {
+    const cur = kind === 's' ? ANN.statuses.find(x => x.id === id) : ANN.labels.find(x => x.id === id);
+    const pm = modal('<h2>Color</h2><div style="display:flex;gap:8px;flex-wrap:wrap">' + swatches(cur.color) + '</div>');
+    $$('.swatch', pm).forEach(sw => sw.addEventListener('click', () => { cur.color = sw.dataset.c; cur.u = nowISO(); annChanged(); closeModal(); libraryModal(); }));
   };
-  openPath = path;
-  $("#dtitle").textContent = p.label;
-  const a = $("#dpath"); a.textContent = p.path; a.href = p.url;
-  $("#dmeta").innerHTML =
-    (p.missing ? `<span class="apill" data-c="red">No longer in the inventory</span>` : "") +
-    `<span class="apill" data-c="slate">${esc(effCat(p))}</span>
-     <span class="apill" data-c="blue">${esc(TIERNAME[effTier(p)] || effTier(p))}</span>
-     ${isMoved(p) ? '<span class="apill" data-c="purple">↔ moved by you</span>' : ''}`;
-
-  $("#dmetrics").innerHTML = `
-    <div><div class="ml">Keywords</div><div class="mv">${p.kw ? n0(p.kw) : "—"}</div>
-      <div class="mn">${p.traffic ? n0(p.traffic) + " est. visits/mo" : "no estimated traffic"}</div></div>
-    <div><div class="ml">Top keyword</div><div class="mv" style="font-size:13px;line-height:1.35">${esc(p.pkw || "—")}</div>
-      <div class="mn">${p.vol ? n0(p.vol) + "/mo · position " + (p.pos ?? "—") : "not ranking"}</div></div>
-    <div><div class="ml">Intent split</div><div class="mv" style="font-size:13px">${p.trans}/${p.comm}/${p.info}</div>
-      <div class="mn">transactional / commercial / informational</div></div>
-    <div><div class="ml">Page type</div><div class="mv" style="font-size:13px">${esc(p.type)}</div>
-      <div class="mn">${p.groups && p.groups.length ? "competes on " + p.groups.length + " term" + (p.groups.length > 1 ? "s" : "") : "no keyword overlap flagged"}</div></div>`;
-
-  renderPlacement();
-  renderLive();
-  renderStatusPicker();
-  renderLabelPicker();
-  const pa = annOf(path);
-  $("#dtarget").value = pa ? (pa.target || "") : "";
-  renderThread();
-  $("#dcomment").value = "";
-  $("#dsaved").textContent = "";
-  $("#drawer").classList.add("on");
-  $("#scrim").classList.add("on");
-}
-
-function closeDrawer() {
-  $("#drawer").classList.remove("on");
-  $("#scrim").classList.remove("on");
-  openPath = null;
-}
-
-/* ---------- placement (cluster + tier), the tap-friendly twin of drag ---- */
-function renderPlacement() {
-  const p = byPath[openPath];
-  const w = $("#dplacement");
-  if (!p) { w.innerHTML = '<span class="emptyc">Not in the current inventory.</span>'; return; }
-  const moved = isMoved(p);
-  w.innerHTML = `
-    <div class="prow">
-      <label for="dcluster">Cluster</label>
-      <select id="dcluster">${DATA.cats.map(c =>
-        `<option value="${esc(c)}"${c === effCat(p) ? " selected" : ""}>${esc(c)}</option>`).join("")}</select>
-    </div>
-    <div class="prow">
-      <label for="dtier">Tier</label>
-      <select id="dtier"${p.tier === "redirect" ? " disabled" : ""}>${MOVABLE_TIERS.map(t =>
-        `<option value="${esc(t)}"${t === effTier(p) ? " selected" : ""}>${esc(TIERNAME[t])}</option>`).join("")}
-        ${["utility", "redirect"].includes(p.tier) ? `<option value="${esc(p.tier)}" selected>${esc(TIERNAME[p.tier])}</option>` : ""}
-      </select>
-    </div>
-    ${moved ? `<div class="phint">Build default was <b>${esc(p.cat)} · ${esc(TIERNAME[p.tier] || p.tier)}</b>.
-       <button class="linkbtn" id="dreset" type="button">Reset to build default</button></div>`
-      : `<div class="phint">Matches the build's own classification. Drag the page on the topic map, or change it here.</div>`}`;
-
-  $("#dcluster").onchange = e => {
-    const a = pageAnn(openPath, true);
-    a.cluster = e.target.value === p.cat ? "" : e.target.value;
-    touch(openPath, "cluster"); renderPlacement(); refreshViews(); flashSaved("Moved");
-    $("#dmeta").querySelector(".apill").outerHTML = `<span class="apill" data-c="slate">${esc(effCat(p))}</span>`;
-  };
-  const dt = $("#dtier");
-  if (dt) dt.onchange = e => {
-    const a = pageAnn(openPath, true);
-    a.tier = e.target.value === p.tier ? "" : e.target.value;
-    touch(openPath, "tier"); renderPlacement(); refreshViews(); flashSaved("Moved");
-  };
-  const dr = $("#dreset");
-  if (dr) dr.onclick = () => { resetMove(openPath); renderPlacement(); openDrawer(openPath); refreshViews(); flashSaved("Reset"); };
-}
-
-/* ---------- live status: does this URL still serve a page? ---------- */
-function renderLive() {
-  const p = byPath[openPath];
-  const w = $("#dlive");
-  if (!p) { w.innerHTML = '<span class="emptyc">Not in the current inventory.</span>'; return; }
-  const cur = effTier(p) === "redirect" ? "redirect" : "live";
-  const ov = (ANN.live || {})[openPath];
-  const built = p.tier === "redirect" ? "a redirect" : "a live page";
-  w.innerHTML = `
-    <div class="statgrid" id="dlivebtns">
-      <button type="button" data-v="live" aria-pressed="${cur === "live"}">Serves a page</button>
-      <button type="button" data-v="redirect" aria-pressed="${cur === "redirect"}">Redirects</button>
-    </div>
-    <div class="phint">${ov
-      ? `You set this on ${esc((ov.at || "").slice(0, 10))}. The last data build had it as ${built}.
-         <button class="linkbtn" id="dliveclear" type="button">Use the build's value</button>`
-      : `From the last data build, which had it as ${built}.`}</div>`;
-  w.querySelectorAll("#dlivebtns button").forEach(b => b.onclick = () => {
-    setLiveStatus([openPath], b.dataset.v);
-    renderLive(); renderPlacement();
-    flashSaved(b.dataset.v === "redirect" ? "Marked as redirecting" : "Marked as serving");
-  });
-  const c = $("#dliveclear");
-  if (c) c.onclick = () => { clearLiveStatus(openPath); renderLive(); renderPlacement(); flashSaved("Reset"); };
-}
-
-/* ---------- status ---------- */
-function renderStatusPicker() {
-  const cur = (annOf(openPath) || {}).status || "";
-  const w = $("#dstatus"); w.innerHTML = "";
-  visibleStatuses(true).forEach(s => {
-    const b = el("button", null, esc(s.name));
-    b.type = "button";
-    b.dataset.c = s.color;
-    b.setAttribute("aria-pressed", String(s.id === "none" ? !cur : cur === s.id));
-    b.onclick = () => {
-      const a = pageAnn(openPath, true);
-      a.status = (s.id === "none" || a.status === s.id) ? "" : s.id;
-      touch(openPath, "status"); renderStatusPicker(); refreshViews(); flashSaved();
-    };
-    w.append(b);
-  });
-}
-
-/* ---------- labels ---------- */
-function renderLabelPicker() {
-  const p = byPath[openPath] || { flags: [] };
-  const on = effLabels(p);
-  const w = $("#dlabels"); w.innerHTML = "";
-  const visible = ANN.labels.filter(l => !isHidden(l.id));
-  if (!visible.length) { w.innerHTML = '<span class="emptyc">No labels in the library. Add one below.</span>'; return; }
-  visible.forEach(l => {
-    const auto = isDerivedOn(p, l.id);
-    const b = el("button", null, esc(l.name) + (auto ? '<span class="auto" title="the build applied this automatically">auto</span>' : ''));
-    b.type = "button";
-    b.dataset.c = l.color || "slate";
-    b.setAttribute("aria-pressed", String(on.includes(l.id)));
-    b.onclick = () => { toggleLabel(l.id); renderLabelPicker(); refreshViews(); flashSaved(); };
-    w.append(b);
-  });
-}
-
-/* Turning a build-computed label off records it in offFlags rather than trying
-   to edit data.json, so the next refresh can't quietly turn it back on. */
-function toggleLabel(id) {
-  const p = byPath[openPath] || { flags: [] };
-  const a = pageAnn(openPath, true);
-  if (isDerivedOn(p, id)) {
-    const off = a.offFlags || (a.offFlags = []);
-    const i = off.indexOf(id);
-    if (i >= 0) off.splice(i, 1); else off.push(id);
-    touch(openPath, "offFlags");
-    const j = (a.labels || []).indexOf(id);
-    if (j >= 0) { a.labels.splice(j, 1); touch(openPath, "labels"); }
-  } else {
-    const ls = a.labels || (a.labels = []);
-    const i = ls.indexOf(id);
-    if (i >= 0) ls.splice(i, 1); else ls.push(id);
-    touch(openPath, "labels");
-  }
-}
-
-const LABEL_COLORS = ["blue", "amber", "green", "purple", "teal", "pink", "red", "slate"];
-
-function addLabel() {
-  const inp = $("#dnewlabel");
-  const name = inp.value.trim();
-  if (!name) return;
-  const id = slugId(name);
-  if (isHidden(id)) ANN.hidden = ANN.hidden.filter(h => h !== id), ANN.hiddenAt = nowISO();
-  if (!ANN.labels.some(l => l.id === id)) {
-    ANN.labels.push({ id, name, color: LABEL_COLORS[ANN.labels.length % LABEL_COLORS.length], u: nowISO() });
-  }
-  touchLibrary();
-  if (openPath) {
-    const a = pageAnn(openPath, true);
-    if (!(a.labels || []).includes(id)) { a.labels.push(id); touch(openPath, "labels"); }
-  }
-  inp.value = "";
-  renderLabelPicker(); refreshViews(); buildAnnFilters(); flashSaved();
-}
-
-function slugId(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || ("l" + uid().slice(0, 6));
-}
-
-/* ---------- status manager ---------- */
-function statusUsage(id) {
-  return Object.values(ANN.pages).filter(a => a.status === id).length;
-}
-
-function renderStatusManager() {
-  const w = $("#statlist"); w.innerHTML = "";
-  const list = visibleStatuses(false);
-  if (!list.length) w.innerHTML = '<div class="emptyc" style="padding:8px 0">Every status has been removed.</div>';
-  list.forEach((st, i) => {
-    const n = statusUsage(st.id);
-    const row = el("div", "labrow");
-    row.dataset.id = st.id;
-    row.innerHTML = `
-      <div class="ord">
-        <button data-up type="button" title="Move up"${i === 0 ? " disabled" : ""}>▲</button>
-        <button data-down type="button" title="Move down"${i === list.length - 1 ? " disabled" : ""}>▼</button>
-      </div>
-      <button class="swatch" data-c="${esc(st.color || 'slate')}" type="button" title="Change colour"></button>
-      <input type="text" value="${esc(st.name)}" aria-label="Status name">
-      <span class="use">${n} page${n === 1 ? "" : "s"}</span>
-      <button class="del" type="button" title="Remove this status everywhere">Remove</button>`;
-
-    row.querySelector("[data-up]").onclick = () => reorderStatus(st.id, -1);
-    row.querySelector("[data-down]").onclick = () => reorderStatus(st.id, 1);
-    row.querySelector(".swatch").onclick = () => {
-      const k = LABEL_COLORS.indexOf(st.color || "slate");
-      st.color = LABEL_COLORS[(k + 1) % LABEL_COLORS.length];
-      st.u = nowISO();
-      touchLibrary(); renderStatusManager(); renderStatusPicker(); refreshViews();
-    };
-    const inp = row.querySelector("input");
-    let rt;
-    inp.oninput = () => {
-      clearTimeout(rt);
-      rt = setTimeout(() => {
-        const v = inp.value.trim();
-        if (!v) return;
-        st.name = v; st.u = nowISO();
-        touchLibrary(); renderStatusPicker(); refreshViews(); buildAnnFilters();
-      }, 400);
-    };
-    row.querySelector(".del").onclick = () => removeStatus(st);
-    w.append(row);
-  });
-
-  const hid = (ANN.hiddenS || []).length;
-  $("#stathidden").innerHTML = hid
-    ? `${hid} status${hid > 1 ? "es" : ""} removed. <button class="linkbtn" id="statrestore" type="button">Restore default statuses</button>`
-    : `<button class="linkbtn" id="statrestore" type="button">Restore default statuses</button>`;
-  $("#statrestore").onclick = restoreStatuses;
-}
-
-/* Order is stored, not implied by array position, so it survives a merge. */
-function reorderStatus(id, dir) {
-  const list = visibleStatuses(false);
-  const i = list.findIndex(x => x.id === id);
-  const j = i + dir;
-  if (i < 0 || j < 0 || j >= list.length) return;
-  const tmp = list[i]; list[i] = list[j]; list[j] = tmp;
-  const t = nowISO();
-  list.forEach((x, k) => { x.o = k; x.u = t; });
-  touchLibrary(); renderStatusManager(); renderStatusPicker(); refreshViews();
-}
-
-function removeStatus(st) {
-  const n = statusUsage(st.id);
-  const msg = n
-    ? `Remove the status “${st.name}”? ${n} page${n > 1 ? "s" : ""} currently ${n > 1 ? "use" : "uses"} it and will be left with no status.`
-    : `Remove the status “${st.name}”?`;
-  if (!confirm(msg)) return;
-
-  ANN.statuses = ANN.statuses.filter(x => x.id !== st.id);
-  ANN.hiddenS = [...new Set([...(ANN.hiddenS || []), st.id])];
-  ANN.hiddenSAt = nowISO();
-  Object.keys(ANN.pages).forEach(path => {
-    if (ANN.pages[path].status === st.id) {
-      ANN.pages[path].status = "";
-      touch(path, "status");
-    }
-  });
-  touchLibrary();
-  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
-  toast(`Removed the status “${st.name}”`);
-}
-
-function addStatus(name) {
-  const v = (name || "").trim();
-  if (!v) return;
-  const id = slugId(v);
-  ANN.hiddenS = (ANN.hiddenS || []).filter(x => x !== id);
-  ANN.hiddenSAt = nowISO();
-  if (!ANN.statuses.some(x => x.id === id)) {
-    const max = Math.max(-1, ...ANN.statuses.filter(x => x.id !== "none").map(x => x.o ?? 0));
-    ANN.statuses.push({ id, name: v, color: LABEL_COLORS[ANN.statuses.length % LABEL_COLORS.length],
-      o: max + 1, u: nowISO() });
-  }
-  touchLibrary();
-  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
-}
-
-function restoreStatuses() {
-  ANN.hiddenS = []; ANN.hiddenSAt = nowISO();
-  DEFAULT_STATUSES.forEach(d => { if (!ANN.statuses.some(x => x.id === d.id)) ANN.statuses.push({ ...d }); });
-  touchLibrary();
-  renderStatusManager(); renderStatusPicker(); refreshViews(); buildAnnFilters();
-  toast("Default statuses restored");
-}
-
-/* ---------- label manager ---------- */
-function labelUsage(id) {
-  let n = 0;
-  P.forEach(p => { if (effLabels(p).includes(id)) n++; });
-  return n;
-}
-
-function openLabels() {
-  renderStatusManager();
-  renderLabelManager();
-  $("#labelmodal").classList.add("on");
-}
-const closeLabels = () => $("#labelmodal").classList.remove("on");
-
-function renderLabelManager() {
-  const w = $("#lablist"); w.innerHTML = "";
-  const visible = ANN.labels.filter(l => !isHidden(l.id));
-  if (!visible.length) w.innerHTML = '<div class="emptyc" style="padding:8px 0">Every label has been removed. Use “Restore defaults” below.</div>';
-  visible.forEach(l => {
-    const row = el("div", "labrow");
-    row.dataset.id = l.id;
-    row.innerHTML = `
-      <button class="swatch" data-c="${esc(l.color || 'slate')}" type="button" title="Change colour"></button>
-      <input type="text" value="${esc(l.name)}" aria-label="Label name">
-      <span class="use">${labelUsage(l.id)} page${labelUsage(l.id) === 1 ? "" : "s"}${l.derived ? " · auto" : ""}</span>
-      <button class="del" type="button" title="Remove this label everywhere">Remove</button>`;
-    const [sw, inp, , del] = row.children;
-    sw.onclick = () => {
-      const i = LABEL_COLORS.indexOf(l.color || "slate");
-      l.color = LABEL_COLORS[(i + 1) % LABEL_COLORS.length];
-      l.u = nowISO();
-      touchLibrary(); renderLabelManager(); refreshViews();
-    };
-    let rt;
-    inp.oninput = () => {
-      clearTimeout(rt);
-      rt = setTimeout(() => {
-        const v = inp.value.trim();
-        if (!v) return;
-        l.name = v; l.u = nowISO();
-        touchLibrary(); refreshViews(); buildAnnFilters();
-      }, 400);
-    };
-    del.onclick = () => removeLabel(l);
-    w.append(row);
-  });
-
-  const hid = (ANN.hidden || []).length;
-  $("#labhidden").innerHTML = hid
-    ? `${hid} label${hid > 1 ? "s" : ""} removed. <button class="linkbtn" id="labrestore" type="button">Restore defaults</button>`
-    : `<button class="linkbtn" id="labrestore" type="button">Restore default labels</button>`;
-  $("#labrestore").onclick = restoreLabels;
-}
-
-function removeLabel(l) {
-  const n = labelUsage(l.id);
-  const msg = n
-    ? `Remove “${l.name}” from the library and from ${n} page${n > 1 ? "s" : ""}?`
-    : `Remove “${l.name}” from the library?`;
-  if (!confirm(msg + (l.derived
-    ? "\n\nThis one is applied automatically by the build. Removing it stops it appearing anywhere; you can restore it later."
-    : ""))) return;
-
-  ANN.labels = ANN.labels.filter(x => x.id !== l.id);
-  ANN.hidden = [...new Set([...(ANN.hidden || []), l.id])];
-  ANN.hiddenAt = nowISO();
-  Object.keys(ANN.pages).forEach(path => {
-    const a = ANN.pages[path];
-    if ((a.labels || []).includes(l.id)) {
-      a.labels = a.labels.filter(x => x !== l.id);
-      touch(path, "labels");
-    }
-  });
-  touchLibrary();
-  renderLabelManager(); renderLabelPicker(); refreshViews(); buildAnnFilters();
-  toast(`Removed “${l.name}”`);
-}
-
-function restoreAll() { restoreStatuses(); restoreLabels(); }
-
-function restoreLabels() {
-  ANN.hidden = []; ANN.hiddenAt = nowISO();
-  ALL_DEFAULT_LABELS().forEach(d => { if (!ANN.labels.some(l => l.id === d.id)) ANN.labels.push(d); });
-  touchLibrary();
-  renderLabelManager(); renderLabelPicker(); refreshViews(); buildAnnFilters();
-  toast("Default labels restored");
-}
-
-/* ---------- comments ---------- */
-function renderThread() {
-  const a = annOf(openPath);
-  const list = (a && a.comments) || [];
-  $("#dccount").textContent = list.length ? "(" + list.length + ")" : "";
-  const ul = $("#dthread"); ul.innerHTML = "";
-  if (!list.length) { ul.innerHTML = '<li style="background:none;border:0;padding:0"><span class="emptyc">No comments yet.</span></li>'; return; }
-  list.forEach(c => {
-    const li = el("li");
-    const when = new Date(c.ts);
-    li.innerHTML = `<div class="cmeta"><b>${esc(c.author || "You")}</b>
-        <span>${isNaN(when) ? "" : when.toLocaleString([], { dateStyle: "medium", timeStyle: "short" })}
-        <button class="cdel" data-del="${esc(c.id)}" type="button">delete</button></span></div>
-      <div class="ctext">${esc(c.text)}</div>`;
-    ul.append(li);
-  });
-  ul.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
-    const a2 = pageAnn(openPath, true);
-    const id = b.dataset.del;
-    a2.comments = (a2.comments || []).filter(c => c.id !== id);
-    a2.delc = [...new Set([...(a2.delc || []), id])];
-    touch(openPath); renderThread(); refreshViews();
-  });
-}
-
-function postComment() {
-  const ta = $("#dcomment");
-  const text = ta.value.trim();
-  if (!text) return;
-  const a = pageAnn(openPath, true);
-  a.comments = a.comments || [];
-  a.comments.push({
-    id: uid(), ts: nowISO(),
-    author: (Sync.config() && Sync.config().author) || ANN.author || "You",
-    text,
-  });
-  ta.value = "";
-  touch(openPath); renderThread(); refreshViews(); flashSaved("Comment added");
-}
-
-let savedTimer;
-function flashSaved(m) {
-  const s = $("#dsaved");
-  if (!s) return;
-  s.textContent = m || "Saved";
-  clearTimeout(savedTimer);
-  savedTimer = setTimeout(() => { s.textContent = ""; }, 1800);
-}
-
-/* --------------------------------------------------------- notes tab ---- */
-function renderNotes() {
-  const paths = Object.keys(ANN.pages).filter(p => !annIsEmpty(ANN.pages[p]));
-  $("#c-notes").textContent = paths.length ? "(" + paths.length + ")" : "";
-
-  const nt = $("#notetiles"); nt.innerHTML = "";
-  const cCount = paths.reduce((n, p) => n + (ANN.pages[p].comments || []).length, 0);
-  const byStatus = {};
-  paths.forEach(p => { const s = ANN.pages[p].status; if (s) byStatus[s] = (byStatus[s] || 0) + 1; });
-  const topStatus = Object.entries(byStatus).sort((a, b) => b[1] - a[1])[0];
-  const kwCovered = paths.reduce((n, p) => n + ((byPath[p] || {}).kw || 0), 0);
-  [["Pages you've marked", n0(paths.length), `of ${n0(liveStats().total)} live pages`],
-  ["Comments", n0(cCount), "across all pages"],
-  ["Keywords under management", n0(kwCovered), `${liveStats().keywords ? Math.round(100 * kwCovered / liveStats().keywords) : 0}% of your ranking keywords`],
-  ["Most common status", topStatus ? (statusById(topStatus[0]) || {}).name || "—" : "—",
-    topStatus ? topStatus[1] + " page" + (topStatus[1] > 1 ? "s" : "") : "nothing marked yet", true],
-  ].forEach(([l, v, n, isText]) => {
-    const t = el("div", "tile");
-    t.append(el("div", "lab", esc(l)), el("div", "val" + (isText ? " txt" : ""), esc(v)), el("div", "note", esc(n)));
-    nt.append(t);
-  });
-
-  const ss = $("#nstatus"), sl = $("#nlabel");
-  const keepS = ss.value, keepL = sl.value;
-  ss.innerHTML = '<option value="">Any status</option>' +
-    visibleStatuses(false).map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");
-  sl.innerHTML = '<option value="">Any label</option>' +
-    ANN.labels.filter(l => !isHidden(l.id)).map(l => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join("");
-  ss.value = keepS; sl.value = keepL;
-
-  const q = ($("#nq").value || "").toLowerCase();
-  const fs = ss.value, fl = sl.value, sort = $("#nsort").value;
-  let rows = paths.filter(p => {
-    const a = ANN.pages[p];
-    const pg = byPath[p];
-    if (fs && a.status !== fs) return false;
-    if (fl && !(pg ? effLabels(pg) : (a.labels || [])).includes(fl)) return false;
-    if (q) {
-      const hay = [p, (pg || {}).label || "", a.target || "", ...(a.comments || []).map(c => c.text)].join(" ").toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    return true;
-  });
-  rows.sort((x, y) => {
-    if (sort === "path") return x.localeCompare(y);
-    if (sort === "kw") return ((byPath[y] || {}).kw || 0) - ((byPath[x] || {}).kw || 0);
-    if (sort === "traffic") return ((byPath[y] || {}).traffic || 0) - ((byPath[x] || {}).traffic || 0);
-    return String(ANN.pages[y].updated || "").localeCompare(String(ANN.pages[x].updated || ""));
-  });
-
-  const w = $("#notelist"); w.innerHTML = "";
-  if (!rows.length) {
-    w.innerHTML = `<div class="card" style="grid-column:1/-1"><h3>Nothing here yet</h3>
-      <p style="color:var(--ink-2);font-size:13px;line-height:1.65">Open any page from the
-      <b>Topic map</b> or <b>All pages</b> tab and click the <span class="notebtn" style="cursor:default">✎</span>
-      button to set a status, apply labels, or leave a comment. Everything you write is keyed to the URL, so the
-      weekly data refresh updates the metrics without touching your notes.</p></div>`;
-    return;
-  }
-  rows.forEach(path => {
-    const a = ANN.pages[path], pg = byPath[path];
-    const last = (a.comments || [])[(a.comments || []).length - 1];
-    const c = el("div", "notecard" + (pg ? "" : " gonecard"));
-    c.innerHTML = `<div class="nh">
-        <div><div class="nt">${esc((pg || {}).label || path)}</div><div class="np">${esc(path)}</div></div>
-        <div class="nkw">${pg && pg.kw ? n0(pg.kw) + " kw" : "0 kw"}${pg && pg.pos ? " · #" + pg.pos : ""}</div>
-      </div>
-      <div class="nb">${pg ? "" : '<span class="apill" data-c="red">not in inventory</span>'}
-        ${pg && isMoved(pg) ? '<span class="apill" data-c="purple">↔ moved</span>' : ''}
-        ${statusPill(path)}${pg ? labelPills(pg, 6) : ''}
-        ${(a.comments || []).length ? `<span class="apill" data-c="slate">${(a.comments || []).length} comment${(a.comments || []).length > 1 ? "s" : ""}</span>` : ""}</div>
-      ${a.target ? `<div class="nc"><b>Target:</b> ${esc(a.target)}</div>` : ""}
-      ${last ? `<div class="nc">${esc(last.text.length > 240 ? last.text.slice(0, 240) + "…" : last.text)}</div>` : ""}`;
-    c.onclick = () => openDrawer(path);
-    w.append(c);
-  });
-}
-
-/* ------------------------------------------------------ export / import - */
-function exportNotes() {
-  const blob = new Blob([JSON.stringify(ANN, null, 2)], { type: "application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "1031cf-content-map-notes-" + new Date().toISOString().slice(0, 10) + ".json";
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-}
-
-function importNotes(file) {
-  const r = new FileReader();
-  r.onload = () => {
-    try {
-      const inc = JSON.parse(r.result);
-      if (!inc || typeof inc !== "object" || !inc.pages) throw new Error("Not a notes file");
-      ANN = mergeAnn(ANN, inc);
-      saveLocal(); Sync.schedule(); refreshViews(); buildAnnFilters();
-      toast("Notes merged — nothing was overwritten");
-    } catch (e) { toast("Couldn't read that file: " + e.message, true); }
-  };
-  r.readAsText(file);
-}
-
-/* ------------------------------------------------------- sync modal ----- */
-function openSync() {
-  const c = Sync.config() || {};
-  $("#syowner").value = c.owner || "";
-  $("#syrepo").value = c.repo || "";
-  $("#sybranch").value = c.branch || "main";
-  $("#sypath").value = c.path || "annotations.json";
-  $("#sytoken").value = c.token || "";
-  $("#syauthor").value = c.author || ANN.author || "";
-  $("#systatus").textContent = ""; $("#systatus").className = "status";
-  $("#syncmodal").classList.add("on");
-  setTimeout(() => $("#syowner").focus(), 60);
-}
-const closeSync = () => $("#syncmodal").classList.remove("on");
-
-function readSyncForm() {
-  return {
-    owner: $("#syowner").value.trim(),
-    repo: $("#syrepo").value.trim(),
-    branch: $("#sybranch").value.trim() || "main",
-    path: ($("#sypath").value.trim() || "annotations.json").replace(/^\/+/, ""),
-    token: $("#sytoken").value.trim(),
-    author: $("#syauthor").value.trim(),
-  };
-}
-
-function syStatus(msg, cls) { const s = $("#systatus"); s.textContent = msg; s.className = "status " + (cls || ""); }
-
-/* --------------------------------------------------------- refresh ------ */
-async function loadData(force) {
-  const r = await fetch("data.json", { cache: force ? "reload" : "default" });
-  if (!r.ok) throw new Error("data.json returned " + r.status);
-  return r.json();
-}
-
-async function refreshData(manual) {
-  const btn = $("#refresh");
-  const old = btn.innerHTML;
-  btn.innerHTML = '<span class="spin"></span>Refreshing';
-  btn.disabled = true;
-  try {
-    if (!navigator.onLine) throw new Error("You're offline");
-    const prev = DATA && DATA.stats && DATA.stats.generated;
-    const d = await loadData(true);
-    bindData(d);
-    await STORE.set("data", d);
-    await Sync.pull(true);
-    renderAllViews();
-    buildAnnFilters();
-    if (manual) {
-      const age = dataAgeDays();
-      if (prev && prev === d.stats.generated) {
-        /* This button fetches the published file. It says nothing about whether
-           that file still matches the site — that's what Check redirects is for,
-           so point at it rather than implying everything is current. */
-        toast(age !== null && age > STALE_AFTER
-          ? `Nothing newer published — this build is ${age} days old. Shipped redirects since? Use Check redirects.`
-          : "Nothing newer published. Shipped redirects since? Use Check redirects.",
-          false, { label: "Check redirects", run: openCheck });
-      } else {
-        toast("Updated — data as of " + d.stats.generated);
-      }
-    }
-  } catch (e) {
-    if (manual) toast("Couldn't refresh: " + (e.message || e), true);
-  } finally { btn.innerHTML = old; btn.disabled = false; }
-}
-
-function refreshViews() {
-  if (!DATA) return;
-  renderHeader();
-  renderMatrix(); renderGroups(); renderWork(); renderAll(); renderCov(); renderNotes();
-}
-/* Called after any merge that may have brought in another device's edits. The
-   open drawer and the manager modal read from the library, so they have to be
-   redrawn too — otherwise a status renamed on the phone still shows its old name
-   in a panel that happens to be open on the laptop. */
-window.onAnnotationsChanged = () => {
-  refreshViews();
-  buildAnnFilters();
-  if (openPath && $("#drawer").classList.contains("on")) {
-    renderPlacement(); renderStatusPicker(); renderLabelPicker(); renderThread();
-  }
-  if ($("#labelmodal").classList.contains("on")) {
-    renderStatusManager(); renderLabelManager();
-  }
-};
-
-/* ------------------------------------------------------------ wiring ---- */
-function wire() {
-  /* delegated: any ✎ button anywhere opens the drawer */
-  document.addEventListener("click", e => {
-    const b = e.target.closest("[data-note]");
-    if (!b) return;
-    e.preventDefault(); e.stopPropagation();
-    openDrawer(b.dataset.note);
-  }, true);
-
-  $("#dclose").onclick = closeDrawer;
-  $("#scrim").onclick = closeDrawer;
-  addEventListener("keydown", e => {
-    if (e.key === "Escape") {
-      if ($("#checkmodal").classList.contains("on")) closeCheck();
-      else if ($("#labelmodal").classList.contains("on")) closeLabels();
-      else if ($("#syncmodal").classList.contains("on")) closeSync();
-      else if ($("#drawer").classList.contains("on")) closeDrawer();
-    }
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && $("#drawer").classList.contains("on")) postComment();
-  });
-
-  $("#dpost").onclick = postComment;
-  $("#daddlabel").onclick = addLabel;
-  $("#dnewlabel").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); addLabel(); } };
-  $("#dmanage").onclick = openLabels;
-  let tt;
-  $("#dtarget").oninput = () => {
-    const path = openPath; if (!path) return;
-    clearTimeout(tt);
-    tt = setTimeout(() => {
-      const a = pageAnn(path, true);
-      a.target = $("#dtarget").value;
-      touch(path, "target"); refreshViews(); flashSaved();
-    }, 500);
-  };
-  $("#dclear").onclick = () => {
-    if (!openPath) return;
-    const a = annOf(openPath);
-    if (!a) { closeDrawer(); return; }
-    if (!confirm("Remove the status, labels, target, placement and all comments for this page? This can't be undone.")) return;
-    const ids = (a.comments || []).map(c => c.id);
-    const t = nowISO();
-    ANN.pages[openPath] = {
-      status: "", labels: [], target: "", cluster: "", tier: "", offFlags: [], comments: [],
-      delc: [...(a.delc || []), ...ids],
-      f: { status: t, labels: t, target: t, cluster: t, tier: t, offFlags: t }, updated: t,
-    };
-    ANN.updated = t;
-    saveLocal(); Sync.schedule();
-    openDrawer(openPath);
-    refreshViews(); toast("Notes cleared for this page");
-  };
-
-  /* label manager */
-  $("#labclose").onclick = closeLabels;
-  $("#labdone").onclick = closeLabels;
-  $("#labrestoreall").onclick = restoreAll;
-  $("#dmanagestat").onclick = openLabels;
-  $("#statnewbtn").onclick = () => { addStatus($("#statnew").value); $("#statnew").value = ""; };
-  $("#statnew").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#statnewbtn").click(); } };
-  $("#labelmodal").onclick = e => { if (e.target === $("#labelmodal")) closeLabels(); };
-  $("#labnewbtn").onclick = () => {
-    const v = $("#labnew").value.trim();
-    if (!v) return;
-    const id = slugId(v);
-    ANN.hidden = (ANN.hidden || []).filter(h => h !== id); ANN.hiddenAt = nowISO();
-    if (!ANN.labels.some(l => l.id === id))
-      ANN.labels.push({ id, name: v, color: LABEL_COLORS[ANN.labels.length % LABEL_COLORS.length], u: nowISO() });
-    $("#labnew").value = "";
-    touchLibrary(); renderLabelManager(); renderLabelPicker(); refreshViews(); buildAnnFilters();
-  };
-  $("#labnew").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#labnewbtn").click(); } };
-
-  /* notes tab controls */
-  ["#nq", "#nstatus", "#nlabel", "#nsort"].forEach(s => $(s).oninput = renderNotes);
-  $("#annexport").onclick = exportNotes;
-  $("#annimport").onclick = () => $("#annfile").click();
-  $("#annfile").onchange = e => { if (e.target.files[0]) importNotes(e.target.files[0]); e.target.value = ""; };
-  $("#annlabels").onclick = openLabels;
-
-  /* filters */
-  $("#q").oninput = e => { F.q = e.target.value; renderMatrix(); };
-  $("#fcat").onchange = e => { F.cat = e.target.value; renderMatrix(); };
-  $("#fann").onchange = e => { F.ann = e.target.value; renderMatrix(); };
-  ["#q2", "#fcat2", "#ftier2", "#ftype2", "#fann2"].forEach(s => { const n = $(s); if (n) n.oninput = renderAll; });
-
-  document.querySelectorAll("nav.tabs button").forEach(b => b.onclick = () => {
-    document.querySelectorAll("nav.tabs button").forEach(x => x.setAttribute("aria-selected", x === b));
-    ["map", "attn", "work", "notes", "redir", "slug", "all", "cov", "src"].forEach(t => {
-      const n = $("#tab-" + t); if (n) n.classList.toggle("hide", t !== b.dataset.tab);
-    });
-    if (b.dataset.tab === "notes") renderNotes();
-  });
-
-  $("#density").onclick = () => {
-    const compact = document.body.dataset.density === "compact";
-    document.body.dataset.density = compact ? "detailed" : "compact";
-    $("#density").textContent = compact ? "Compact" : "Detailed";
-    STORE.set("density", document.body.dataset.density);
-    renderMatrix();
-  };
-
-  $("#csv").onclick = () => {
-    const h = ["path", "label", "cluster", "tier", "cluster_from_build", "tier_from_build", "moved_by_you",
-      "type", "keywords", "traffic", "primary_keyword", "volume", "position",
-      "status", "labels", "target", "comments"];
-    const q = v => '"' + String(v ?? "").replace(/"/g, '""') + '"';
-    const csv = [h.join(",")].concat(P.map(p => {
-      const a = annOf(p.path) || {};
-      return [p.path, p.label, effCat(p), TIERNAME[effTier(p)] || effTier(p), p.cat, TIERNAME[p.tier] || p.tier,
-      isMoved(p) ? "yes" : "no", p.type, p.kw, p.traffic, p.pkw, p.vol, p.pos,
-      (statusById(a.status) || {}).name || "",
-      effLabels(p).map(id => (labelById(id) || {}).name || id).join("|"),
-        a.target || "",
-      (a.comments || []).map(c => `${c.author}: ${c.text}`).join(" ⏎ ")].map(q).join(",");
-    })).join("\n");
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-    a.download = "1031cf-content-map.csv"; a.click();
-  };
-
-  $("#refresh").onclick = () => refreshData(true);
-
-  $("#checkbtn").onclick = openCheck;
-  $("#chkclose").onclick = closeCheck;
-  $("#chkcancel").onclick = closeCheck;
-  $("#chkstart").onclick = runCheck;
-  $("#chkstop").onclick = () => { SWEEP.abort = true; };
-  $("#chkurls").oninput = previewPaste;
-  document.querySelectorAll('input[name="chkstate"]').forEach(r => r.onchange = previewPaste);
-  $("#dbulkstat").onclick = openCheck;
-
-  /* sync modal */
-  $("#syncchip").onclick = openSync;
-  $("#sycancel").onclick = closeSync;
-  $("#syncmodal").onclick = e => { if (e.target === $("#syncmodal")) closeSync(); };
-  $("#sytest").onclick = async () => {
-    const c = readSyncForm();
-    if (!c.owner || !c.repo || !c.token) { syStatus("Owner, repository and token are all required.", "bad"); return; }
-    syStatus("Testing…");
-    try {
-      const r = await Sync.test(c);
-      syStatus(`Connected to ${r.repo}${r.priv ? " (private)" : " (public)"} — write access confirmed.`, "ok");
-    } catch (e) { syStatus(e.message, "bad"); }
-  };
-  $("#sysave").onclick = async () => {
-    const c = readSyncForm();
-    if (!c.owner || !c.repo || !c.token) { syStatus("Owner, repository and token are all required.", "bad"); return; }
-    syStatus("Connecting…");
-    try {
-      await Sync.test(c);
-      ANN.author = c.author || ANN.author;
-      await Sync.save(c);
-      await Sync.push();
-      refreshViews();
-      closeSync();
-      toast("Sync connected — your notes are now backed up");
-    } catch (e) { syStatus(e.message, "bad"); }
-  };
-  $("#sydisconnect").onclick = async () => {
-    await Sync.disconnect();
-    closeSync();
-    toast("Disconnected — notes stay on this device");
-  };
-
-  Sync.on((state, msg) => {
-    const c = $("#syncchip");
-    if (!c) return;
-    c.dataset.s = state;
-    c.querySelector("span.stxt").textContent =
-      state === "synced" ? "Synced" : state === "pending" ? "Saving…" :
-        state === "error" ? "Sync issue" : state === "offline" ? "Offline" : "Local only";
-    c.title = msg;
-  });
-
-  addEventListener("online", () => $("#offlinebar").classList.remove("on"));
-  addEventListener("offline", () => $("#offlinebar").classList.add("on"));
-  if (!navigator.onLine) $("#offlinebar").classList.add("on");
-}
-
-/* -------------------------------------------------------- PWA shell ----- */
-let deferredPrompt = null;
-addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const b = $("#install");
-  if (b) { b.style.display = ""; b.onclick = async () => { b.style.display = "none"; deferredPrompt.prompt(); deferredPrompt = null; }; }
-});
-addEventListener("appinstalled", () => { const b = $("#install"); if (b) b.style.display = "none"; });
-
-function registerSW() {
-  if (!("serviceWorker" in navigator)) return;
-  navigator.serviceWorker.register("sw.js").then(reg => {
-    reg.addEventListener("updatefound", () => {
-      const nw = reg.installing;
-      if (!nw) return;
-      nw.addEventListener("statechange", () => {
-        if (nw.state === "installed" && navigator.serviceWorker.controller) {
-          const bar = $("#updatebar");
-          bar.classList.add("on");
-          $("#doupdate").onclick = () => { nw.postMessage({ type: "SKIP_WAITING" }); };
-        }
+  const wireLib = () => {
+    $$('#m-sts .libitem', m).forEach(it => {
+      const id = it.dataset.id;
+      $('[data-rn]', it).addEventListener('change', ev => { const s = ANN.statuses.find(x => x.id === id); s.name = ev.target.value.trim() || s.name; s.u = nowISO(); annChanged(); });
+      $('[data-pick]', it).addEventListener('click', () => pickColor('s', id));
+      $$('[data-mv]', it).forEach(b => b.addEventListener('click', () => {
+        const list = visibleStatuses(false); const i = list.findIndex(x => x.id === id); const j = i + Number(b.dataset.mv);
+        if (j < 0 || j >= list.length) return;
+        [list[i], list[j]] = [list[j], list[i]];
+        list.forEach((s, k) => { s.o = k; s.u = nowISO(); });
+        annChanged(); draw();
+      }));
+      $('[data-rm]', it).addEventListener('click', ev => {
+        const b = ev.currentTarget;
+        const n = usage(id);
+        if (n && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'remove from ' + n + '?'; b.style.color = '#b91c1c'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '✕'; b.style.color = ''; }, 3500); return; }
+        ANN.hiddenS = [...new Set([...(ANN.hiddenS || []), id])]; ANN.hiddenSAt = nowISO();
+        for (const [path, e] of Object.entries(ANN.pages)) if (e.status === id) { e.status = ''; stampField(e, 'status'); }
+        annChanged(); draw();
       });
     });
-    setInterval(() => reg.update(), 60 * 60 * 1000);
-  }).catch(() => {});
-  let reloading = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (reloading) return; reloading = true; location.reload();
-  });
-}
-
-/* ------------------------------------------------------------- boot ----- */
-(async function boot() {
-  try {
-    /* No theme switch in the UI any more — follow whatever the OS asks for, and
-       keep honouring a preference set before the button was removed. */
-    const theme = await STORE.get("theme");
-    const dark = theme ? theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-    if (dark) document.documentElement.dataset.theme = "dark";
-    document.querySelector('meta[name="theme-color"]').content = dark ? "#0d0d0d" : "#f9f9f7";
-    document.body.dataset.density = (await STORE.get("density")) || "detailed";
-
-    const stored = await STORE.get("annotations");
-    if (stored && stored.pages) {
-      ANN = mergeAnn(emptyAnn(), migrate(stored));
-      ANN.labels = ANN.labels.filter(l => !isHidden(l.id));
-      ANN.statuses = ANN.statuses.filter(x => !isHiddenS(x.id));
-    }
-
-    await Sync.load();
-
-    let d = null;
-    try { d = await loadData(false); await STORE.set("data", d); }
-    catch (e) { d = await STORE.get("data"); if (!d) throw e; }
-    bindData(d);
-
-    if (document.body.dataset.density === "compact") $("#density").textContent = "Detailed";
-
-    wire();
-    renderAllViews();
-    buildAnnFilters();
-    $("#boot").classList.add("off");
-
-    registerSW();
-    Sync.pull(true).then(() => { buildAnnFilters(); refreshViews(); });
-  } catch (e) {
-    $("#boot").innerHTML = `<div class="berr"><b>Couldn't load the content map.</b><br><br>
-      ${esc(e.message || String(e))}<br><br>
-      If this is the first time you've opened the app, check that <code>data.json</code> sits next to
-      <code>index.html</code> on the server. Otherwise try reloading — an offline copy is kept after the
-      first successful load.</div>`;
-  }
-})();
-
-/* v1 documents had a "redirect" label meaning "needs a 301"; v2 uses that id for
-   the build-computed "this URL redirects" label and calls the manual one
-   "needs301". Rename it so both survive. */
-function migrate(a) {
-  if ((a.version || 1) >= 2) return a;
-  const old = (a.labels || []).find(l => l.id === "redirect" && /needs/i.test(l.name || ""));
-  if (old) {
-    old.id = "needs301";
-    Object.values(a.pages || {}).forEach(p => {
-      p.labels = (p.labels || []).map(x => (x === "redirect" ? "needs301" : x));
+    $$('#m-lbs .libitem', m).forEach(it => {
+      const id = it.dataset.id;
+      $('[data-rn]', it).addEventListener('change', ev => { const l = ANN.labels.find(x => x.id === id); l.name = ev.target.value.trim() || l.name; l.u = nowISO(); annChanged(); });
+      $('[data-pick]', it).addEventListener('click', () => pickColor('l', id));
+      $('[data-rm]', it).addEventListener('click', ev => {
+        const b = ev.currentTarget;
+        const n = usageL(id);
+        if (n && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'remove from ' + n + '?'; b.style.color = '#b91c1c'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '✕'; b.style.color = ''; }, 3500); return; }
+        ANN.hidden = [...new Set([...(ANN.hidden || []), id])]; ANN.hiddenAt = nowISO();
+        for (const e of Object.values(ANN.pages)) { const i = (e.labels || []).indexOf(id); if (i >= 0) { e.labels.splice(i, 1); stampField(e, 'labels'); } }
+        annChanged(); draw();
+      });
     });
-  }
-  a.version = 2;
-  return a;
+  };
+  $('#m-adds', m).addEventListener('click', () => {
+    const name = $('#m-news', m).value.trim(); if (!name) return;
+    ANN.statuses.push({ id:'s' + uuid().slice(0, 8), name, color:'slate', o: Math.max(0, ...visibleStatuses(false).map(s => s.o || 0)) + 1, u: nowISO() });
+    $('#m-news', m).value = '';
+    annChanged(); draw();
+  });
+  $('#m-addl', m).addEventListener('click', () => {
+    const name = $('#m-newl', m).value.trim(); if (!name) return;
+    ANN.labels.push({ id:'l' + uuid().slice(0, 8), name, color:'blue', u: nowISO() });
+    $('#m-newl', m).value = '';
+    annChanged(); draw();
+  });
+  $('#m-restore', m).addEventListener('click', () => {
+    ANN.hidden = []; ANN.hiddenAt = nowISO(); ANN.hiddenS = []; ANN.hiddenSAt = nowISO();
+    normAnn(ANN); annChanged(); draw(); toast('Removed statuses and labels restored.');
+  });
+  $('#m-done', m).addEventListener('click', () => { closeModal(); redraw(); });
+  draw();
 }
 
-function buildAnnFilters() {
-  const opts = () => '<option value="">Any of my notes</option>' +
-    '<option value="__any">Has notes</option>' +
-    '<option value="__none">No notes</option>' +
-    '<option value="__comment">Has comments</option>' +
-    '<option value="__moved">Moved by me</option>' +
-    '<option value="__statuschanged">Redirect status changed by me</option>' +
-    '<optgroup label="Status">' + visibleStatuses(false)
-      .map(s => `<option value="s:${esc(s.id)}">${esc(s.name)}</option>`).join("") + '</optgroup>' +
-    '<optgroup label="Label">' + ANN.labels.filter(l => !isHidden(l.id))
-      .map(l => `<option value="l:${esc(l.id)}">${esc(l.name)}</option>`).join("") + '</optgroup>';
-  [["#fann", F.ann], ["#fann2", $("#fann2") ? $("#fann2").value : ""]].forEach(([sel, keep]) => {
-    const n = $(sel); if (!n) return;
-    n.innerHTML = opts(); n.value = keep || "";
+/* ============================== drag (pointer events — NOT HTML5 DnD) ============================== */
+const DRAG = { active:false, path:null, ghost:null, zone:null, sx:0, sy:0, moved:false, suppress:false, supT:null, lpT:null, raf:null, py:0, px:0 };
+document.addEventListener('dragstart', e => { if (e.target.closest && e.target.closest('[data-drag]')) e.preventDefault(); });
+function bindDrag(root) {
+  $$('[data-drag]', root).forEach(el => {
+    el.addEventListener('click', e => {
+      if (DRAG.suppress || DRAG.active) { e.preventDefault(); return; }
+    });
+    el.addEventListener('pointerdown', e => {
+      if (e.button !== 0) return;
+      const path = el.dataset.drag;
+      DRAG.sx = e.clientX; DRAG.sy = e.clientY; DRAG.moved = false;
+      const start = () => beginDrag(el, path, e);
+      if (e.pointerType === 'touch') {
+        DRAG.lpT = setTimeout(start, 380);
+        const cancel = () => { clearTimeout(DRAG.lpT); el.removeEventListener('pointerup', cancel); el.removeEventListener('pointercancel', cancel); };
+        el.addEventListener('pointerup', cancel, { once:true }); el.addEventListener('pointercancel', cancel, { once:true });
+        const mv = ev => { if (Math.abs(ev.clientX - DRAG.sx) > 6 || Math.abs(ev.clientY - DRAG.sy) > 6) { clearTimeout(DRAG.lpT); el.removeEventListener('pointermove', mv); } };
+        el.addEventListener('pointermove', mv);
+      } else {
+        const mv = ev => { if (!DRAG.active && (Math.abs(ev.clientX - DRAG.sx) > 5 || Math.abs(ev.clientY - DRAG.sy) > 5)) { beginDrag(el, path, ev); } };
+        const up = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', up); };
+        document.addEventListener('pointermove', mv); document.addEventListener('pointerup', up, { once:true });
+      }
+    });
   });
 }
+let touchBlock = null;
+function beginDrag(el, path, e) {
+  if (DRAG.active) return;
+  DRAG.active = true; DRAG.path = path; DRAG.moved = true;
+  tipEl().style.display = 'none';
+  const g = document.createElement('div'); g.id = 'ghost';
+  g.textContent = (PAGE[path] || { label: path }).label;
+  document.body.appendChild(g); DRAG.ghost = g;
+  moveGhost(e.clientX, e.clientY);
+  document.addEventListener('pointermove', moveDrag);
+  document.addEventListener('pointerup', dropDrag, { once:true });
+  touchBlock = ev => { if (DRAG.active) ev.preventDefault(); };
+  document.addEventListener('touchmove', touchBlock, { passive:false });
+  document.body.style.userSelect = 'none';
+  autoScrollLoop();
+}
+function moveGhost(x, y) { if (DRAG.ghost) { DRAG.ghost.style.left = (x + 12) + 'px'; DRAG.ghost.style.top = (y + 10) + 'px'; } DRAG.px = x; DRAG.py = y; }
+function zoneAt(x, y) {
+  const el = document.elementFromPoint(x, y);
+  return el && el.closest ? el.closest('[data-drop]') : null;
+}
+function moveDrag(e) {
+  moveGhost(e.clientX, e.clientY);
+  const z = zoneAt(e.clientX, e.clientY);
+  if (z !== DRAG.zone) {
+    DRAG.zone && DRAG.zone.classList.remove('dropok');
+    DRAG.zone = null;
+    if (z && dropAllowed(z)) { DRAG.zone = z; z.classList.add('dropok'); }
+  }
+}
+function dropAllowed(z) {
+  const p = PAGE[DRAG.path]; if (!p) return false;
+  const [, tier] = z.dataset.drop.split('|');
+  const isRedir = effTier(p) === 'redirect';
+  if (isRedir) return tier === 'redirect' || tier === '';   // redirects can re-cluster only
+  return tier !== 'redirect';                                // live pages can't be dropped into Redirect
+}
+function autoScrollLoop() {
+  if (!DRAG.active) return;
+  const M = 56, S = 14;
+  const mx = $('#matrix');
+  if (mx) {
+    const r = mx.getBoundingClientRect();
+    if (DRAG.px < r.left + M) mx.scrollLeft -= S;
+    else if (DRAG.px > r.right - M) mx.scrollLeft += S;
+  }
+  if (!DRAG.zone && !zoneAt(DRAG.px, DRAG.py)) {   // vertical scroll yields to drop targets
+    if (DRAG.py < 90) window.scrollBy(0, -S);
+    else if (DRAG.py > window.innerHeight - M) window.scrollBy(0, S);
+  }
+  DRAG.raf = requestAnimationFrame(autoScrollLoop);
+}
+function dropDrag(e) {
+  const z = DRAG.zone;
+  const path = DRAG.path;
+  endDrag();
+  if (!z || !path) return;
+  const p = PAGE[path];
+  const [cluster, tier] = z.dataset.drop.split('|');
+  const a = ensurePageAnn(path);
+  const prev = { cluster: a.cluster, tier: a.tier, fc: a.f.cluster, ft: a.f.tier };
+  a.cluster = cluster === p.cat ? '' : cluster; stampField(a, 'cluster');
+  if (tier && tier !== 'redirect') { a.tier = tier === p.tier ? '' : tier; stampField(a, 'tier'); }
+  annChanged();
+  toast('Moved to ' + cluster + (tier && tier !== 'redirect' ? ' / ' + TIERNAME[tier] : ''), () => {
+    a.cluster = prev.cluster; a.tier = prev.tier;
+    a.f.cluster = prev.fc || nowISO(); a.f.tier = prev.ft || nowISO(); a.updated = nowISO();
+    annChanged();
+  });
+}
+function endDrag(cancelled) {
+  DRAG.active = false;
+  clearTimeout(DRAG.lpT);
+  cancelAnimationFrame(DRAG.raf);
+  DRAG.zone && DRAG.zone.classList.remove('dropok');
+  DRAG.zone = null;
+  DRAG.ghost && DRAG.ghost.remove(); DRAG.ghost = null;
+  document.removeEventListener('pointermove', moveDrag);
+  touchBlock && document.removeEventListener('touchmove', touchBlock);
+  document.body.style.userSelect = '';
+  DRAG.suppress = true;
+  clearTimeout(DRAG.supT);
+  DRAG.supT = setTimeout(() => { DRAG.suppress = false; }, 350);
+  if (cancelled) DRAG.path = null;
+}
+
+boot();
