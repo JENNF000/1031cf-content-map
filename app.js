@@ -6,8 +6,11 @@
 /* ============================== constants ============================== */
 const TIERS = ['transactional', 'pillar', 'fanout', 'redirect'];
 const TIERNAME = { transactional: 'Transactional', pillar: 'Pillar', fanout: 'Fan-out', redirect: 'Redirect' };
-const COLORS = { slate:'#64748b', amber:'#b45309', red:'#b91c1c', green:'#15803d', blue:'#2563eb',
-                 purple:'#7c3aed', teal:'#0f766e', pink:'#be185d' };
+/* Muted, institutional chip palette. Named keys are the seeded defaults; a
+   custom color picked in Manage is stored as a raw hex — colorOf() takes both. */
+const COLORS = { slate:'#68727d', amber:'#9a6700', red:'#b23636', green:'#20713a', blue:'#2b5f9e',
+                 purple:'#5f4bb6', teal:'#1b7c83', pink:'#a84c72' };
+const colorOf = c => COLORS[c] || (typeof c === 'string' && c[0] === '#' ? c : COLORS.slate);
 const PAGE_FIELDS = ['status', 'labels', 'target', 'cluster', 'tier', 'offFlags'];
 const DEFAULT_STATUSES = [
   { id:'none', name:'No status', color:'slate', fixed:true, o:-1 },
@@ -411,15 +414,15 @@ function toolbarHTML(hideTier) {
 function statusPill(p) {
   const e = annOf(p.path); if (!e || !e.status || isHiddenS(e.status)) return '';
   const s = ANN.statuses.find(x => x.id === e.status); if (!s) return '';
-  return '<span class="spill" style="background:' + COLORS[s.color] + '">' + esc(s.name) + '</span>';
+  return '<span class="spill" style="background:' + colorOf(s.color) + '">' + esc(s.name) + '</span>';
 }
 function labelPills(p, max) {
   const ids = effLabels(p);
   return ids.slice(0, max).map(id => {
     const d = labelDef(id); if (!d) return '';
     return d.derived
-      ? '<span class="apill auto-l" style="color:' + COLORS[d.color] + '">' + esc(d.name) + '</span>'
-      : '<span class="apill mine" style="background:' + COLORS[d.color] + '">' + esc(d.name) + '</span>';
+      ? '<span class="apill auto-l" style="color:' + colorOf(d.color) + '">' + esc(d.name) + '</span>'
+      : '<span class="apill mine" style="background:' + colorOf(d.color) + '">' + esc(d.name) + '</span>';
   }).join('') + (ids.length > max ? '<span class="apill auto-l" style="color:#64748b">+' + (ids.length - max) + '</span>' : '');
 }
 function cellHTML(p) {
@@ -438,10 +441,6 @@ function viewMap() {
   const tiles =
     '<div class="tiles">' +
     '<div class="tile"><div class="v">' + fmt(s.total) + '</div><div class="l">Live pages</div></div>' +
-    '<div class="tile t-trans"><div class="v">' + fmt(s.byTier.transactional) + '</div><div class="l">Transactional</div></div>' +
-    '<div class="tile t-pillar"><div class="v">' + fmt(s.byTier.pillar) + '</div><div class="l">Pillar</div></div>' +
-    '<div class="tile t-fanout"><div class="v">' + fmt(s.byTier.fanout) + '</div><div class="l">Fan-out</div></div>' +
-    '<div class="tile t-redir"><div class="v">' + fmt(s.byTier.redirect) + '</div><div class="l">Redirects</div></div>' +
     '<div class="tile"><div class="v">' + fmt(s.keywords) + '</div><div class="l">Ranking keywords</div></div>' +
     '<div class="tile"><div class="v">' + fmt(s.traffic) + '</div><div class="l">Est. monthly visits</div></div>' +
     '</div>';
@@ -621,11 +620,11 @@ function openDrawer(path) {
       if (p.tier === 'redirect') return '<p class="mini">Verified redirect → <b>' + esc(p.redirects_to || '') + '</b>' + (lo === 'live' ? ' — <b>you marked it live</b>.' : '') + '</p><button class="btn sub" id="d-live">' + (lo === 'live' ? 'Use build value (redirect)' : 'Mark as live (build is wrong / page restored)') + '</button>';
       return '<p class="mini">Crawled live (200, index,follow)' + (lo === 'redirect' ? ' — <b>you marked it as redirecting</b>.' : '') + '</p><button class="btn sub" id="d-live">' + (lo === 'redirect' ? 'Use build value (live)' : 'Mark as redirecting (I shipped a 301)') + '</button>';
     })() + '</div>' : '') +
-  '<div class="sec"><h5>Status</h5><div class="pillrow">' + visibleStatuses(true).map(s => '<span class="apill mine ' + (((e.status || 'none') === s.id) ? '' : 'off') + '" data-st="' + s.id + '" style="background:' + COLORS[s.color] + '">' + esc(s.name) + '</span>').join('') + '</div></div>' +
+  '<div class="sec"><h5>Status</h5><div class="pillrow">' + visibleStatuses(true).map(s => '<span class="apill mine ' + (((e.status || 'none') === s.id) ? '' : 'off') + '" data-st="' + s.id + '" style="background:' + colorOf(s.color) + '">' + esc(s.name) + '</span>').join('') + '</div></div>' +
   '<div class="sec"><h5>Labels <a href="#" id="d-libs" style="font-weight:400;font-size:11px">manage</a></h5><div class="pillrow">' +
     ANN.labels.filter(l => !isHiddenL(l.id)).map(l => {
       const on = p ? effLabels(p).includes(l.id) : (e.labels || []).includes(l.id);
-      const style = l.derived ? 'class="apill auto-l ' + (on ? '' : 'off') + '" style="color:' + COLORS[l.color] + '"' : 'class="apill mine ' + (on ? '' : 'off') + '" style="background:' + COLORS[l.color] + '"';
+      const style = l.derived ? 'class="apill auto-l ' + (on ? '' : 'off') + '" style="color:' + colorOf(l.color) + '"' : 'class="apill mine ' + (on ? '' : 'off') + '" style="background:' + colorOf(l.color) + '"';
       return '<span ' + style + ' data-lb="' + l.id + '">' + esc(l.name) + '</span>';
     }).join('') + '</div><p class="mini">Outlined labels are computed by the build — click to switch off for this page. Solid ones are yours.</p></div>' +
   '<div class="sec"><h5>Target keyword</h5><input type="text" id="d-target" placeholder="e.g. what is a dst 1031 exchange" value="' + esc(e.target || '') + '"></div>' +
@@ -742,7 +741,9 @@ function checkRedirectsModal() {
   });
 }
 function libraryModal() {
-  const swatches = sel => Object.entries(COLORS).map(([k, v]) => '<div class="swatch" data-c="' + k + '" style="background:' + v + ';outline:' + (sel === k ? '2px solid #1c2523' : 'none') + '"></div>').join('');
+  // Each swatch embeds a native <input type=color> — clicking it opens the
+  // browser's full color picker (hex / RGB / eyedropper), her choice saved as hex.
+  const swatch = (kind, id, cur) => '<div class="swatch" style="background:' + colorOf(cur) + '"><input type="color" value="' + colorOf(cur) + '" data-pick="' + kind + '" data-for="' + id + '" title="Pick a color"></div>';
   const m = modal('<h2>Statuses &amp; labels</h2>' +
     '<h3 style="font-size:13px;margin:10px 0 4px">Statuses</h3><div id="m-sts"></div>' +
     '<div class="addc" style="margin-top:6px"><input type="text" id="m-news" placeholder="New status…"><button class="btn sub" id="m-adds">Add status</button></div>' +
@@ -754,24 +755,24 @@ function libraryModal() {
   const draw = () => {
     const sts = visibleStatuses(false);
     $('#m-sts', m).innerHTML = sts.map((s, i) =>
-      '<div class="libitem" data-id="' + s.id + '"><div class="swatch" style="background:' + COLORS[s.color] + '" data-pick="s"></div>' +
+      '<div class="libitem" data-id="' + s.id + '">' + swatch('s', s.id, s.color) +
       '<input type="text" value="' + esc(s.name) + '" data-rn="s"><span class="use">' + usage(s.id) + ' pages</span>' +
       '<button data-mv="-1" ' + (i === 0 ? 'disabled' : '') + '>↑</button><button data-mv="1" ' + (i === sts.length - 1 ? 'disabled' : '') + '>↓</button><button data-rm="s" title="remove">✕</button></div>').join('');
     $('#m-lbs', m).innerHTML = ANN.labels.filter(l => !isHiddenL(l.id)).map(l =>
-      '<div class="libitem" data-id="' + l.id + '"><div class="swatch" style="background:' + COLORS[l.color] + '" data-pick="l"></div>' +
+      '<div class="libitem" data-id="' + l.id + '">' + swatch('l', l.id, l.color) +
       '<input type="text" value="' + esc(l.name) + '" data-rn="l"><span class="use">' + usageL(l.id) + ' pages' + (l.derived ? ' · auto' : '') + '</span><button data-rm="l" title="remove">✕</button></div>').join('');
     wireLib();
   };
-  const pickColor = (kind, id) => {
-    const cur = kind === 's' ? ANN.statuses.find(x => x.id === id) : ANN.labels.find(x => x.id === id);
-    const pm = modal('<h2>Color</h2><div style="display:flex;gap:8px;flex-wrap:wrap">' + swatches(cur.color) + '</div>');
-    $$('.swatch', pm).forEach(sw => sw.addEventListener('click', () => { cur.color = sw.dataset.c; cur.u = nowISO(); annChanged(); closeModal(); libraryModal(); }));
+  const bindPick = (it, entry) => {
+    const inp = $('input[data-pick]', it); if (!inp) return;
+    inp.addEventListener('input', () => { entry.color = inp.value; entry.u = nowISO(); inp.parentElement.style.background = inp.value; });
+    inp.addEventListener('change', () => { entry.color = inp.value; entry.u = nowISO(); annChanged(); });
   };
   const wireLib = () => {
     $$('#m-sts .libitem', m).forEach(it => {
       const id = it.dataset.id;
       $('[data-rn]', it).addEventListener('change', ev => { const s = ANN.statuses.find(x => x.id === id); s.name = ev.target.value.trim() || s.name; s.u = nowISO(); annChanged(); });
-      $('[data-pick]', it).addEventListener('click', () => pickColor('s', id));
+      bindPick(it, ANN.statuses.find(x => x.id === id));
       $$('[data-mv]', it).forEach(b => b.addEventListener('click', () => {
         const list = visibleStatuses(false); const i = list.findIndex(x => x.id === id); const j = i + Number(b.dataset.mv);
         if (j < 0 || j >= list.length) return;
@@ -782,7 +783,7 @@ function libraryModal() {
       $('[data-rm]', it).addEventListener('click', ev => {
         const b = ev.currentTarget;
         const n = usage(id);
-        if (n && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'remove from ' + n + '?'; b.style.color = '#b91c1c'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '✕'; b.style.color = ''; }, 3500); return; }
+        if (n && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'remove from ' + n + '?'; b.style.color = '#d03b3b'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '✕'; b.style.color = ''; }, 3500); return; }
         ANN.hiddenS = [...new Set([...(ANN.hiddenS || []), id])]; ANN.hiddenSAt = nowISO();
         for (const [path, e] of Object.entries(ANN.pages)) if (e.status === id) { e.status = ''; stampField(e, 'status'); }
         annChanged(); draw();
@@ -791,11 +792,11 @@ function libraryModal() {
     $$('#m-lbs .libitem', m).forEach(it => {
       const id = it.dataset.id;
       $('[data-rn]', it).addEventListener('change', ev => { const l = ANN.labels.find(x => x.id === id); l.name = ev.target.value.trim() || l.name; l.u = nowISO(); annChanged(); });
-      $('[data-pick]', it).addEventListener('click', () => pickColor('l', id));
+      bindPick(it, ANN.labels.find(x => x.id === id));
       $('[data-rm]', it).addEventListener('click', ev => {
         const b = ev.currentTarget;
         const n = usageL(id);
-        if (n && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'remove from ' + n + '?'; b.style.color = '#b91c1c'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '✕'; b.style.color = ''; }, 3500); return; }
+        if (n && !b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'remove from ' + n + '?'; b.style.color = '#d03b3b'; setTimeout(() => { b.dataset.armed = ''; b.textContent = '✕'; b.style.color = ''; }, 3500); return; }
         ANN.hidden = [...new Set([...(ANN.hidden || []), id])]; ANN.hiddenAt = nowISO();
         for (const e of Object.values(ANN.pages)) { const i = (e.labels || []).indexOf(id); if (i >= 0) { e.labels.splice(i, 1); stampField(e, 'labels'); } }
         annChanged(); draw();
