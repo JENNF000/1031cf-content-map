@@ -14,7 +14,10 @@
   --bg:#f9f9f7; --panel:#ffffff; --ink:#0b0b0b; --muted:#52514e; --faint:#898781;
   --line:#e1e0d9; --hair:rgba(11,11,11,.10);
   --navy:#1f4e79; --navy-soft:#eef2f6;
-  --trans:#1c5cab; --pillar:#0e7a5f; --fanout:#898781; --redir:#2a78d6;
+  /* Jennifer's tier colors (8/23): band fills are her exact hexes; the darker
+     steps derived from each are used where a fill won't read (dots, ticks). */
+  --trans-bg:#b8d4bc; --pillar-bg:#8bb0e0; --fanout-bg:#9accd8bd; --redir-bg:#dedee1;
+  --trans:#54815c; --pillar:#3d69a5; --fanout:#48899a; --redir:#87878f;
   --crit:#d03b3b; --ser:#c05621; --warn:#9a6700; --ok:#006300; --info:#898781;
   --r:6px; font-size:15px;
 }
@@ -60,12 +63,12 @@ main{padding:14px 16px 90px;max-width:100%}
 .col>.head{padding:9px 12px;border-bottom:1px solid var(--line);font-weight:650;font-size:13.5px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--panel);border-radius:var(--r) var(--r) 0 0}
 .col>.head .k{font-weight:400;color:var(--faint);font-size:11.5px}
 .band{margin:8px;border:1px solid var(--line);border-radius:4px;overflow:hidden}
-.band>.bh{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:650;padding:4px 9px;background:#f6f6f4;color:var(--muted);border-left:3px solid var(--faint)}
-.band>.bh .bn{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:0 6px;font-size:11px;color:var(--muted)}
-.band.b-transactional>.bh{border-left-color:var(--trans)}
-.band.b-pillar>.bh{border-left-color:var(--pillar)}
-.band.b-fanout>.bh{border-left-color:var(--fanout)}
-.band.b-redirect>.bh{border-left-color:var(--redir)}
+.band>.bh{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:650;padding:4px 9px;background:#f6f6f4;color:#2c332e;border-left:3px solid var(--faint)}
+.band>.bh .bn{background:rgba(255,255,255,.85);border:1px solid var(--hair);border-radius:4px;padding:0 6px;font-size:11px;color:var(--ink)}
+.band.b-transactional>.bh{background:var(--trans-bg);border-left-color:var(--trans);color:#243b29}
+.band.b-pillar>.bh{background:var(--pillar-bg);border-left-color:var(--pillar);color:#1c3050}
+.band.b-fanout>.bh{background:var(--fanout-bg);border-left-color:var(--fanout);color:#1e3d46}
+.band.b-redirect>.bh{background:var(--redir-bg);border-left-color:var(--redir);color:#3c3c42}
 .band .cells{padding:5px}
 .band.dropok{outline:2px dashed var(--navy);outline-offset:-3px;background:var(--navy-soft)}
 .cell{display:block;position:relative;border:1px solid var(--line);background:var(--panel);border-radius:4px;padding:6px 8px;margin:4px 0;font-size:12.6px;line-height:1.3;color:var(--ink);text-decoration:none;cursor:grab}

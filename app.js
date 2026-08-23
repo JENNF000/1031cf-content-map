@@ -267,7 +267,9 @@ async function boot() {
   else Sync.pullPublished().then(ok => { if (ok) redraw(); });
   setSyncChip(); updateChips();
   renderTabs(); redraw();
-  window.onAnnotationsChanged = () => { updateChips(); redraw(); };
+  // Any annotation change (local edit, library edit, sync merge) redraws the
+  // views AND an open drawer — unless a modal is up or she's typing in a field.
+  window.onAnnotationsChanged = () => { updateChips(); redraw(); refreshDrawer(); };
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').then(reg => {
       if (reg.waiting) showUpdate(reg);
@@ -588,6 +590,12 @@ function exportCSV() {
 /* ============================== drawer ============================== */
 let DRAWER = null;
 function closeDrawer() { $$('.drawer,.drawer-scrim').forEach(e => e.remove()); DRAWER = null; }
+function refreshDrawer() {
+  if (!DRAWER || $('.modal-scrim')) return;
+  const a = document.activeElement;
+  if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA')) return;
+  openDrawer(DRAWER);
+}
 function ensurePageAnn(path) {
   if (!ANN.pages[path]) ANN.pages[path] = { comments:[], delc:[], f:{}, status:'', labels:[], target:'', cluster:'', tier:'', offFlags:[], updated:'' };
   return ANN.pages[path];
@@ -677,7 +685,7 @@ function modal(html) {
   closeModal();
   const s = document.createElement('div'); s.className = 'modal-scrim';
   s.innerHTML = '<div class="modal">' + html + '</div>';
-  s.addEventListener('click', e => { if (e.target === s) closeModal(); });
+  s.addEventListener('click', e => { if (e.target === s) { closeModal(); if (DRAWER) openDrawer(DRAWER); } });
   document.body.appendChild(s);
   return $('.modal', s);
 }
@@ -763,16 +771,32 @@ function libraryModal() {
       '<input type="text" value="' + esc(l.name) + '" data-rn="l"><span class="use">' + usageL(l.id) + ' pages' + (l.derived ? ' · auto' : '') + '</span><button data-rm="l" title="remove">✕</button></div>').join('');
     wireLib();
   };
-  const bindPick = (it, entry) => {
+  // Resolve the entry FRESH on every event — a sync merge replaces ANN, so a
+  // reference captured at bind time can point into a dead object (colors picked
+  // after a merge silently vanished). Persist on 'input' too, debounced: some
+  // pickers (macOS panel) close without ever firing 'change'.
+  const saveSoon = debounce(() => annChanged(), 600);
+  const bindPick = (it, kind, id) => {
     const inp = $('input[data-pick]', it); if (!inp) return;
-    inp.addEventListener('input', () => { entry.color = inp.value; entry.u = nowISO(); inp.parentElement.style.background = inp.value; });
-    inp.addEventListener('change', () => { entry.color = inp.value; entry.u = nowISO(); annChanged(); });
+    const entry = () => (kind === 's' ? ANN.statuses : ANN.labels).find(x => x.id === id);
+    inp.addEventListener('input', () => {
+      const e2 = entry(); if (!e2) return;
+      e2.color = inp.value; e2.u = nowISO();
+      inp.parentElement.style.background = inp.value;
+      saveSoon();
+    });
+    inp.addEventListener('change', () => {
+      const e2 = entry(); if (!e2) return;
+      e2.color = inp.value; e2.u = nowISO();
+      inp.parentElement.style.background = inp.value;
+      annChanged();
+    });
   };
   const wireLib = () => {
     $$('#m-sts .libitem', m).forEach(it => {
       const id = it.dataset.id;
       $('[data-rn]', it).addEventListener('change', ev => { const s = ANN.statuses.find(x => x.id === id); s.name = ev.target.value.trim() || s.name; s.u = nowISO(); annChanged(); });
-      bindPick(it, ANN.statuses.find(x => x.id === id));
+      bindPick(it, 's', id);
       $$('[data-mv]', it).forEach(b => b.addEventListener('click', () => {
         const list = visibleStatuses(false); const i = list.findIndex(x => x.id === id); const j = i + Number(b.dataset.mv);
         if (j < 0 || j >= list.length) return;
@@ -792,7 +816,7 @@ function libraryModal() {
     $$('#m-lbs .libitem', m).forEach(it => {
       const id = it.dataset.id;
       $('[data-rn]', it).addEventListener('change', ev => { const l = ANN.labels.find(x => x.id === id); l.name = ev.target.value.trim() || l.name; l.u = nowISO(); annChanged(); });
-      bindPick(it, ANN.labels.find(x => x.id === id));
+      bindPick(it, 'l', id);
       $('[data-rm]', it).addEventListener('click', ev => {
         const b = ev.currentTarget;
         const n = usageL(id);
@@ -819,7 +843,7 @@ function libraryModal() {
     ANN.hidden = []; ANN.hiddenAt = nowISO(); ANN.hiddenS = []; ANN.hiddenSAt = nowISO();
     normAnn(ANN); annChanged(); draw(); toast('Removed statuses and labels restored.');
   });
-  $('#m-done', m).addEventListener('click', () => { closeModal(); redraw(); });
+  $('#m-done', m).addEventListener('click', () => { closeModal(); redraw(); if (DRAWER) openDrawer(DRAWER); });
   draw();
 }
 
