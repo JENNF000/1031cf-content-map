@@ -1,11 +1,155 @@
 {
  "version": 2,
- "updated": "2026-08-23T00:00:00.000Z",
+ "updated": "2026-08-23T19:47:29.522Z",
  "author": "Jennifer",
- "statuses": [],
- "labels": [],
+ "statuses": [
+  {
+   "id": "none",
+   "name": "No status",
+   "color": "slate",
+   "fixed": true,
+   "o": -1
+  },
+  {
+   "id": "todo",
+   "name": "To do",
+   "color": "slate",
+   "o": 0
+  },
+  {
+   "id": "inprogress",
+   "name": "In progress",
+   "color": "amber",
+   "o": 1
+  },
+  {
+   "id": "drafted",
+   "name": "Drafted",
+   "color": "purple",
+   "o": 2
+  },
+  {
+   "id": "published",
+   "name": "Published",
+   "color": "green",
+   "o": 3
+  },
+  {
+   "id": "monitoring",
+   "name": "Monitoring",
+   "color": "blue",
+   "o": 4
+  },
+  {
+   "id": "blocked",
+   "name": "Blocked",
+   "color": "red",
+   "o": 5
+  },
+  {
+   "id": "wontdo",
+   "name": "Won't do",
+   "color": "slate",
+   "o": 6
+  }
+ ],
+ "labels": [
+  {
+   "id": "rewrite",
+   "name": "Rewrite",
+   "color": "amber"
+  },
+  {
+   "id": "refresh",
+   "name": "Refresh content",
+   "color": "amber"
+  },
+  {
+   "id": "titlemeta",
+   "name": "Title / meta",
+   "color": "amber"
+  },
+  {
+   "id": "schema",
+   "name": "Add schema",
+   "color": "purple"
+  },
+  {
+   "id": "aeo-answer",
+   "name": "AEO: direct answer",
+   "color": "teal"
+  },
+  {
+   "id": "aeo-faq",
+   "name": "AEO: FAQ block",
+   "color": "teal"
+  },
+  {
+   "id": "intlinks",
+   "name": "Internal links",
+   "color": "blue"
+  },
+  {
+   "id": "eeat",
+   "name": "E-E-A-T / author",
+   "color": "purple"
+  },
+  {
+   "id": "needs301",
+   "name": "Needs 301",
+   "color": "red"
+  },
+  {
+   "id": "keep",
+   "name": "Keep as-is",
+   "color": "green"
+  },
+  {
+   "id": "priority",
+   "name": "Priority",
+   "color": "pink"
+  },
+  {
+   "id": "consolidate",
+   "name": "Consolidate",
+   "color": "red",
+   "derived": true
+  },
+  {
+   "id": "slug",
+   "name": "Slug fix",
+   "color": "amber",
+   "derived": true
+  },
+  {
+   "id": "underperform",
+   "name": "Underperformer",
+   "color": "pink",
+   "derived": true
+  },
+  {
+   "id": "nokw",
+   "name": "No keywords",
+   "color": "slate",
+   "derived": true
+  },
+  {
+   "id": "newpage",
+   "name": "New (no data yet)",
+   "color": "blue",
+   "derived": true
+  },
+  {
+   "id": "redirect",
+   "name": "301 redirect",
+   "color": "blue",
+   "derived": true
+  }
+ ],
  "hidden": [],
+ "hiddenAt": "",
  "hiddenS": [],
+ "hiddenSAt": "",
  "pages": {
   "/delaware-statutory-trust-pros-and-cons/": {
    "comments": [
@@ -18,13 +162,13 @@
    ],
    "delc": [],
    "f": {},
+   "updated": "2026-08-23T00:00:00.000Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-08-23T00:00:00.000Z"
+   "offFlags": []
   }
  },
  "live": {}
