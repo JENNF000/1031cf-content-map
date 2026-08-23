@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-23T20:20:13.829Z",
+ "updated": "2026-08-23T23:31:25.606Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -184,6 +184,21 @@
    "cluster": "",
    "tier": "",
    "offFlags": []
+  },
+  "/721-exchange-real-estate-investing/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-08-23T23:31:25.606Z",
+    "tier": "2026-08-23T23:31:25.606Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "pillar",
+   "offFlags": [],
+   "updated": "2026-08-23T23:31:25.606Z"
   }
  },
  "live": {}
