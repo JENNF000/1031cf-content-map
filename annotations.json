@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-23T19:47:29.522Z",
+ "updated": "2026-08-23T19:51:25.661Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -146,8 +146,10 @@
    "derived": true
   }
  ],
- "hidden": [],
- "hiddenAt": "",
+ "hidden": [
+  "titlemeta"
+ ],
+ "hiddenAt": "2026-08-23T19:51:25.661Z",
  "hiddenS": [],
  "hiddenSAt": "",
  "pages": {
