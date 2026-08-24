@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-24T22:42:49.620Z",
+ "updated": "2026-08-24T23:29:08.368Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -222,13 +222,13 @@
     "cluster": "2026-08-24T22:41:43.812Z",
     "tier": "2026-08-24T22:41:43.812Z"
    },
+   "updated": "2026-08-24T22:41:43.812Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "pillar",
-   "offFlags": [],
-   "updated": "2026-08-24T22:41:43.812Z"
+   "offFlags": []
   },
   "/testimonials/": {
    "comments": [],
@@ -237,13 +237,13 @@
     "cluster": "2026-08-24T22:41:55.741Z",
     "tier": "2026-08-24T22:41:55.741Z"
    },
+   "updated": "2026-08-24T22:41:55.741Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "pillar",
-   "offFlags": [],
-   "updated": "2026-08-24T22:41:55.741Z"
+   "offFlags": []
   },
   "/what-makes-a-great-leader-vs-a-great-manager/": {
    "comments": [],
@@ -251,13 +251,27 @@
    "f": {
     "cluster": "2026-08-24T22:42:49.620Z"
    },
+   "updated": "2026-08-24T22:42:49.620Z",
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "Press Mentions",
+   "tier": "",
+   "offFlags": []
+  },
+  "/most-businesses-slow-down-during-a-recession-heres-how-to-keep-pace-and-grow-your-company-in-2023/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-08-24T22:43:38.867Z"
+   },
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "Press Mentions",
    "tier": "",
    "offFlags": [],
-   "updated": "2026-08-24T22:42:49.620Z"
+   "updated": "2026-08-24T22:43:38.867Z"
   }
  },
  "live": {},
@@ -305,7 +319,7 @@
   {
    "id": "330b8166-7aea-4126-a849-15b2abbf5baa",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T23:29:08.368Z",
    "bucket": "sched",
    "date": "2026-07-13",
    "status": "published",
@@ -317,7 +331,7 @@
    "vol": 170,
    "kd": 7,
    "prompts": "How to choose a DST sponsor?",
-   "gdoc": "",
+   "gdoc": "https://docs.google.com/document/d/1E2aDsdwTBnxhjI8jcD323cfArGKYT3oYHFnGVB6P1GQ/edit?usp=drive_link",
    "url": "https://www.1031crowdfunding.com/how-to-choose-a-dst-sponsor/",
    "oldurl": "",
    "lastpub": ""
