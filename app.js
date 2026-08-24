@@ -577,12 +577,16 @@ const fmtDate = d => {
   if (!y || !m) return d;
   return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1] + ' ' + dd + ', ' + y;
 };
+const isIdea = e => e.bucket === 'idea';
 function viewCal() {
-  let list = calEntries();
-  if (CALF.q) { const q = CALF.q.toLowerCase(); list = list.filter(e => ((e.topic||'') + ' ' + (e.kw||'') + ' ' + (e.url||'') + ' ' + (e.oldurl||'') + ' ' + (e.prompts||'')).toLowerCase().includes(q)); }
+  let all = calEntries();
+  if (CALF.q) { const q = CALF.q.toLowerCase(); all = all.filter(e => ((e.topic||'') + ' ' + (e.kw||'') + ' ' + (e.url||'') + ' ' + (e.oldurl||'') + ' ' + (e.prompts||'')).toLowerCase().includes(q)); }
+  if (CALF.type) all = all.filter(e => (e.types || []).includes(CALF.type));
+  let ideas = all.filter(isIdea);
+  let list = all.filter(e => !isIdea(e));
   if (CALF.status) list = list.filter(e => e.status === CALF.status);
-  if (CALF.type) list = list.filter(e => (e.types || []).includes(CALF.type));
   list.sort((a, b) => ((a.date || '9999') < (b.date || '9999') ? -1 : (a.date || '9999') > (b.date || '9999') ? 1 : ((a.topic||'') < (b.topic||'') ? -1 : 1)));
+  ideas.sort((a, b) => ((a.created||'') < (b.created||'') ? -1 : 1));
   const monthOf = e => e.date ? e.date.slice(0, 7) : '';
   const monthName = k => k ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(k.slice(5, 7)) - 1] + ' ' + k.slice(0, 4) : 'Unscheduled';
   let rows = '', lastMonth = null;
@@ -602,26 +606,46 @@ function viewCal() {
       '<td style="max-width:180px;word-break:break-all">' + oldLinks + '</td>' +
       '<td style="white-space:nowrap">' + (fmtDate(e.lastpub) || '—') + '</td></tr>';
   }
-  return '<p class="intro">Plan pieces here; each row is fully editable (click it). Entries live in your notes file, so they sync across devices and survive data refreshes. <b>' + calEntries().length + '</b> planned.</p>' +
+  const ideaCards = ideas.map(e => {
+    const meta = [e.kw ? esc(e.kw) + (e.vol ? ' · vol ' + fmt(e.vol) : '') + (e.kd ? ' · KD ' + esc(e.kd) : '') : '',
+                  (e.types || []).map(tid => { const d = CAL_TYPES.find(x => x[0] === tid); return d ? d[1] : ''; }).filter(Boolean).join(' + ')]
+      .filter(Boolean).join(' — ');
+    const olds = (e.oldurl || '').split(',').map(x => x.trim()).filter(Boolean).map(x => linkA(x)).join(' · ');
+    return '<div class="group" data-cal="' + e.id + '" style="padding:9px 12px;cursor:pointer" title="Click to edit">' +
+      '<div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap"><b>' + (esc(e.topic) || '(untitled idea)') + '</b>' +
+      (meta ? '<span class="mini">' + meta + '</span>' : '') +
+      '<span style="margin-left:auto"><button class="btn sub" data-sched="' + e.id + '" style="padding:3px 12px;font-size:12px">Schedule ↑</button></span></div>' +
+      (e.prompts ? '<div class="mini">' + esc(e.prompts.length > 120 ? e.prompts.slice(0, 120) + '…' : e.prompts) + '</div>' : '') +
+      (olds ? '<div class="mini">Old: ' + olds + '</div>' : '') + '</div>';
+  }).join('');
+  return '<p class="intro">Plan pieces here; each row is fully editable (click it). Entries live in your notes file, so they sync across devices and survive data refreshes. <b>' + calEntries().filter(e => !isIdea(e)).length + '</b> scheduled · <b>' + calEntries().filter(isIdea).length + '</b> ideas.</p>' +
     '<div class="toolbar">' +
     '<button class="btn" id="cal-new">+ New entry</button>' +
     '<input type="search" id="cal-q" placeholder="Search topic, keyword, URL…" value="' + esc(CALF.q) + '">' +
     '<select id="cal-status"><option value="">Any status</option>' + CAL_STATUSES.map(s => '<option value="' + s[0] + '" ' + (CALF.status === s[0] ? 'selected' : '') + '>' + s[1] + '</option>').join('') + '</select>' +
     '<select id="cal-type"><option value="">Any type</option>' + CAL_TYPES.map(t => '<option value="' + t[0] + '" ' + (CALF.type === t[0] ? 'selected' : '') + '>' + t[1] + '</option>').join('') + '</select>' +
     '<span class="count">' + list.length + ' shown</span></div>' +
+    '<h2 style="font-size:15px;margin:4px 0 8px">Scheduled</h2>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th>Publish date</th><th>Status</th><th>Content type</th><th>Topic</th><th>Primary target kw</th><th>Target prompts</th><th>Draft</th><th>Publish URL</th><th>Old URL</th><th>Last publish</th></tr></thead><tbody>' +
-    (rows || '<tr><td colspan="10" class="mini" style="padding:18px">Nothing planned yet — hit + New entry.</td></tr>') +
-    '</tbody></table></div>';
+    (rows || '<tr><td colspan="10" class="mini" style="padding:18px">Nothing scheduled yet — hit + New entry, or promote an idea below.</td></tr>') +
+    '</tbody></table></div>' +
+    '<h2 style="font-size:15px;margin:20px 0 8px">Ideas <span class="mini">' + ideas.length + '</span></h2>' +
+    '<div class="addc" style="max-width:560px;margin-bottom:10px"><input type="text" id="idea-new" placeholder="Drop a topic idea… (details later — click it any time to flesh out)"><button class="btn sub" id="idea-add">Add idea</button></div>' +
+    (ideaCards || '<p class="mini">No ideas parked. Anything you type above lands here; Schedule ↑ moves it into the table.</p>');
 }
-function calEditor(id) {
+function calEditor(id, opts) {
   const existing = id ? calEntries().find(e => e.id === id) : null;
-  const e = existing || { id: uuid(), date:'', status:'outline', types:[], topic:'', kw:'', vol:'', kd:'', prompts:'', gdoc:'', url:'', oldurl:'', lastpub:'' };
+  const e = existing || { id: uuid(), bucket:'sched', date:'', status:'outline', types:[], topic:'', kw:'', vol:'', kd:'', prompts:'', gdoc:'', url:'', oldurl:'', lastpub:'' };
+  const bucket0 = (opts && opts.promote) ? 'sched' : (e.bucket === 'idea' ? 'idea' : 'sched');
   const fld = (label, inner) => '<div class="sec" style="margin-bottom:11px"><h5>' + label + '</h5>' + inner + '</div>';
   const ti = (fid, val, ph) => '<input type="text" id="' + fid + '" value="' + esc(val || '') + '" placeholder="' + esc(ph || '') + '" style="width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">';
-  const m = modal('<h2>' + (existing ? 'Edit entry' : 'New entry') + '</h2>' +
+  const m = modal('<h2>' + (existing ? (opts && opts.promote ? 'Schedule this idea' : 'Edit entry') : 'New entry') + '</h2>' +
+    fld('Where does this live?', '<div class="pillrow">' +
+      '<span class="apill mine ' + (bucket0 === 'idea' ? '' : 'off') + '" data-bk="idea" style="background:' + colorOf('slate') + '">Idea</span>' +
+      '<span class="apill mine ' + (bucket0 === 'sched' ? '' : 'off') + '" data-bk="sched" style="background:' + colorOf('green') + '">Scheduled</span></div>') +
     '<div class="row2">' +
       '<div style="flex:1">' + fld('Publish date', '<input type="date" id="c-date" value="' + esc(e.date || '') + '" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">') + '</div>' +
-      '<div style="flex:1">' + fld('Status', '<select id="c-status" style="width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff">' + CAL_STATUSES.map(s => '<option value="' + s[0] + '" ' + (e.status === s[0] ? 'selected' : '') + '>' + s[1] + '</option>').join('') + '</select>') + '</div>' +
+      '<div style="flex:1">' + fld('Status', '<select id="c-status" style="width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff"><option value="">—</option>' + CAL_STATUSES.map(s => '<option value="' + s[0] + '" ' + (e.status === s[0] ? 'selected' : '') + '>' + s[1] + '</option>').join('') + '</select>') + '</div>' +
     '</div>' +
     fld('Content type (choose any)', '<div class="pillrow">' + CAL_TYPES.map(t => '<span class="apill mine ' + ((e.types || []).includes(t[0]) ? '' : 'off') + '" data-ct="' + t[0] + '" style="background:' + colorOf('blue') + '">' + t[1] + '</span>').join('') + '</div>') +
     fld('Topic', ti('c-topic', e.topic, 'e.g. QOF basics pillar')) +
@@ -637,6 +661,13 @@ function calEditor(id) {
     fld('Last publish date (of the old post)', '<input type="date" id="c-lastpub" value="' + esc(e.lastpub || '') + '" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">') +
     '<div class="foot">' + (existing ? '<button class="btn danger" id="c-del">Delete</button>' : '') + '<button class="btn sub" id="c-cancel">Cancel</button><button class="btn" id="c-save">Save</button></div>');
   $$('[data-ct]', m).forEach(el => el.addEventListener('click', () => el.classList.toggle('off')));
+  $$('[data-bk]', m).forEach(el => el.addEventListener('click', () => {
+    $$('[data-bk]', m).forEach(x => x.classList.add('off'));
+    el.classList.remove('off');
+    // promoting an idea with no status yet → suggest Outline
+    if (el.dataset.bk === 'sched' && !$('#c-status', m).value) $('#c-status', m).value = 'outline';
+  }));
+  if (opts && opts.promote && !e.status) $('#c-status', m).value = 'outline';
   // convenience: if the keyword matches a known top keyword, prefill its volume
   $('#c-kw', m).addEventListener('change', () => {
     if ($('#c-vol', m).value) return;
@@ -653,7 +684,9 @@ function calEditor(id) {
     annChanged(); closeModal(); toast('Entry deleted.');
   });
   $('#c-save', m).addEventListener('click', () => {
+    const bk = ($$('[data-bk]', m).find(x => !x.classList.contains('off')) || {}).dataset;
     const upd = { id: e.id, created: e.created || nowISO(), u: nowISO(),
+      bucket: (bk && bk.bk) === 'idea' ? 'idea' : 'sched',
       date: $('#c-date', m).value, status: $('#c-status', m).value,
       types: $$('[data-ct]', m).filter(x => !x.classList.contains('off')).map(x => x.dataset.ct),
       topic: $('#c-topic', m).value.trim(), kw: $('#c-kw', m).value.trim(),
@@ -691,7 +724,19 @@ function wire(root) {
     const bindC = (fid, key) => { const el = $('#' + fid, root); el && el.addEventListener('change', () => { CALF[key] = el.value; redraw(); }); };
     bindC('cal-status', 'status'); bindC('cal-type', 'type');
   }
-  $$('[data-cal]', root).forEach(tr => tr.addEventListener('click', ev => { if (ev.target.closest('a')) return; calEditor(tr.dataset.cal); }));
+  $$('[data-cal]', root).forEach(tr => tr.addEventListener('click', ev => { if (ev.target.closest('a') || ev.target.closest('[data-sched]')) return; calEditor(tr.dataset.cal); }));
+  $$('[data-sched]', root).forEach(b => b.addEventListener('click', ev => { ev.stopPropagation(); calEditor(b.dataset.sched, { promote: true }); }));
+  const ia = $('#idea-add', root);
+  if (ia) {
+    const addIdea = () => {
+      const inp = $('#idea-new', root); const v = inp.value.trim(); if (!v) return;
+      ANN.cal.push({ id: uuid(), created: nowISO(), u: nowISO(), bucket: 'idea', date: '', status: '',
+        types: [], topic: v, kw: '', vol: '', kd: '', prompts: '', gdoc: '', url: '', oldurl: '', lastpub: '' });
+      annChanged();
+    };
+    ia.addEventListener('click', addIdea);
+    $('#idea-new', root).addEventListener('keydown', ev => { if (ev.key === 'Enter') addIdea(); });
+  }
   bindTips(root);
   bindDrag(root);
 }

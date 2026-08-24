@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-24T20:44:32.808Z",
+ "updated": "2026-08-24T21:30:00.000Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -221,6 +221,229 @@
    "url": "https://www.1031crowdfunding.com/1031-exchange-california/",
    "oldurl": "https://www.1031crowdfunding.com/a-guide-to-1031-exchanges-in-california/",
    "lastpub": "2024-07-08"
+  },
+  {
+   "id": "b33b9da3-b4a8-41fc-8e45-ad61c502b9e0",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "sched",
+   "date": "2026-07-06",
+   "status": "published",
+   "types": [
+    "rewrite",
+    "consolidate"
+   ],
+   "topic": "1031 DST pros & cons",
+   "kw": "dst 1031 exchange",
+   "vol": 720,
+   "kd": 17,
+   "prompts": "What are the pros and cons of DST 1031?\nShould I 1031 into a DST?",
+   "gdoc": "",
+   "url": "https://www.1031crowdfunding.com/delaware-statutory-trust-pros-and-cons/",
+   "oldurl": "https://www.1031crowdfunding.com/10-reasons-to-consider-a-dst-1031-exchange/, https://www.1031crowdfunding.com/pros-and-cons-of-investing-in-a-delaware-statutory-trust/",
+   "lastpub": "2023-09-04"
+  },
+  {
+   "id": "330b8166-7aea-4126-a849-15b2abbf5baa",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "sched",
+   "date": "2026-07-13",
+   "status": "published",
+   "types": [
+    "new"
+   ],
+   "topic": "How to choose a DST sponsor",
+   "kw": "dst sponsors",
+   "vol": 170,
+   "kd": 7,
+   "prompts": "How to choose a DST sponsor?",
+   "gdoc": "",
+   "url": "https://www.1031crowdfunding.com/how-to-choose-a-dst-sponsor/",
+   "oldurl": "",
+   "lastpub": ""
+  },
+  {
+   "id": "9d602202-c98d-4a32-80bc-c790fe4dd211",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "sched",
+   "date": "2026-07-20",
+   "status": "published",
+   "types": [
+    "new"
+   ],
+   "topic": "How to invest in multifamily real estate",
+   "kw": "how to invest in multifamily real estate",
+   "vol": 110,
+   "kd": 20,
+   "prompts": "How to invest in multifamily real estate?",
+   "gdoc": "",
+   "url": "https://www.1031crowdfunding.com/how-to-invest-in-multifamily-real-estate/",
+   "oldurl": "",
+   "lastpub": ""
+  },
+  {
+   "id": "c284d7ee-7114-4d2c-9baf-3940a1068647",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "sched",
+   "date": "2026-07-27",
+   "status": "published",
+   "types": [
+    "rewrite"
+   ],
+   "topic": "Use 401(k) in real estate",
+   "kw": "how to use 401k to invest in real estate",
+   "vol": 70,
+   "kd": 10,
+   "prompts": "How to use 401(k) to invest in real estate?",
+   "gdoc": "",
+   "url": "https://www.1031crowdfunding.com/how-to-use-401k-to-invest-in-real-estate/",
+   "oldurl": "https://www.1031crowdfunding.com/use-401k-for-real-estate-investing/",
+   "lastpub": "2024-01-29"
+  },
+  {
+   "id": "2ee87663-a99b-40af-855c-e411bcf1592b",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "sched",
+   "date": "2026-08-03",
+   "status": "published",
+   "types": [
+    "new"
+   ],
+   "topic": "731 exchange",
+   "kw": "731 exchange",
+   "vol": 90,
+   "kd": 10,
+   "prompts": "What is a 731 exchange?",
+   "gdoc": "",
+   "url": "https://www.1031crowdfunding.com/731-exchange/",
+   "oldurl": "",
+   "lastpub": ""
+  },
+  {
+   "id": "62cf06ae-d4db-4f64-9bd6-44d15ed411db",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "sched",
+   "date": "2026-08-17",
+   "status": "published",
+   "types": [
+    "rewrite"
+   ],
+   "topic": "Drop and swap",
+   "kw": "drop and swap 1031 exchange",
+   "vol": 320,
+   "kd": 5,
+   "prompts": "What is a drop and swap in real estate?",
+   "gdoc": "",
+   "url": "https://www.1031crowdfunding.com/drop-and-swap-1031-exchange/",
+   "oldurl": "https://www.1031crowdfunding.com/drop-and-swap-the-basics/",
+   "lastpub": "2025-08-04"
+  },
+  {
+   "id": "bd512154-b192-45c9-96a7-3fc2dd8b82a2",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "sched",
+   "date": "2026-08-31",
+   "status": "draft",
+   "types": [
+    "rewrite",
+    "consolidate"
+   ],
+   "topic": "QI (qualified intermediary)",
+   "kw": "1031 exchange qualified intermediary",
+   "vol": 1600,
+   "kd": 22,
+   "prompts": "What Is a Qualified Intermediary?",
+   "gdoc": "",
+   "url": "",
+   "oldurl": "https://www.1031crowdfunding.com/what-is-a-qualified-intermediary/, https://www.1031crowdfunding.com/the-role-of-a-qualified-intermediary-in-1031-exchanges/, https://www.1031crowdfunding.com/choosing-the-right-1031-exchange-qualified-intermediary/",
+   "lastpub": "2025-09-29"
+  },
+  {
+   "id": "853e0589-858e-41d8-aaec-036a05ac4aca",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "idea",
+   "date": "",
+   "status": "",
+   "types": [
+    "rewrite"
+   ],
+   "topic": "Depreciation recapture",
+   "kw": "how to calculate depreciation recapture",
+   "vol": 140,
+   "kd": 31,
+   "prompts": "How to calculate depreciation recapture?",
+   "gdoc": "",
+   "url": "",
+   "oldurl": "https://www.1031crowdfunding.com/depreciation-recapture-when-selling-property/",
+   "lastpub": "2022-10-31"
+  },
+  {
+   "id": "ca5b742a-dfbb-45e2-997e-d5e2492890cd",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "idea",
+   "date": "",
+   "status": "",
+   "types": [
+    "rewrite",
+    "consolidate"
+   ],
+   "topic": "Do's & Don'ts of DSTs",
+   "kw": "dst guide",
+   "vol": 170,
+   "kd": 20,
+   "prompts": "",
+   "gdoc": "",
+   "url": "",
+   "oldurl": "https://www.1031crowdfunding.com/the-5-dos-and-donts-of-dsts-2/, https://www.1031crowdfunding.com/5-dos-of-dsts/, https://www.1031crowdfunding.com/5-donts-of-dsts/",
+   "lastpub": ""
+  },
+  {
+   "id": "76cacef5-bc9e-41a6-857f-756f0df12d57",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "idea",
+   "date": "",
+   "status": "",
+   "types": [
+    "rewrite"
+   ],
+   "topic": "1031 exchange strategies",
+   "kw": "",
+   "vol": "",
+   "kd": "",
+   "prompts": "",
+   "gdoc": "",
+   "url": "",
+   "oldurl": "https://www.1031crowdfunding.com/1031-investment-strategies-maximize-your-real-estate-portfolio/",
+   "lastpub": ""
+  },
+  {
+   "id": "b12fd9a8-5351-41d3-a19b-e4618417e326",
+   "created": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T21:30:00.000Z",
+   "bucket": "idea",
+   "date": "",
+   "status": "",
+   "types": [
+    "rewrite"
+   ],
+   "topic": "Where & how to find 1031 properties online",
+   "kw": "",
+   "vol": "",
+   "kd": "",
+   "prompts": "",
+   "gdoc": "",
+   "url": "",
+   "oldurl": "https://www.1031crowdfunding.com/identify-properties-online-for-your-real-estate-exchange/",
+   "lastpub": ""
   }
  ],
  "calDel": []
