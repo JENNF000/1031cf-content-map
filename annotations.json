@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-23T23:31:25.606Z",
+ "updated": "2026-08-24T20:44:32.808Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -189,17 +189,39 @@
    "comments": [],
    "delc": [],
    "f": {
-    "cluster": "2026-08-23T23:31:25.606Z",
-    "tier": "2026-08-23T23:31:25.606Z"
+    "cluster": "2026-08-23T23:31:29.237Z",
+    "tier": "2026-08-23T23:31:29.237Z"
    },
+   "updated": "2026-08-23T23:31:29.237Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
-   "tier": "pillar",
-   "offFlags": [],
-   "updated": "2026-08-23T23:31:25.606Z"
+   "tier": "",
+   "offFlags": []
   }
  },
- "live": {}
+ "live": {},
+ "cal": [
+  {
+   "id": "09976d2b-1682-400c-80d6-c6f1e4e9e427",
+   "created": "2026-08-24T20:44:32.808Z",
+   "u": "2026-08-24T20:44:32.808Z",
+   "date": "2026-06-15",
+   "status": "published",
+   "types": [
+    "rewrite"
+   ],
+   "topic": "1031 exchange California",
+   "kw": "1031 exchange california",
+   "vol": 1300,
+   "kd": 19,
+   "prompts": "",
+   "gdoc": "https://docs.google.com/document/d/1joemWLEJ_tHJSgR6cTxZjkHMg3FVBfP_orKPygN_U1g/edit?usp=drive_link",
+   "url": "https://www.1031crowdfunding.com/1031-exchange-california/",
+   "oldurl": "https://www.1031crowdfunding.com/a-guide-to-1031-exchanges-in-california/",
+   "lastpub": "2024-07-08"
+  }
+ ],
+ "calDel": []
 }
