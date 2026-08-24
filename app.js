@@ -43,6 +43,9 @@ const DEFAULT_LABELS = [
   { id:'redirect', name:'301 redirect', color:'blue', derived:true },
 ];
 const INTENTS = [['trans','Transactional'],['comm','Commercial'],['info','Informational']];
+/* Editorial calendar vocabularies (her spec, 8/23) */
+const CAL_STATUSES = [['outline','Outline','slate'],['draft','Draft','amber'],['queue','In queue in WP','blue'],['published','Published','green']];
+const CAL_TYPES = [['new','New'],['rewrite','Rewrite'],['consolidate','Consolidate']];
 
 /* ============================== tiny utils ============================== */
 const $ = (s, el) => (el || document).querySelector(s);
@@ -85,7 +88,8 @@ function blankAnn() {
   return { version: 2, updated: nowISO(), author: 'Jennifer',
     statuses: JSON.parse(JSON.stringify(DEFAULT_STATUSES)),
     labels: JSON.parse(JSON.stringify(DEFAULT_LABELS)),
-    hidden: [], hiddenAt: '', hiddenS: [], hiddenSAt: '', pages: {}, live: {} };
+    hidden: [], hiddenAt: '', hiddenS: [], hiddenSAt: '', pages: {}, live: {},
+    cal: [], calDel: [] };
 }
 function normAnn(a) {
   if (!a || typeof a !== 'object') return blankAnn();
@@ -98,6 +102,7 @@ function normAnn(a) {
   for (const d of DEFAULT_STATUSES) if (d.id==='none' && !a.statuses.some(s=>s.id==='none')) a.statuses.unshift(JSON.parse(JSON.stringify(d)));
   a.hidden = a.hidden || []; a.hiddenS = a.hiddenS || [];
   a.pages = a.pages || {}; a.live = a.live || {};
+  a.cal = a.cal || []; a.calDel = a.calDel || [];
   for (const p of Object.values(a.pages)) {
     p.comments = p.comments || []; p.delc = p.delc || []; p.f = p.f || {};
     p.labels = p.labels || []; p.offFlags = p.offFlags || [];
@@ -151,6 +156,8 @@ function mergeAnn(a, b) {
   const sA = (a.hiddenSAt||''), sB = (b.hiddenSAt||'');
   m.hiddenS = sB > sA ? b.hiddenS : a.hiddenS; m.hiddenSAt = sB > sA ? sB : sA;
   m.pages = mergePages(a.pages, b.pages);
+  m.calDel = [...new Set([...(a.calDel || []), ...(b.calDel || [])])];
+  m.cal = unionById(a.cal, b.cal).filter(e => !m.calDel.includes(e.id));
   m.live = {};
   for (const k of new Set([...Object.keys(a.live), ...Object.keys(b.live)])) {
     const x = a.live[k], y = b.live[k];
@@ -317,12 +324,14 @@ async function doRefresh() {
 }
 
 /* ============================== chrome: tabs, toast, tooltip ============================== */
+function calEntries() { return (ANN.cal || []).filter(e => !(ANN.calDel || []).includes(e.id)); }
 function renderTabs() {
-  const t = [['map','Topic map'],['pages','All pages'],['insights','Audit insights'],['redirects','Redirects'],['notes','My notes']];
+  const t = [['map','Topic map'],['cal','Editorial calendar'],['pages','All pages'],['insights','Audit insights'],['redirects','Redirects'],['notes','My notes']];
   $('#tabs').innerHTML = t.map(([id, name]) => {
     let n = '';
     if (id === 'insights') n = '<span class="n">' + DATA.insights.filter(i => ['critical','serious'].includes(i.sev)).length + '</span>';
     if (id === 'redirects') n = '<span class="n">' + liveStats().byTier.redirect + '</span>';
+    if (id === 'cal' && calEntries().length) n = '<span class="n">' + calEntries().length + '</span>';
     return '<button data-tab="' + id + '" class="' + (TAB === id ? 'on' : '') + '">' + name + n + '</button>';
   }).join('');
   $$('#tabs button').forEach(b => b.addEventListener('click', () => { TAB = b.dataset.tab; renderTabs(); redraw(); }));
@@ -377,6 +386,7 @@ function redraw() {
   tipEl().style.display = 'none';
   const m = $('#main');
   if (TAB === 'map') m.innerHTML = viewMap();
+  else if (TAB === 'cal') m.innerHTML = viewCal();
   else if (TAB === 'pages') m.innerHTML = viewPages();
   else if (TAB === 'insights') m.innerHTML = viewInsights();
   else if (TAB === 'redirects') m.innerHTML = viewRedirects();
@@ -550,6 +560,112 @@ function viewNotes() {
     (orphans.length ? '<h3 style="font-size:14px;margin:16px 0 6px">Notes on pages no longer in the inventory</h3>' + orphans.map(path => '<div class="u" style="font-size:13px"><span class="tag gone">not in inventory</span> <a href="#" data-open="' + esc(path) + '">' + esc(path) + '</a></div>').join('') : '');
 }
 
+/* ============================== editorial calendar ============================== */
+const CALF = { q:'', status:'', type:'' };
+const linkA = (u, text) => {
+  if (!u) return '—';
+  const href = /^https?:\/\//i.test(u) ? u : (u.startsWith('/') ? 'https://www.1031crowdfunding.com' + u : '');
+  return href ? '<a href="' + esc(href) + '" target="_blank" rel="noopener">' + esc(text || u) + ' ↗</a>' : esc(u);
+};
+const calStatusPill = id => {
+  const s = CAL_STATUSES.find(x => x[0] === id);
+  return s ? '<span class="spill" style="background:' + colorOf(s[2]) + '">' + esc(s[1]) + '</span>' : '—';
+};
+const fmtDate = d => {
+  if (!d) return '';
+  const [y, m, dd] = d.split('-').map(Number);
+  if (!y || !m) return d;
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m - 1] + ' ' + dd + ', ' + y;
+};
+function viewCal() {
+  let list = calEntries();
+  if (CALF.q) { const q = CALF.q.toLowerCase(); list = list.filter(e => ((e.topic||'') + ' ' + (e.kw||'') + ' ' + (e.url||'') + ' ' + (e.oldurl||'') + ' ' + (e.prompts||'')).toLowerCase().includes(q)); }
+  if (CALF.status) list = list.filter(e => e.status === CALF.status);
+  if (CALF.type) list = list.filter(e => (e.types || []).includes(CALF.type));
+  list.sort((a, b) => ((a.date || '9999') < (b.date || '9999') ? -1 : (a.date || '9999') > (b.date || '9999') ? 1 : ((a.topic||'') < (b.topic||'') ? -1 : 1)));
+  const monthOf = e => e.date ? e.date.slice(0, 7) : '';
+  const monthName = k => k ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(k.slice(5, 7)) - 1] + ' ' + k.slice(0, 4) : 'Unscheduled';
+  let rows = '', lastMonth = null;
+  for (const e of list) {
+    const mk = monthOf(e);
+    if (mk !== lastMonth) { rows += '<tr class="mrow"><td colspan="10" style="background:#f6f6f4;font-weight:650;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#52514e">' + monthName(mk) + '</td></tr>'; lastMonth = mk; }
+    const oldLinks = (e.oldurl || '').split(',').map(x => x.trim()).filter(Boolean).map(x => linkA(x)).join('<br>') || '—';
+    rows += '<tr data-cal="' + e.id + '" style="cursor:pointer" title="Click to edit">' +
+      '<td style="white-space:nowrap">' + (fmtDate(e.date) || '—') + '</td>' +
+      '<td>' + calStatusPill(e.status) + '</td>' +
+      '<td>' + ((e.types || []).map(tid => { const d = CAL_TYPES.find(x => x[0] === tid); return d ? '<span class="badge">' + d[1] + '</span>' : ''; }).join(' ') || '—') + '</td>' +
+      '<td style="min-width:160px"><b>' + (esc(e.topic) || '—') + '</b></td>' +
+      '<td>' + (e.kw ? esc(e.kw) + '<div class="mini">' + (e.vol ? 'vol ' + fmt(e.vol) : '') + (e.vol && e.kd ? ' · ' : '') + (e.kd ? 'KD ' + esc(e.kd) : '') + '</div>' : '—') + '</td>' +
+      '<td style="max-width:220px"><span class="mini" title="' + esc(e.prompts || '') + '">' + esc((e.prompts || '').length > 90 ? e.prompts.slice(0, 90) + '…' : e.prompts || '—') + '</span></td>' +
+      '<td>' + (e.gdoc ? linkA(e.gdoc, 'Google Doc') : '—') + '</td>' +
+      '<td style="max-width:180px;word-break:break-all">' + linkA(e.url) + '</td>' +
+      '<td style="max-width:180px;word-break:break-all">' + oldLinks + '</td>' +
+      '<td style="white-space:nowrap">' + (fmtDate(e.lastpub) || '—') + '</td></tr>';
+  }
+  return '<p class="intro">Plan pieces here; each row is fully editable (click it). Entries live in your notes file, so they sync across devices and survive data refreshes. <b>' + calEntries().length + '</b> planned.</p>' +
+    '<div class="toolbar">' +
+    '<button class="btn" id="cal-new">+ New entry</button>' +
+    '<input type="search" id="cal-q" placeholder="Search topic, keyword, URL…" value="' + esc(CALF.q) + '">' +
+    '<select id="cal-status"><option value="">Any status</option>' + CAL_STATUSES.map(s => '<option value="' + s[0] + '" ' + (CALF.status === s[0] ? 'selected' : '') + '>' + s[1] + '</option>').join('') + '</select>' +
+    '<select id="cal-type"><option value="">Any type</option>' + CAL_TYPES.map(t => '<option value="' + t[0] + '" ' + (CALF.type === t[0] ? 'selected' : '') + '>' + t[1] + '</option>').join('') + '</select>' +
+    '<span class="count">' + list.length + ' shown</span></div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Publish date</th><th>Status</th><th>Content type</th><th>Topic</th><th>Primary target kw</th><th>Target prompts</th><th>Draft</th><th>Publish URL</th><th>Old URL</th><th>Last publish</th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="10" class="mini" style="padding:18px">Nothing planned yet — hit + New entry.</td></tr>') +
+    '</tbody></table></div>';
+}
+function calEditor(id) {
+  const existing = id ? calEntries().find(e => e.id === id) : null;
+  const e = existing || { id: uuid(), date:'', status:'outline', types:[], topic:'', kw:'', vol:'', kd:'', prompts:'', gdoc:'', url:'', oldurl:'', lastpub:'' };
+  const fld = (label, inner) => '<div class="sec" style="margin-bottom:11px"><h5>' + label + '</h5>' + inner + '</div>';
+  const ti = (fid, val, ph) => '<input type="text" id="' + fid + '" value="' + esc(val || '') + '" placeholder="' + esc(ph || '') + '" style="width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">';
+  const m = modal('<h2>' + (existing ? 'Edit entry' : 'New entry') + '</h2>' +
+    '<div class="row2">' +
+      '<div style="flex:1">' + fld('Publish date', '<input type="date" id="c-date" value="' + esc(e.date || '') + '" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">') + '</div>' +
+      '<div style="flex:1">' + fld('Status', '<select id="c-status" style="width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:4px;font:inherit;background:#fff">' + CAL_STATUSES.map(s => '<option value="' + s[0] + '" ' + (e.status === s[0] ? 'selected' : '') + '>' + s[1] + '</option>').join('') + '</select>') + '</div>' +
+    '</div>' +
+    fld('Content type (choose any)', '<div class="pillrow">' + CAL_TYPES.map(t => '<span class="apill mine ' + ((e.types || []).includes(t[0]) ? '' : 'off') + '" data-ct="' + t[0] + '" style="background:' + colorOf('blue') + '">' + t[1] + '</span>').join('') + '</div>') +
+    fld('Topic', ti('c-topic', e.topic, 'e.g. QOF basics pillar')) +
+    '<div class="row2">' +
+      '<div style="flex:2">' + fld('Primary target keyword', ti('c-kw', e.kw, 'e.g. qualified opportunity fund')) + '</div>' +
+      '<div style="flex:1">' + fld('Volume', '<input type="number" id="c-vol" value="' + esc(e.vol || '') + '" min="0" style="width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">') + '</div>' +
+      '<div style="flex:1">' + fld('KD %', '<input type="number" id="c-kd" value="' + esc(e.kd || '') + '" min="0" max="100" style="width:100%;padding:7px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">') + '</div>' +
+    '</div>' +
+    fld('Target prompts (AEO)', '<textarea id="c-prompts" style="min-height:70px" placeholder="One per line — e.g. what is a qualified opportunity fund and how does it work">' + esc(e.prompts || '') + '</textarea>') +
+    fld('Draft in Google Docs (link)', ti('c-gdoc', e.gdoc, 'https://docs.google.com/document/…')) +
+    fld('Publish URL', ti('c-url', e.url, '/education-center/…/ or full URL')) +
+    fld('Old URL(s) — for rewrites / consolidations, comma-separated', ti('c-oldurl', e.oldurl, '/old-slug/, /another-old-slug/')) +
+    fld('Last publish date (of the old post)', '<input type="date" id="c-lastpub" value="' + esc(e.lastpub || '') + '" style="width:100%;padding:6px 10px;border:1px solid var(--line);border-radius:4px;font:inherit">') +
+    '<div class="foot">' + (existing ? '<button class="btn danger" id="c-del">Delete</button>' : '') + '<button class="btn sub" id="c-cancel">Cancel</button><button class="btn" id="c-save">Save</button></div>');
+  $$('[data-ct]', m).forEach(el => el.addEventListener('click', () => el.classList.toggle('off')));
+  // convenience: if the keyword matches a known top keyword, prefill its volume
+  $('#c-kw', m).addEventListener('change', () => {
+    if ($('#c-vol', m).value) return;
+    const kw = $('#c-kw', m).value.trim().toLowerCase();
+    const hit = DATA.pages.find(p => (p.pkw || '').toLowerCase() === kw && p.vol);
+    if (hit) $('#c-vol', m).value = hit.vol;
+  });
+  $('#c-cancel', m).addEventListener('click', closeModal);
+  const del = $('#c-del', m);
+  del && del.addEventListener('click', () => {
+    if (!del.dataset.armed) { del.dataset.armed = '1'; del.textContent = 'Delete — sure?'; setTimeout(() => { del.dataset.armed = ''; del.textContent = 'Delete'; }, 3500); return; }
+    ANN.calDel = [...new Set([...(ANN.calDel || []), e.id])];
+    ANN.cal = (ANN.cal || []).filter(x => x.id !== e.id);
+    annChanged(); closeModal(); toast('Entry deleted.');
+  });
+  $('#c-save', m).addEventListener('click', () => {
+    const upd = { id: e.id, created: e.created || nowISO(), u: nowISO(),
+      date: $('#c-date', m).value, status: $('#c-status', m).value,
+      types: $$('[data-ct]', m).filter(x => !x.classList.contains('off')).map(x => x.dataset.ct),
+      topic: $('#c-topic', m).value.trim(), kw: $('#c-kw', m).value.trim(),
+      vol: $('#c-vol', m).value ? Number($('#c-vol', m).value) : '', kd: $('#c-kd', m).value ? Number($('#c-kd', m).value) : '',
+      prompts: $('#c-prompts', m).value.trim(), gdoc: $('#c-gdoc', m).value.trim(),
+      url: $('#c-url', m).value.trim(), oldurl: $('#c-oldurl', m).value.trim(), lastpub: $('#c-lastpub', m).value };
+    const i = (ANN.cal || []).findIndex(x => x.id === e.id);
+    if (i >= 0) ANN.cal[i] = upd; else ANN.cal.push(upd);
+    annChanged(); closeModal();
+  });
+}
+
 /* ============================== wiring ============================== */
 function wire(root) {
   const q = $('#f-q', root);
@@ -568,6 +684,14 @@ function wire(root) {
   }));
   const csv = $('#btn-csv', root); csv && csv.addEventListener('click', exportCSV);
   const libs = $('#btn-libs', root); libs && libs.addEventListener('click', libraryModal);
+  const cn = $('#cal-new', root); cn && cn.addEventListener('click', () => calEditor(null));
+  const cq = $('#cal-q', root);
+  if (cq) {
+    cq.addEventListener('input', debounce(() => { CALF.q = cq.value.trim(); redrawKeepFocus('cal-q'); }, 220));
+    const bindC = (fid, key) => { const el = $('#' + fid, root); el && el.addEventListener('change', () => { CALF[key] = el.value; redraw(); }); };
+    bindC('cal-status', 'status'); bindC('cal-type', 'type');
+  }
+  $$('[data-cal]', root).forEach(tr => tr.addEventListener('click', ev => { if (ev.target.closest('a')) return; calEditor(tr.dataset.cal); }));
   bindTips(root);
   bindDrag(root);
 }
