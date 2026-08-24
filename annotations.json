@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-24T22:30:06.924Z",
+ "updated": "2026-08-24T22:31:30.923Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -286,7 +286,7 @@
   {
    "id": "c284d7ee-7114-4d2c-9baf-3940a1068647",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T22:31:30.923Z",
    "bucket": "sched",
    "date": "2026-07-27",
    "status": "published",
@@ -298,7 +298,7 @@
    "vol": 70,
    "kd": 10,
    "prompts": "How to use 401(k) to invest in real estate?",
-   "gdoc": "",
+   "gdoc": "https://docs.google.com/document/d/1lW9VjYMwhbl4RtoVKzPnsdx-9JJcGUgVBUAbiLssWkk/edit?usp=drive_link",
    "url": "https://www.1031crowdfunding.com/how-to-use-401k-to-invest-in-real-estate/",
    "oldurl": "https://www.1031crowdfunding.com/use-401k-for-real-estate-investing/",
    "lastpub": "2024-01-29"
@@ -306,7 +306,7 @@
   {
    "id": "2ee87663-a99b-40af-855c-e411bcf1592b",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T22:31:05.480Z",
    "bucket": "sched",
    "date": "2026-08-03",
    "status": "published",
@@ -318,7 +318,7 @@
    "vol": 90,
    "kd": 10,
    "prompts": "What is a 731 exchange?",
-   "gdoc": "",
+   "gdoc": "https://docs.google.com/document/d/1yXEGr9A9OjJZcyL-nBh8x4U1aGd7sFFOdehuo9nTt7o/edit?usp=drive_link",
    "url": "https://www.1031crowdfunding.com/731-exchange/",
    "oldurl": "",
    "lastpub": ""
@@ -326,7 +326,7 @@
   {
    "id": "62cf06ae-d4db-4f64-9bd6-44d15ed411db",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T22:30:33.035Z",
    "bucket": "sched",
    "date": "2026-08-17",
    "status": "published",
@@ -338,7 +338,7 @@
    "vol": 320,
    "kd": 5,
    "prompts": "What is a drop and swap in real estate?",
-   "gdoc": "",
+   "gdoc": "https://docs.google.com/document/d/1VL9dxOjIRu_ydQIrSVJjsZ0HdybbMxBs4ByzjBgfQek/edit?usp=drive_link",
    "url": "https://www.1031crowdfunding.com/drop-and-swap-1031-exchange/",
    "oldurl": "https://www.1031crowdfunding.com/drop-and-swap-the-basics/",
    "lastpub": "2025-08-04"
