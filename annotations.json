@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-24T22:31:30.923Z",
+ "updated": "2026-08-24T22:41:31.843Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -199,6 +199,21 @@
    "cluster": "",
    "tier": "",
    "offFlags": []
+  },
+  "/marketplace-for-1031-exchange-investments/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-08-24T22:41:31.843Z",
+    "tier": "2026-08-24T22:41:31.843Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "transactional",
+   "offFlags": [],
+   "updated": "2026-08-24T22:41:31.843Z"
   }
  },
  "live": {},
@@ -266,7 +281,7 @@
   {
    "id": "9d602202-c98d-4a32-80bc-c790fe4dd211",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T22:31:50.421Z",
    "bucket": "sched",
    "date": "2026-07-20",
    "status": "published",
@@ -278,7 +293,7 @@
    "vol": 110,
    "kd": 20,
    "prompts": "How to invest in multifamily real estate?",
-   "gdoc": "",
+   "gdoc": "https://docs.google.com/document/d/1QVAAVI7i8_N8O1sfSCn3pu3PiH8IODElAju0iKqsL-k/edit?usp=drive_link",
    "url": "https://www.1031crowdfunding.com/how-to-invest-in-multifamily-real-estate/",
    "oldurl": "",
    "lastpub": ""
