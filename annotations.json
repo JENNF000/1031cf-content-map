@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-24T22:41:31.843Z",
+ "updated": "2026-08-24T22:42:49.620Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -207,13 +207,57 @@
     "cluster": "2026-08-24T22:41:31.843Z",
     "tier": "2026-08-24T22:41:31.843Z"
    },
+   "updated": "2026-08-24T22:41:31.843Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "transactional",
+   "offFlags": []
+  },
+  "/education-center/blog/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-08-24T22:41:43.812Z",
+    "tier": "2026-08-24T22:41:43.812Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "pillar",
    "offFlags": [],
-   "updated": "2026-08-24T22:41:31.843Z"
+   "updated": "2026-08-24T22:41:43.812Z"
+  },
+  "/testimonials/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-08-24T22:41:55.741Z",
+    "tier": "2026-08-24T22:41:55.741Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "pillar",
+   "offFlags": [],
+   "updated": "2026-08-24T22:41:55.741Z"
+  },
+  "/what-makes-a-great-leader-vs-a-great-manager/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-08-24T22:42:49.620Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "Press Mentions",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-24T22:42:49.620Z"
   }
  },
  "live": {},
