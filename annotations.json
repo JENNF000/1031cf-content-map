@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-24T23:29:08.368Z",
+ "updated": "2026-08-27T23:25:33.986Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -13,8 +13,9 @@
   {
    "id": "todo",
    "name": "To do",
-   "color": "slate",
-   "o": 0
+   "color": "#eef22c",
+   "o": 0,
+   "u": "2026-08-27T23:25:35.209Z"
   },
   {
    "id": "inprogress",
@@ -265,13 +266,13 @@
    "f": {
     "cluster": "2026-08-24T22:43:38.867Z"
    },
+   "updated": "2026-08-24T22:43:38.867Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "Press Mentions",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-08-24T22:43:38.867Z"
+   "offFlags": []
   }
  },
  "live": {},
@@ -298,7 +299,7 @@
   {
    "id": "b33b9da3-b4a8-41fc-8e45-ad61c502b9e0",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
+   "u": "2026-08-24T23:29:27.023Z",
    "bucket": "sched",
    "date": "2026-07-06",
    "status": "published",
@@ -311,7 +312,7 @@
    "vol": 720,
    "kd": 17,
    "prompts": "What are the pros and cons of DST 1031?\nShould I 1031 into a DST?",
-   "gdoc": "",
+   "gdoc": "https://docs.google.com/document/d/17avK3kdHj_pbhLTeIUJzqCDJw8upRknlsSYk1hUbtIo/edit?usp=drive_link",
    "url": "https://www.1031crowdfunding.com/delaware-statutory-trust-pros-and-cons/",
    "oldurl": "https://www.1031crowdfunding.com/10-reasons-to-consider-a-dst-1031-exchange/, https://www.1031crowdfunding.com/pros-and-cons-of-investing-in-a-delaware-statutory-trust/",
    "lastpub": "2023-09-04"
