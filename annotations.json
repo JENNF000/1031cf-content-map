@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-27T23:25:33.986Z",
+ "updated": "2026-08-27T23:26:33.733Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -13,9 +13,9 @@
   {
    "id": "todo",
    "name": "To do",
-   "color": "#eef22c",
+   "color": "#f1f42f",
    "o": 0,
-   "u": "2026-08-27T23:25:35.209Z"
+   "u": "2026-08-27T23:25:37.729Z"
   },
   {
    "id": "inprogress",
@@ -26,20 +26,23 @@
   {
    "id": "drafted",
    "name": "Drafted",
-   "color": "purple",
-   "o": 2
+   "color": "#9e95c6",
+   "o": 2,
+   "u": "2026-08-27T23:26:11.220Z"
   },
   {
    "id": "published",
    "name": "Published",
-   "color": "green",
-   "o": 3
+   "color": "#43b668",
+   "o": 3,
+   "u": "2026-08-27T23:25:47.276Z"
   },
   {
    "id": "monitoring",
    "name": "Monitoring",
-   "color": "blue",
-   "o": 4
+   "color": "#bb8cd4",
+   "o": 4,
+   "u": "2026-08-27T23:25:57.867Z"
   },
   {
    "id": "blocked",
@@ -58,8 +61,8 @@
   {
    "id": "rewrite",
    "name": "Rewrite",
-   "color": "#b1904e",
-   "u": "2026-08-23T20:15:09.957Z"
+   "color": "#eef04c",
+   "u": "2026-08-27T23:26:33.131Z"
   },
   {
    "id": "refresh",
