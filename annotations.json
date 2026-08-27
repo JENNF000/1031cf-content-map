@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-27T23:26:33.733Z",
+ "updated": "2026-08-27T23:27:34.136Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -61,8 +61,8 @@
   {
    "id": "rewrite",
    "name": "Rewrite",
-   "color": "#eef04c",
-   "u": "2026-08-27T23:26:33.131Z"
+   "color": "#f1f42f",
+   "u": "2026-08-27T23:26:52.510Z"
   },
   {
    "id": "refresh",
@@ -136,20 +136,23 @@
   {
    "id": "nokw",
    "name": "No keywords",
-   "color": "slate",
-   "derived": true
+   "color": "#909498",
+   "derived": true,
+   "u": "2026-08-27T23:27:34.136Z"
   },
   {
    "id": "newpage",
    "name": "New (no data yet)",
-   "color": "blue",
-   "derived": true
+   "color": "#2c67af",
+   "derived": true,
+   "u": "2026-08-27T23:27:30.191Z"
   },
   {
    "id": "redirect",
    "name": "301 redirect",
-   "color": "blue",
-   "derived": true
+   "color": "#9ec5f5",
+   "derived": true,
+   "u": "2026-08-27T23:27:19.365Z"
   }
  ],
  "hidden": [
@@ -160,9 +163,10 @@
   "intlinks",
   "eeat",
   "priority",
-  "keep"
+  "keep",
+  "refresh"
  ],
- "hiddenAt": "2026-08-23T19:52:14.362Z",
+ "hiddenAt": "2026-08-27T23:26:56.405Z",
  "hiddenS": [
   "blocked",
   "wontdo",
