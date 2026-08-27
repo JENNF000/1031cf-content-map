@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-27T23:27:34.136Z",
+ "updated": "2026-08-27T23:28:35.405Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -13,9 +13,9 @@
   {
    "id": "todo",
    "name": "To do",
-   "color": "#f1f42f",
+   "color": "#ffde38",
    "o": 0,
-   "u": "2026-08-27T23:25:37.729Z"
+   "u": "2026-08-27T23:28:29.292Z"
   },
   {
    "id": "inprogress",
@@ -61,8 +61,8 @@
   {
    "id": "rewrite",
    "name": "Rewrite",
-   "color": "#f1f42f",
-   "u": "2026-08-27T23:26:52.510Z"
+   "color": "#ffde2f",
+   "u": "2026-08-27T23:28:36.662Z"
   },
   {
    "id": "refresh",
@@ -123,8 +123,9 @@
   {
    "id": "slug",
    "name": "Slug fix",
-   "color": "amber",
-   "derived": true
+   "color": "#e6bb65",
+   "derived": true,
+   "u": "2026-08-27T23:27:46.030Z"
   },
   {
    "id": "underperform",
