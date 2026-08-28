@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-28T18:24:42.144Z",
+ "updated": "2026-08-28T18:25:46.749Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -290,13 +290,13 @@
    "f": {
     "status": "2026-08-27T23:28:55.670Z"
    },
+   "updated": "2026-08-27T23:28:55.670Z",
    "status": "todo",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-08-27T23:28:55.670Z"
+   "offFlags": []
   },
   "/education-center/dst-1031-exchange/": {
    "comments": [],
@@ -304,13 +304,13 @@
    "f": {
     "status": "2026-08-27T23:29:02.317Z"
    },
+   "updated": "2026-08-27T23:29:02.317Z",
    "status": "todo",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-08-27T23:29:02.317Z"
+   "offFlags": []
   },
   "/replacement-property-identification/": {
    "comments": [],
@@ -319,13 +319,13 @@
     "status": "2026-08-27T23:29:06.456Z",
     "offFlags": "2026-08-27T23:29:13.459Z"
    },
+   "updated": "2026-08-27T23:29:13.459Z",
    "status": "todo",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-08-27T23:29:13.459Z"
+   "offFlags": []
   },
   "/1031-exchange-rules/": {
    "comments": [],
@@ -334,13 +334,27 @@
     "status": "2026-08-27T23:29:18.352Z",
     "offFlags": "2026-08-27T23:29:20.270Z"
    },
+   "updated": "2026-08-27T23:29:20.270Z",
    "status": "todo",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
+   "offFlags": []
+  },
+  "/1031-exchange-california/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-28T18:25:46.749Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
    "offFlags": [],
-   "updated": "2026-08-27T23:29:20.270Z"
+   "updated": "2026-08-28T18:25:46.749Z"
   }
  },
  "live": {},
