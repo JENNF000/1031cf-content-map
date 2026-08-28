@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-28T18:28:56.575Z",
+ "updated": "2026-08-28T18:30:12.026Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -186,12 +186,13 @@
    ],
    "delc": [],
    "f": {
-    "status": "2026-08-28T18:24:42.144Z"
+    "status": "2026-08-28T18:24:42.144Z",
+    "target": "2026-08-28T18:30:12.026Z"
    },
-   "updated": "2026-08-28T18:24:42.144Z",
+   "updated": "2026-08-28T18:30:12.026Z",
    "status": "published",
    "labels": [],
-   "target": "",
+   "target": "dst 1031 exchange",
    "cluster": "",
    "tier": "",
    "offFlags": []
@@ -360,12 +361,13 @@
    "comments": [],
    "delc": [],
    "f": {
-    "status": "2026-08-28T18:26:08.214Z"
+    "status": "2026-08-28T18:26:08.214Z",
+    "target": "2026-08-28T18:29:43.540Z"
    },
-   "updated": "2026-08-28T18:26:08.214Z",
+   "updated": "2026-08-28T18:29:43.540Z",
    "status": "published",
    "labels": [],
-   "target": "",
+   "target": "dst sponsors",
    "cluster": "",
    "tier": "",
    "offFlags": []
