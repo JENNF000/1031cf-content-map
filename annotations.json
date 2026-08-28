@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-27T23:28:35.405Z",
+ "updated": "2026-08-28T18:24:42.144Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -61,8 +61,8 @@
   {
    "id": "rewrite",
    "name": "Rewrite",
-   "color": "#ffde2f",
-   "u": "2026-08-27T23:28:36.662Z"
+   "color": "#ffde38",
+   "u": "2026-08-27T23:28:40.337Z"
   },
   {
    "id": "refresh",
@@ -185,9 +185,11 @@
     }
    ],
    "delc": [],
-   "f": {},
-   "updated": "2026-08-23T00:00:00.000Z",
-   "status": "",
+   "f": {
+    "status": "2026-08-28T18:24:42.144Z"
+   },
+   "updated": "2026-08-28T18:24:42.144Z",
+   "status": "published",
    "labels": [],
    "target": "",
    "cluster": "",
@@ -281,6 +283,64 @@
    "cluster": "Press Mentions",
    "tier": "",
    "offFlags": []
+  },
+  "/the-three-property-rule-in-1031-exchanges/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-27T23:28:55.670Z"
+   },
+   "status": "todo",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-27T23:28:55.670Z"
+  },
+  "/education-center/dst-1031-exchange/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-27T23:29:02.317Z"
+   },
+   "status": "todo",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-27T23:29:02.317Z"
+  },
+  "/replacement-property-identification/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-27T23:29:06.456Z",
+    "offFlags": "2026-08-27T23:29:13.459Z"
+   },
+   "status": "todo",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-27T23:29:13.459Z"
+  },
+  "/1031-exchange-rules/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-27T23:29:18.352Z",
+    "offFlags": "2026-08-27T23:29:20.270Z"
+   },
+   "status": "todo",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-27T23:29:20.270Z"
   }
  },
  "live": {},
