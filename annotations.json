@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-28T18:25:46.749Z",
+ "updated": "2026-08-28T18:27:08.542Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -348,13 +348,41 @@
    "f": {
     "status": "2026-08-28T18:25:46.749Z"
    },
+   "updated": "2026-08-28T18:25:46.749Z",
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": []
+  },
+  "/how-to-choose-a-dst-sponsor/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-28T18:26:08.214Z"
+   },
    "status": "published",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
    "offFlags": [],
-   "updated": "2026-08-28T18:25:46.749Z"
+   "updated": "2026-08-28T18:26:08.214Z"
+  },
+  "/how-to-invest-in-multifamily-real-estate/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-28T18:27:08.542Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-28T18:27:08.542Z"
   }
  },
  "live": {},
