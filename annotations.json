@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-28T18:30:12.026Z",
+ "updated": "2026-08-28T18:31:12.220Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -347,12 +347,13 @@
    "comments": [],
    "delc": [],
    "f": {
-    "status": "2026-08-28T18:25:46.749Z"
+    "status": "2026-08-28T18:25:46.749Z",
+    "target": "2026-08-28T18:30:26.733Z"
    },
-   "updated": "2026-08-28T18:25:46.749Z",
+   "updated": "2026-08-28T18:30:26.733Z",
    "status": "published",
    "labels": [],
-   "target": "",
+   "target": "1031 exchange california",
    "cluster": "",
    "tier": "",
    "offFlags": []
@@ -386,6 +387,21 @@
    "cluster": "",
    "tier": "",
    "offFlags": []
+  },
+  "/how-to-use-401k-to-invest-in-real-estate/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "target": "2026-08-28T18:31:11.370Z",
+    "status": "2026-08-28T18:31:12.220Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "how to use 401k to invest in real estate",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-28T18:31:12.220Z"
   }
  },
  "live": {},
