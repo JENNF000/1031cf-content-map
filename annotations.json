@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-28T18:31:12.220Z",
+ "updated": "2026-08-28T18:33:29.409Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -392,16 +392,31 @@
    "comments": [],
    "delc": [],
    "f": {
-    "target": "2026-08-28T18:31:11.370Z",
-    "status": "2026-08-28T18:31:12.220Z"
+    "status": "2026-08-28T18:31:12.220Z",
+    "target": "2026-08-28T18:31:11.370Z"
    },
+   "updated": "2026-08-28T18:31:12.220Z",
    "status": "published",
    "labels": [],
    "target": "how to use 401k to invest in real estate",
    "cluster": "",
    "tier": "",
+   "offFlags": []
+  },
+  "/731-exchange/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "target": "2026-08-28T18:33:28.571Z",
+    "status": "2026-08-28T18:33:29.409Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "731 exchange",
+   "cluster": "",
+   "tier": "",
    "offFlags": [],
-   "updated": "2026-08-28T18:31:12.220Z"
+   "updated": "2026-08-28T18:33:29.409Z"
   }
  },
  "live": {},
