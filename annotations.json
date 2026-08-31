@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-31T18:13:07.124Z",
+ "updated": "2026-08-31T18:14:19.306Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -418,6 +418,20 @@
    "cluster": "721 Exchange",
    "tier": "",
    "offFlags": []
+  },
+  "/what-is-a-qualified-intermediary/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-08-31T18:14:19.306Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-08-31T18:14:19.306Z"
   }
  },
  "live": {
