@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-31T18:04:10.081Z",
+ "updated": "2026-08-31T18:13:07.124Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -424,6 +424,10 @@
   "/the-role-of-a-qualified-intermediary-in-1031-exchanges/": {
    "s": "redirect",
    "at": "2026-08-31T18:04:10.081Z"
+  },
+  "/choosing-the-right-1031-exchange-qualified-intermediary/": {
+   "s": "redirect",
+   "at": "2026-08-31T18:13:07.124Z"
   }
  },
  "cal": [
