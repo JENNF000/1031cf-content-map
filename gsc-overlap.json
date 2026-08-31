@@ -1,6 +1,6 @@
 {
- "note": "Machine-written by the app after each GSC pull. Read by the weekly Claude report for merge/split judgment. Public like the rest of the repo.",
- "fetched": "2026-08-31T19:04:43.516Z",
+ "note": "Machine-written by the app after each GSC pull. Read by the weekly Claude report. Public like the rest of the repo.",
+ "fetched": "2026-08-31T19:35:43.434Z",
  "range": "2026-05-31 → 2026-08-29",
  "property": "sc-domain:1031crowdfunding.com",
  "totalRows": 36296,
@@ -29654,5 +29654,4474 @@
    "pillarLoses": false,
    "atStake": 56
   }
- ]
+ ],
+ "pages": {
+  "/": {
+   "clicks": 442,
+   "imps": 26143,
+   "queries": 848,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 228,
+   "topqImps": 2088,
+   "topqPos": 1,
+   "pos": 9.7
+  },
+  "/education-center/what-is-a-delaware-statutory-trust/": {
+   "clicks": 193,
+   "imps": 64495,
+   "queries": 858,
+   "topq": "dst",
+   "topqClicks": 116,
+   "topqImps": 12105,
+   "topqPos": 8.4,
+   "pos": 15.8
+  },
+  "/converting-1031-exchange-to-principal-residence/": {
+   "clicks": 171,
+   "imps": 36562,
+   "queries": 917,
+   "topq": "can you live in a 1031 exchange property",
+   "topqClicks": 3,
+   "topqImps": 208,
+   "topqPos": 6.7,
+   "pos": 29.9
+  },
+  "/capital-gains-tax-calculator/": {
+   "clicks": 145,
+   "imps": 78345,
+   "queries": 3729,
+   "topq": "capital gains tax calculator",
+   "topqClicks": 18,
+   "topqImps": 4055,
+   "topqPos": 13.5,
+   "pos": 22.2
+  },
+  "/marketplace-for-1031-exchange-investments/": {
+   "clicks": 83,
+   "imps": 10839,
+   "queries": 132,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 18,
+   "topqImps": 2043,
+   "topqPos": 1.1,
+   "pos": 8.4
+  },
+  "/author/edward-e-fernandez/": {
+   "clicks": 42,
+   "imps": 2284,
+   "queries": 39,
+   "topq": "ed fernandez",
+   "topqClicks": 1,
+   "topqImps": 59,
+   "topqPos": 9.3,
+   "pos": 7.9
+  },
+  "/can-you-avoid-capital-gains-tax-by-buying-another-property/": {
+   "clicks": 42,
+   "imps": 7606,
+   "queries": 782,
+   "topq": "how to avoid capital gains tax on primary residence",
+   "topqClicks": 1,
+   "topqImps": 3,
+   "topqPos": 52,
+   "pos": 36.9
+  },
+  "/1031-exchange-properties/": {
+   "clicks": 37,
+   "imps": 73827,
+   "queries": 571,
+   "topq": "1031 exchange properties for sale",
+   "topqClicks": 6,
+   "topqImps": 1292,
+   "topqPos": 2.9,
+   "pos": 6.1
+  },
+  "/can-you-gift-a-1031-exchange-property/": {
+   "clicks": 37,
+   "imps": 1461,
+   "queries": 28,
+   "topq": "can you gift a 1031 exchange property",
+   "topqClicks": 1,
+   "topqImps": 68,
+   "topqPos": 2.6,
+   "pos": 8.1
+  },
+  "/what-is-equal-or-greater/": {
+   "clicks": 29,
+   "imps": 8193,
+   "queries": 173,
+   "topq": "1031 exchange equal or greater value",
+   "topqClicks": 1,
+   "topqImps": 64,
+   "topqPos": 3.1,
+   "pos": 16.2
+  },
+  "/education-center/investing-in-student-housing/": {
+   "clicks": 26,
+   "imps": 15997,
+   "queries": 241,
+   "topq": "student housing investments",
+   "topqClicks": 2,
+   "topqImps": 181,
+   "topqPos": 8.7,
+   "pos": 26.5
+  },
+  "/education-center/spanish-1031/": {
+   "clicks": 26,
+   "imps": 3140,
+   "queries": 122,
+   "topq": "1031",
+   "topqClicks": 2,
+   "topqImps": 319,
+   "topqPos": 6.9,
+   "pos": 7.4
+  },
+  "/can-you-refinance-a-1031-exchange-property/": {
+   "clicks": 25,
+   "imps": 2001,
+   "queries": 27,
+   "topq": "refinance after 1031 exchange",
+   "topqClicks": 2,
+   "topqImps": 37,
+   "topqPos": 2.8,
+   "pos": 7.5
+  },
+  "/login": {
+   "clicks": 23,
+   "imps": 3875,
+   "queries": 36,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 4,
+   "topqImps": 1836,
+   "topqPos": 1.2,
+   "pos": 4.8
+  },
+  "/1031-exchange-rules-all-or-nothing/": {
+   "clicks": 23,
+   "imps": 6599,
+   "queries": 96,
+   "topq": "partial 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 1080,
+   "topqPos": 13.9,
+   "pos": 11.5
+  },
+  "/operating-partnership-units-upreits/": {
+   "clicks": 19,
+   "imps": 4068,
+   "queries": 57,
+   "topq": "op units",
+   "topqClicks": 4,
+   "topqImps": 302,
+   "topqPos": 1.5,
+   "pos": 9.4
+  },
+  "/can-you-do-a-1031-exchange-with-a-family-member/": {
+   "clicks": 17,
+   "imps": 3549,
+   "queries": 53,
+   "topq": "1031 exchange between related parties",
+   "topqClicks": 0,
+   "topqImps": 107,
+   "topqPos": 62,
+   "pos": 13.9
+  },
+  "/1031-deadlines-extensions/": {
+   "clicks": 16,
+   "imps": 9184,
+   "queries": 234,
+   "topq": "1031 exchange extension",
+   "topqClicks": 1,
+   "topqImps": 351,
+   "topqPos": 8.3,
+   "pos": 37
+  },
+  "/how-does-your-money-roll-over-in-a-1031-exchange/": {
+   "clicks": 15,
+   "imps": 3229,
+   "queries": 96,
+   "topq": "real estate tax rollover",
+   "topqClicks": 1,
+   "topqImps": 55,
+   "topqPos": 4.9,
+   "pos": 19.7
+  },
+  "/comparing-1031-and-1033-exchanges/": {
+   "clicks": 13,
+   "imps": 2930,
+   "queries": 124,
+   "topq": "1033 vs 1031 exchange",
+   "topqClicks": 2,
+   "topqImps": 42,
+   "topqPos": 4.1,
+   "pos": 37.7
+  },
+  "/leaving-your-heirs-with-assets-not-liabilities/": {
+   "clicks": 13,
+   "imps": 4672,
+   "queries": 116,
+   "topq": "inherited rental property",
+   "topqClicks": 0,
+   "topqImps": 156,
+   "topqPos": 10.2,
+   "pos": 12.8
+  },
+  "/1031cf-bridge-fund-iii/": {
+   "clicks": 12,
+   "imps": 1613,
+   "queries": 26,
+   "topq": "1031 exchange bridge loan",
+   "topqClicks": 0,
+   "topqImps": 59,
+   "topqPos": 10.3,
+   "pos": 8.9
+  },
+  "/chreit/": {
+   "clicks": 12,
+   "imps": 1972,
+   "queries": 53,
+   "topq": "1031 cf properties",
+   "topqClicks": 1,
+   "topqImps": 9,
+   "topqPos": 1.6,
+   "pos": 9.1
+  },
+  "/education-center/qofs-vs-dsts/": {
+   "clicks": 11,
+   "imps": 3231,
+   "queries": 63,
+   "topq": "dst opportunities",
+   "topqClicks": 1,
+   "topqImps": 134,
+   "topqPos": 9.3,
+   "pos": 10.6
+  },
+  "/education-center/replacement-calculator/": {
+   "clicks": 11,
+   "imps": 1297,
+   "queries": 28,
+   "topq": "partial 1031 exchange calculator",
+   "topqClicks": 0,
+   "topqImps": 63,
+   "topqPos": 29.5,
+   "pos": 12.1
+  },
+  "/testimonials/": {
+   "clicks": 11,
+   "imps": 1516,
+   "queries": 24,
+   "topq": "1031 crowdfunding reviews",
+   "topqClicks": 7,
+   "topqImps": 239,
+   "topqPos": 6.7,
+   "pos": 10.1
+  },
+  "/an-investors-guide-to-mixed-use-properties-and-tax-rules/": {
+   "clicks": 10,
+   "imps": 2243,
+   "queries": 103,
+   "topq": "tax planning for mixed-use buildings",
+   "topqClicks": 0,
+   "topqImps": 72,
+   "topqPos": 13.4,
+   "pos": 24.6
+  },
+  "/author/wade-curtis-mba/": {
+   "clicks": 10,
+   "imps": 537,
+   "queries": 8,
+   "topq": "wade curtis",
+   "topqClicks": 4,
+   "topqImps": 158,
+   "topqPos": 1.9,
+   "pos": 7.1
+  },
+  "/what-states-do-not-conform-with-qoz-tax-benefits/": {
+   "clicks": 10,
+   "imps": 6144,
+   "queries": 39,
+   "topq": "show me 10 tax-advantaged alternative investments for us investors and how they stack up against j.p. morgan options.",
+   "topqClicks": 0,
+   "topqImps": 36,
+   "topqPos": 26,
+   "pos": 6.9
+  },
+  "/1031-improvement-exchange-property-already-owned/": {
+   "clicks": 9,
+   "imps": 2109,
+   "queries": 72,
+   "topq": "1031 improvement exchange on property already owned",
+   "topqClicks": 0,
+   "topqImps": 161,
+   "topqPos": 18.4,
+   "pos": 37.4
+  },
+  "/education-center/senior-housing/": {
+   "clicks": 9,
+   "imps": 8210,
+   "queries": 270,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 2,
+   "topqImps": 1287,
+   "topqPos": 1.2,
+   "pos": 16.7
+  },
+  "/how-many-reits-should-i-own/": {
+   "clicks": 9,
+   "imps": 1458,
+   "queries": 65,
+   "topq": "how many reits should i own",
+   "topqClicks": 1,
+   "topqImps": 14,
+   "topqPos": 4.6,
+   "pos": 30.4
+  },
+  "/mortgage-boot-1031-exchange-guide/": {
+   "clicks": 9,
+   "imps": 7000,
+   "queries": 181,
+   "topq": "1031 exchange boot",
+   "topqClicks": 0,
+   "topqImps": 511,
+   "topqPos": 26.5,
+   "pos": 21.9
+  },
+  "/can-you-gift-a-1031-exchange-property-2/": {
+   "clicks": 8,
+   "imps": 237,
+   "queries": 5,
+   "topq": "1031 exchange on inherited property",
+   "topqClicks": 0,
+   "topqImps": 4,
+   "topqPos": 100.5,
+   "pos": 14.2
+  },
+  "/education-center/dst-1031-exchange/": {
+   "clicks": 8,
+   "imps": 19982,
+   "queries": 421,
+   "topq": "1031 days",
+   "topqClicks": 1,
+   "topqImps": 29,
+   "topqPos": 7.3,
+   "pos": 18.8
+  },
+  "/education-center/multifamily-properties/": {
+   "clicks": 8,
+   "imps": 59971,
+   "queries": 740,
+   "topq": "invest in multifamily real estate",
+   "topqClicks": 1,
+   "topqImps": 286,
+   "topqPos": 7.5,
+   "pos": 20.7
+  },
+  "/what-is-a-holding-period/": {
+   "clicks": 8,
+   "imps": 2175,
+   "queries": 115,
+   "topq": "1031 exchange rules",
+   "topqClicks": 2,
+   "topqImps": 115,
+   "topqPos": 2.2,
+   "pos": 23.7
+  },
+  "/calculating-reit-rate-of-return/": {
+   "clicks": 7,
+   "imps": 1337,
+   "queries": 86,
+   "topq": "how to calculate reit dividend",
+   "topqClicks": 1,
+   "topqImps": 34,
+   "topqPos": 8.2,
+   "pos": 15.2
+  },
+  "/how-much-money-can-you-inherit-tax-free/": {
+   "clicks": 7,
+   "imps": 2060,
+   "queries": 372,
+   "topq": "how to avoid inheritance tax",
+   "topqClicks": 1,
+   "topqImps": 3,
+   "topqPos": 1,
+   "pos": 42.1
+  },
+  "/section-897-capital-gain-rules-impact/": {
+   "clicks": 7,
+   "imps": 7755,
+   "queries": 86,
+   "topq": "irc 897",
+   "topqClicks": 3,
+   "topqImps": 499,
+   "topqPos": 9,
+   "pos": 8.6
+  },
+  "/capital-gains-exemptions-seniors/": {
+   "clicks": 6,
+   "imps": 2674,
+   "queries": 228,
+   "topq": "capital gains tax over 65",
+   "topqClicks": 0,
+   "topqImps": 167,
+   "topqPos": 25.3,
+   "pos": 17.3
+  },
+  "/education-center/nnn-property-investments-what-you-should-know/": {
+   "clicks": 6,
+   "imps": 26669,
+   "queries": 405,
+   "topq": "nnn property",
+   "topqClicks": 1,
+   "topqImps": 422,
+   "topqPos": 12.7,
+   "pos": 11.7
+  },
+  "/education-center/self-storage-investments/": {
+   "clicks": 6,
+   "imps": 55800,
+   "queries": 254,
+   "topq": "how to invest in storage units",
+   "topqClicks": 1,
+   "topqImps": 73,
+   "topqPos": 16.1,
+   "pos": 54.4
+  },
+  "/plan-your-exit/": {
+   "clicks": 6,
+   "imps": 2199,
+   "queries": 102,
+   "topq": "1031 exchange into dst",
+   "topqClicks": 0,
+   "topqImps": 92,
+   "topqPos": 74.3,
+   "pos": 24.8
+  },
+  "/1031-exchange-documents/": {
+   "clicks": 5,
+   "imps": 1729,
+   "queries": 71,
+   "topq": "1031 exchange documents",
+   "topqClicks": 1,
+   "topqImps": 70,
+   "topqPos": 28.5,
+   "pos": 33.3
+  },
+  "/can-an-llc-do-a-1031-exchange/": {
+   "clicks": 5,
+   "imps": 1447,
+   "queries": 30,
+   "topq": "1031 exchange llc",
+   "topqClicks": 0,
+   "topqImps": 159,
+   "topqPos": 49.5,
+   "pos": 31
+  },
+  "/contactus/": {
+   "clicks": 5,
+   "imps": 3197,
+   "queries": 21,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 1368,
+   "topqPos": 1.2,
+   "pos": 4.7
+  },
+  "/depreciation-recapture-when-selling-property/": {
+   "clicks": 5,
+   "imps": 5684,
+   "queries": 288,
+   "topq": "depreciation recapture calculator",
+   "topqClicks": 0,
+   "topqImps": 210,
+   "topqPos": 35,
+   "pos": 27.9
+  },
+  "/education-center/everything-you-should-know-about-upreits/": {
+   "clicks": 5,
+   "imps": 9064,
+   "queries": 203,
+   "topq": "721 upreit",
+   "topqClicks": 1,
+   "topqImps": 296,
+   "topqPos": 15.9,
+   "pos": 35.4
+  },
+  "/education-center/ltv-calculator/": {
+   "clicks": 5,
+   "imps": 985,
+   "queries": 67,
+   "topq": "ltv conversions",
+   "topqClicks": 0,
+   "topqImps": 107,
+   "topqPos": 15,
+   "pos": 24.9
+  },
+  "/income-producing-real-estate-the-basics/": {
+   "clicks": 5,
+   "imps": 6103,
+   "queries": 189,
+   "topq": "income producing real estate",
+   "topqClicks": 2,
+   "topqImps": 1089,
+   "topqPos": 7.8,
+   "pos": 20.8
+  },
+  "/property-basis-post-1031-exchange/": {
+   "clicks": 5,
+   "imps": 3942,
+   "queries": 120,
+   "topq": "1031 exchange gain calculation",
+   "topqClicks": 1,
+   "topqImps": 5,
+   "topqPos": 13.4,
+   "pos": 17.3
+  },
+  "/section-897-ordinary-dividends/": {
+   "clicks": 5,
+   "imps": 2730,
+   "queries": 63,
+   "topq": "sec 897 dividends",
+   "topqClicks": 1,
+   "topqImps": 6,
+   "topqPos": 8.2,
+   "pos": 9.6
+  },
+  "/tax-strategies-for-mineral-rights-how-1031-exchanges-can-help/": {
+   "clicks": 5,
+   "imps": 1128,
+   "queries": 33,
+   "topq": "1031 exchange mineral rights",
+   "topqClicks": 0,
+   "topqImps": 238,
+   "topqPos": 12.8,
+   "pos": 24
+  },
+  "/what-to-do-with-inherited-property/": {
+   "clicks": 5,
+   "imps": 1993,
+   "queries": 135,
+   "topq": "1031 exchange inherited property",
+   "topqClicks": 0,
+   "topqImps": 24,
+   "topqPos": 37.4,
+   "pos": 9.1
+  },
+  "/why-real-estate-investors-are-choosing-dsts-over-reits/": {
+   "clicks": 5,
+   "imps": 1125,
+   "queries": 42,
+   "topq": "reit vs dst",
+   "topqClicks": 1,
+   "topqImps": 54,
+   "topqPos": 6,
+   "pos": 18.6
+  },
+  "/1031-construction-exchange/": {
+   "clicks": 4,
+   "imps": 2896,
+   "queries": 73,
+   "topq": "build to suit 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 133,
+   "topqPos": 69.8,
+   "pos": 25.1
+  },
+  "/1031-exchange-california/": {
+   "clicks": 4,
+   "imps": 3912,
+   "queries": 148,
+   "topq": "1031 exchange california",
+   "topqClicks": 0,
+   "topqImps": 288,
+   "topqPos": 41.2,
+   "pos": 38.3
+  },
+  "/731-exchange/": {
+   "clicks": 4,
+   "imps": 348,
+   "queries": 19,
+   "topq": "731 exchange",
+   "topqClicks": 1,
+   "topqImps": 39,
+   "topqPos": 5.9,
+   "pos": 19.3
+  },
+  "/author/thomas-p-roussel/": {
+   "clicks": 4,
+   "imps": 193,
+   "queries": 8,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 6,
+   "topqPos": 52.7,
+   "pos": 10.3
+  },
+  "/can-you-use-1031-exchanges-for-renovations/": {
+   "clicks": 4,
+   "imps": 1059,
+   "queries": 36,
+   "topq": "1031 exchange new construction",
+   "topqClicks": 0,
+   "topqImps": 66,
+   "topqPos": 92.7,
+   "pos": 33.4
+  },
+  "/dsts-in-california/": {
+   "clicks": 4,
+   "imps": 2575,
+   "queries": 75,
+   "topq": "dst 1031 california",
+   "topqClicks": 0,
+   "topqImps": 286,
+   "topqPos": 13,
+   "pos": 18.2
+  },
+  "/education-center/calculator/": {
+   "clicks": 4,
+   "imps": 2172,
+   "queries": 91,
+   "topq": "1031 exchange deadline calculator",
+   "topqClicks": 1,
+   "topqImps": 107,
+   "topqPos": 7,
+   "pos": 12.8
+  },
+  "/education-center/industrial-real-estate-investing-guide/": {
+   "clicks": 4,
+   "imps": 20155,
+   "queries": 295,
+   "topq": "made in warehouse",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 1,
+   "pos": 31.3
+  },
+  "/education-center/investing-medical-office-buildings/": {
+   "clicks": 4,
+   "imps": 3271,
+   "queries": 109,
+   "topq": "investing in medical office buildings",
+   "topqClicks": 0,
+   "topqImps": 266,
+   "topqPos": 12.1,
+   "pos": 17.2
+  },
+  "/guide-to-like-kind-exchanges/": {
+   "clicks": 4,
+   "imps": 2784,
+   "queries": 170,
+   "topq": "1031 like kind exchanges",
+   "topqClicks": 0,
+   "topqImps": 185,
+   "topqPos": 59.9,
+   "pos": 50.7
+  },
+  "/investing-in-data-center-real-estate/": {
+   "clicks": 4,
+   "imps": 1433,
+   "queries": 103,
+   "topq": "data center real estate",
+   "topqClicks": 0,
+   "topqImps": 133,
+   "topqPos": 46.8,
+   "pos": 27.7
+  },
+  "/qualified-opportunity-zones/": {
+   "clicks": 4,
+   "imps": 3503,
+   "queries": 147,
+   "topq": "qualified opportunity fund",
+   "topqClicks": 1,
+   "topqImps": 54,
+   "topqPos": 22.7,
+   "pos": 23
+  },
+  "/reit-investing-for-beginners/": {
+   "clicks": 4,
+   "imps": 1896,
+   "queries": 219,
+   "topq": "how to invest in reit",
+   "topqClicks": 1,
+   "topqImps": 33,
+   "topqPos": 28.2,
+   "pos": 32.1
+  },
+  "/types-of-ira-investments/": {
+   "clicks": 4,
+   "imps": 1824,
+   "queries": 206,
+   "topq": "ira",
+   "topqClicks": 1,
+   "topqImps": 9,
+   "topqPos": 6.6,
+   "pos": 47.7
+  },
+  "/what-is-syndication/": {
+   "clicks": 4,
+   "imps": 4891,
+   "queries": 198,
+   "topq": "define syndication",
+   "topqClicks": 1,
+   "topqImps": 597,
+   "topqPos": 8.3,
+   "pos": 20.3
+  },
+  "/1031-exchange-escrow-account/": {
+   "clicks": 3,
+   "imps": 1561,
+   "queries": 35,
+   "topq": "1031 exchange escrow account",
+   "topqClicks": 1,
+   "topqImps": 284,
+   "topqPos": 9.8,
+   "pos": 12.8
+  },
+  "/1031-exchanges-back-to-the-basics-2/": {
+   "clicks": 3,
+   "imps": 1559,
+   "queries": 185,
+   "topq": "1031 exchange for dummies",
+   "topqClicks": 0,
+   "topqImps": 97,
+   "topqPos": 81.9,
+   "pos": 53.8
+  },
+  "/5-year-holding-rule-1031-exchanges/": {
+   "clicks": 3,
+   "imps": 3766,
+   "queries": 128,
+   "topq": "1031 exchange 5 year rule",
+   "topqClicks": 0,
+   "topqImps": 525,
+   "topqPos": 12.9,
+   "pos": 65.7
+  },
+  "/7-benefits-of-all-cash-dsts/": {
+   "clicks": 3,
+   "imps": 554,
+   "queries": 27,
+   "topq": "no debt",
+   "topqClicks": 0,
+   "topqImps": 10,
+   "topqPos": 2.2,
+   "pos": 6.4
+  },
+  "/calculating-depreciation/": {
+   "clicks": 3,
+   "imps": 577,
+   "queries": 28,
+   "topq": "depreciation after 1031 exchange",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 44,
+   "pos": 12.7
+  },
+  "/comparing-cap-rates-vs-cash-on-cash-returns/": {
+   "clicks": 3,
+   "imps": 9397,
+   "queries": 133,
+   "topq": "cash on cash return vs cap rate",
+   "topqClicks": 1,
+   "topqImps": 491,
+   "topqPos": 8.4,
+   "pos": 10.4
+  },
+  "/do-you-need-an-attorney-for-a-1031-exchange/": {
+   "clicks": 3,
+   "imps": 510,
+   "queries": 21,
+   "topq": "1031 exchange attorney",
+   "topqClicks": 0,
+   "topqImps": 125,
+   "topqPos": 40.9,
+   "pos": 22.9
+  },
+  "/drop-and-swap-the-basics/": {
+   "clicks": 3,
+   "imps": 3281,
+   "queries": 99,
+   "topq": "drop and swap 1031",
+   "topqClicks": 0,
+   "topqImps": 270,
+   "topqPos": 31.1,
+   "pos": 24.8
+  },
+  "/education-center/glossary/": {
+   "clicks": 3,
+   "imps": 748,
+   "queries": 66,
+   "topq": "sale of personal residence",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 7,
+   "pos": 12.1
+  },
+  "/explore-the-potential-of-reits-a-guide-for-investors/": {
+   "clicks": 3,
+   "imps": 586,
+   "queries": 91,
+   "topq": "real estate investment trust",
+   "topqClicks": 0,
+   "topqImps": 18,
+   "topqPos": 1.9,
+   "pos": 23.4
+  },
+  "/generating-passive-income-with-real-estate-investing/": {
+   "clicks": 3,
+   "imps": 7362,
+   "queries": 317,
+   "topq": "passive real estate investing",
+   "topqClicks": 0,
+   "topqImps": 604,
+   "topqPos": 60.2,
+   "pos": 52.1
+  },
+  "/how-to-use-401k-to-invest-in-real-estate/": {
+   "clicks": 3,
+   "imps": 966,
+   "queries": 75,
+   "topq": "401k real estate investment rules",
+   "topqClicks": 1,
+   "topqImps": 21,
+   "topqPos": 26.4,
+   "pos": 20.5
+  },
+  "/invest-with-an-ira/": {
+   "clicks": 3,
+   "imps": 1562,
+   "queries": 311,
+   "topq": "at what age can you withdraw from a roth ira",
+   "topqClicks": 1,
+   "topqImps": 2,
+   "topqPos": 1,
+   "pos": 10.4
+  },
+  "/ira-contribution-rules/": {
+   "clicks": 3,
+   "imps": 1077,
+   "queries": 110,
+   "topq": "when can you contribute to an ira",
+   "topqClicks": 0,
+   "topqImps": 32,
+   "topqPos": 63.4,
+   "pos": 30.2
+  },
+  "/private-credit-funds/": {
+   "clicks": 3,
+   "imps": 609,
+   "queries": 70,
+   "topq": "private credit funds",
+   "topqClicks": 0,
+   "topqImps": 64,
+   "topqPos": 67.9,
+   "pos": 53.5
+  },
+  "/qualified-reit-dividends/": {
+   "clicks": 3,
+   "imps": 4533,
+   "queries": 191,
+   "topq": "qreit",
+   "topqClicks": 1,
+   "topqImps": 4,
+   "topqPos": 7.8,
+   "pos": 13.8
+  },
+  "/reit-etfs-vs-private-reits/": {
+   "clicks": 3,
+   "imps": 609,
+   "queries": 97,
+   "topq": "district reit reviews",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 1,
+   "pos": 24.5
+  },
+  "/simultaneous-1031-exchange/": {
+   "clicks": 3,
+   "imps": 487,
+   "queries": 33,
+   "topq": "simultaneous 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 56,
+   "topqPos": 21,
+   "pos": 11.9
+  },
+  "/the-three-property-rule-in-1031-exchanges/": {
+   "clicks": 3,
+   "imps": 2266,
+   "queries": 110,
+   "topq": "what are the risks",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 2,
+   "pos": 10.6
+  },
+  "/1031-exchange-2-year-rule/": {
+   "clicks": 2,
+   "imps": 1017,
+   "queries": 71,
+   "topq": "1031 exchange holding period",
+   "topqClicks": 0,
+   "topqImps": 138,
+   "topqPos": 87.2,
+   "pos": 42.5
+  },
+  "/1031-exchange-between-states/": {
+   "clicks": 2,
+   "imps": 702,
+   "queries": 43,
+   "topq": "out-of-state 1031 exchange utah multifamily",
+   "topqClicks": 0,
+   "topqImps": 52,
+   "topqPos": 29.6,
+   "pos": 34.2
+  },
+  "/1031-exchanges-in-commercial-real-estate/": {
+   "clicks": 2,
+   "imps": 2404,
+   "queries": 111,
+   "topq": "can you 1031 into a property you already own",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 1,
+   "pos": 40.3
+  },
+  "/721-exchange-real-estate-investing/": {
+   "clicks": 2,
+   "imps": 1390,
+   "queries": 101,
+   "topq": "721 exchange",
+   "topqClicks": 0,
+   "topqImps": 91,
+   "topqPos": 71.3,
+   "pos": 58.1
+  },
+  "/calculating-equity-and-capital-gains/": {
+   "clicks": 2,
+   "imps": 2392,
+   "queries": 107,
+   "topq": "adjusted basis",
+   "topqClicks": 0,
+   "topqImps": 540,
+   "topqPos": 3.2,
+   "pos": 9.1
+  },
+  "/choosing-the-right-1031-exchange-qualified-intermediary/": {
+   "clicks": 2,
+   "imps": 4602,
+   "queries": 151,
+   "topq": "qualified intermediary",
+   "topqClicks": 0,
+   "topqImps": 266,
+   "topqPos": 47.1,
+   "pos": 45
+  },
+  "/cost-segregation-benefits/": {
+   "clicks": 2,
+   "imps": 195,
+   "queries": 27,
+   "topq": "1031 exchange cost segregation",
+   "topqClicks": 0,
+   "topqImps": 16,
+   "topqPos": 54.6,
+   "pos": 26.4
+  },
+  "/difference-between-single-net-double-net-triple-net/": {
+   "clicks": 2,
+   "imps": 1322,
+   "queries": 60,
+   "topq": "what is a double net lease",
+   "topqClicks": 1,
+   "topqImps": 202,
+   "topqPos": 66,
+   "pos": 47.4
+  },
+  "/education-center/faq/": {
+   "clicks": 2,
+   "imps": 675,
+   "queries": 38,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 1,
+   "topqImps": 313,
+   "topqPos": 1.3,
+   "pos": 8.7
+  },
+  "/education-center/guide-to-1031-exchanges/": {
+   "clicks": 2,
+   "imps": 8878,
+   "queries": 647,
+   "topq": "how does a 1031 exchange work",
+   "topqClicks": 0,
+   "topqImps": 223,
+   "topqPos": 68.1,
+   "pos": 49.9
+  },
+  "/how-to-invest-in-multifamily-real-estate/": {
+   "clicks": 2,
+   "imps": 1336,
+   "queries": 91,
+   "topq": "how to invest in multifamily real estate",
+   "topqClicks": 0,
+   "topqImps": 64,
+   "topqPos": 37.1,
+   "pos": 13.1
+  },
+  "/investing-in-assisted-living-facilities-using-1031-exchanges/": {
+   "clicks": 2,
+   "imps": 872,
+   "queries": 28,
+   "topq": "assisted living 1031 exchange opportunities",
+   "topqClicks": 0,
+   "topqImps": 31,
+   "topqPos": 3.2,
+   "pos": 11.7
+  },
+  "/investing-in-senior-housing-what-is-senior-housing-care/": {
+   "clicks": 2,
+   "imps": 1465,
+   "queries": 122,
+   "topq": "assisted living investors",
+   "topqClicks": 0,
+   "topqImps": 169,
+   "topqPos": 74,
+   "pos": 63.9
+  },
+  "/non-correlated-investment-asset/": {
+   "clicks": 2,
+   "imps": 2881,
+   "queries": 101,
+   "topq": "non correlated assets",
+   "topqClicks": 0,
+   "topqImps": 188,
+   "topqPos": 46.5,
+   "pos": 30.9
+  },
+  "/passive-real-estate-investing-for-retirement/": {
+   "clicks": 2,
+   "imps": 1768,
+   "queries": 173,
+   "topq": "passive income in retirement",
+   "topqClicks": 0,
+   "topqImps": 106,
+   "topqPos": 28.1,
+   "pos": 21.2
+  },
+  "/pros-and-cons-of-investing-in-a-delaware-statutory-trust/": {
+   "clicks": 2,
+   "imps": 1735,
+   "queries": 143,
+   "topq": "delaware statutory trust risks",
+   "topqClicks": 0,
+   "topqImps": 108,
+   "topqPos": 68.6,
+   "pos": 67.6
+  },
+  "/real-estate-equity/": {
+   "clicks": 2,
+   "imps": 6792,
+   "queries": 310,
+   "topq": "equity real estate",
+   "topqClicks": 1,
+   "topqImps": 444,
+   "topqPos": 21.8,
+   "pos": 40.5
+  },
+  "/rebalancing-your-real-estate-portfolio/": {
+   "clicks": 2,
+   "imps": 169,
+   "queries": 1,
+   "topq": "reit portfolio rebalancing",
+   "topqClicks": 0,
+   "topqImps": 16,
+   "topqPos": 18.9,
+   "pos": 7.8
+  },
+  "/reit-tax-advantages/": {
+   "clicks": 2,
+   "imps": 4663,
+   "queries": 203,
+   "topq": "reit tax implications",
+   "topqClicks": 1,
+   "topqImps": 34,
+   "topqPos": 11.7,
+   "pos": 24.1
+  },
+  "/reits-vs-etfs/": {
+   "clicks": 2,
+   "imps": 2589,
+   "queries": 138,
+   "topq": "etf vs reit",
+   "topqClicks": 0,
+   "topqImps": 135,
+   "topqPos": 29.4,
+   "pos": 25.5
+  },
+  "/retirement-reit/": {
+   "clicks": 2,
+   "imps": 870,
+   "queries": 106,
+   "topq": "reit in ira",
+   "topqClicks": 0,
+   "topqImps": 41,
+   "topqPos": 63.6,
+   "pos": 20.1
+  },
+  "/should-you-hold-reits-in-an-ira/": {
+   "clicks": 2,
+   "imps": 1536,
+   "queries": 77,
+   "topq": "reit in roth ira",
+   "topqClicks": 0,
+   "topqImps": 283,
+   "topqPos": 25,
+   "pos": 19.1
+  },
+  "/types-of-real-estate-1031-exchanges/": {
+   "clicks": 2,
+   "imps": 2067,
+   "queries": 134,
+   "topq": "what is 1031 exchange?",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 2,
+   "pos": 54.9
+  },
+  "/what-cap-rate-is-right-for-you/": {
+   "clicks": 2,
+   "imps": 604,
+   "queries": 57,
+   "topq": "what is a good cap rate",
+   "topqClicks": 0,
+   "topqImps": 44,
+   "topqPos": 93,
+   "pos": 59.9
+  },
+  "/what-happens-when-you-sell-a-1031-exchange-property/": {
+   "clicks": 2,
+   "imps": 2451,
+   "queries": 122,
+   "topq": "what happens when you sell a 1031 exchange property",
+   "topqClicks": 0,
+   "topqImps": 429,
+   "topqPos": 15,
+   "pos": 38.4
+  },
+  "/what-is-a-bridge-loan/": {
+   "clicks": 2,
+   "imps": 3876,
+   "queries": 222,
+   "topq": "crowdfunded bridging loans",
+   "topqClicks": 0,
+   "topqImps": 1024,
+   "topqPos": 6.8,
+   "pos": 46.7
+  },
+  "/what-is-a-delayed-1031-exchange/": {
+   "clicks": 2,
+   "imps": 1023,
+   "queries": 50,
+   "topq": "delayed 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 221,
+   "topqPos": 13.8,
+   "pos": 28.3
+  },
+  "/what-is-a-good-irr-for-real-estate/": {
+   "clicks": 2,
+   "imps": 1557,
+   "queries": 118,
+   "topq": "good irr for rental property",
+   "topqClicks": 0,
+   "topqImps": 74,
+   "topqPos": 35.8,
+   "pos": 36.4
+  },
+  "/what-is-a-qualified-intermediary/": {
+   "clicks": 2,
+   "imps": 4131,
+   "queries": 159,
+   "topq": "qualified intermediary",
+   "topqClicks": 0,
+   "topqImps": 1148,
+   "topqPos": 48.6,
+   "pos": 48.5
+  },
+  "/what-is-an-ira-and-why-should-you-invest/": {
+   "clicks": 2,
+   "imps": 4327,
+   "queries": 490,
+   "topq": "where is ira",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 1,
+   "pos": 55.8
+  },
+  "/what-to-do-tired-being-landlord/": {
+   "clicks": 2,
+   "imps": 433,
+   "queries": 14,
+   "topq": "tired of being a landlord",
+   "topqClicks": 0,
+   "topqImps": 105,
+   "topqPos": 28.2,
+   "pos": 15.9
+  },
+  "/1031-crowdfunding-launches-covenant-senior-housing-reit-with-51-3m-in-assets/": {
+   "clicks": 1,
+   "imps": 145,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7
+  },
+  "/1031-exchange-fails/": {
+   "clicks": 1,
+   "imps": 1269,
+   "queries": 38,
+   "topq": "failed 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 172,
+   "topqPos": 10.2,
+   "pos": 21.6
+  },
+  "/1031-exchange-rules/": {
+   "clicks": 1,
+   "imps": 8207,
+   "queries": 577,
+   "topq": "1031 exchange rules",
+   "topqClicks": 0,
+   "topqImps": 599,
+   "topqPos": 64.1,
+   "pos": 70.4
+  },
+  "/1031-exchange-utah/": {
+   "clicks": 1,
+   "imps": 806,
+   "queries": 28,
+   "topq": "1031 exchange replacement property utah",
+   "topqClicks": 0,
+   "topqImps": 60,
+   "topqPos": 22.5,
+   "pos": 34.9
+  },
+  "/1031-exchanges-for-land/": {
+   "clicks": 1,
+   "imps": 2083,
+   "queries": 64,
+   "topq": "1031 exchange vacant land",
+   "topqClicks": 0,
+   "topqImps": 132,
+   "topqPos": 20.5,
+   "pos": 24.5
+  },
+  "/1031cf-portfolio-4-dst/": {
+   "clicks": 1,
+   "imps": 743,
+   "queries": 5,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 5,
+   "topqPos": 67.6,
+   "pos": 5.8
+  },
+  "/adding-hospitality-reits-to-your-real-estate-portfolio/": {
+   "clicks": 1,
+   "imps": 2127,
+   "queries": 97,
+   "topq": "hospitality real estate",
+   "topqClicks": 0,
+   "topqImps": 451,
+   "topqPos": 54.4,
+   "pos": 47.8
+  },
+  "/best-ever-cre-podcast-how-to-win-the-1031-exchange-game-ft-ed-fernandez/": {
+   "clicks": 1,
+   "imps": 89,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 9.2
+  },
+  "/capital-gains-tax-rates-by-state/": {
+   "clicks": 1,
+   "imps": 10790,
+   "queries": 1083,
+   "topq": "states with no capital gains tax",
+   "topqClicks": 0,
+   "topqImps": 1075,
+   "topqPos": 7.6,
+   "pos": 31.3
+  },
+  "/comparing-gross-rent-multiplier-return-on-investment/": {
+   "clicks": 1,
+   "imps": 228,
+   "queries": 23,
+   "topq": "what is a good gross rent multiplier​",
+   "topqClicks": 0,
+   "topqImps": 56,
+   "topqPos": 51.7,
+   "pos": 33.9
+  },
+  "/comparing-present-value-and-net-present-value/": {
+   "clicks": 1,
+   "imps": 3343,
+   "queries": 101,
+   "topq": "pv vs npv",
+   "topqClicks": 0,
+   "topqImps": 251,
+   "topqPos": 10.1,
+   "pos": 15.9
+  },
+  "/delaware-statutory-trust-pros-and-cons/": {
+   "clicks": 1,
+   "imps": 3187,
+   "queries": 217,
+   "topq": "delaware statutory trust risks",
+   "topqClicks": 0,
+   "topqImps": 133,
+   "topqPos": 66.5,
+   "pos": 49.6
+  },
+  "/delaware-statutory-trusts/": {
+   "clicks": 1,
+   "imps": 2456,
+   "queries": 152,
+   "topq": "delaware statutory trust",
+   "topqClicks": 0,
+   "topqImps": 131,
+   "topqPos": 82.2,
+   "pos": 66.8
+  },
+  "/education-center/1031-crowdfunding-scenarios/": {
+   "clicks": 1,
+   "imps": 898,
+   "queries": 52,
+   "topq": "1031 exchange examples",
+   "topqClicks": 0,
+   "topqImps": 222,
+   "topqPos": 29.4,
+   "pos": 24
+  },
+  "/edward-fernandez-featured-on-td-ameritrade-network/": {
+   "clicks": 1,
+   "imps": 14,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 21.4
+  },
+  "/exchange-accommodation-titleholders/": {
+   "clicks": 1,
+   "imps": 774,
+   "queries": 27,
+   "topq": "exchange accommodation titleholder",
+   "topqClicks": 1,
+   "topqImps": 113,
+   "topqPos": 13.2,
+   "pos": 19.7
+  },
+  "/exchange-alternatives-with-upreits-and-721-exchanges/": {
+   "clicks": 1,
+   "imps": 1266,
+   "queries": 54,
+   "topq": "1031 exchange alternatives",
+   "topqClicks": 0,
+   "topqImps": 139,
+   "topqPos": 40.4,
+   "pos": 47.7
+  },
+  "/featured-video-1031-exchange-the-questions-everyone-asks/": {
+   "clicks": 1,
+   "imps": 4584,
+   "queries": 627,
+   "topq": "1031 exchange intermediary",
+   "topqClicks": 0,
+   "topqImps": 84,
+   "topqPos": 88.1,
+   "pos": 80.9
+  },
+  "/featured-video-1031-exchange-vs-721-exchange/": {
+   "clicks": 1,
+   "imps": 2169,
+   "queries": 148,
+   "topq": "upreit 1031",
+   "topqClicks": 0,
+   "topqImps": 95,
+   "topqPos": 93,
+   "pos": 81.2
+  },
+  "/featured-video-1031-exchanges-and-retirement/": {
+   "clicks": 1,
+   "imps": 3000,
+   "queries": 175,
+   "topq": "1031 investments",
+   "topqClicks": 0,
+   "topqImps": 107,
+   "topqPos": 77.4,
+   "pos": 54.8
+  },
+  "/featured-video-3-myths-about-1031-exchanges/": {
+   "clicks": 1,
+   "imps": 224,
+   "queries": 12,
+   "topq": "1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 25,
+   "topqPos": 6.4,
+   "pos": 17.4
+  },
+  "/featured-video-what-is-an-upreit-or-721-exchange/": {
+   "clicks": 1,
+   "imps": 1362,
+   "queries": 84,
+   "topq": "upreit 1031",
+   "topqClicks": 0,
+   "topqImps": 136,
+   "topqPos": 74.1,
+   "pos": 81.3
+  },
+  "/florida-1031-exchange-rules-and-regulations/": {
+   "clicks": 1,
+   "imps": 1627,
+   "queries": 62,
+   "topq": "1031 exchange florida",
+   "topqClicks": 0,
+   "topqImps": 307,
+   "topqPos": 36.7,
+   "pos": 38.9
+  },
+  "/fulfilling-debt-requirements-with-dsts-1031-exchange-requirements-fulfillment/": {
+   "clicks": 1,
+   "imps": 1474,
+   "queries": 80,
+   "topq": "1031 exchange debt requirements",
+   "topqClicks": 0,
+   "topqImps": 121,
+   "topqPos": 26.8,
+   "pos": 42.8
+  },
+  "/guide-to-healthcare-reits/": {
+   "clicks": 1,
+   "imps": 8003,
+   "queries": 141,
+   "topq": "healthcare reit",
+   "topqClicks": 0,
+   "topqImps": 555,
+   "topqPos": 22.3,
+   "pos": 15.3
+  },
+  "/harvesting-tax-benefits-agricultural-1031-exchanges/": {
+   "clicks": 1,
+   "imps": 162,
+   "queries": 13,
+   "topq": "1031 exchange farmland",
+   "topqClicks": 0,
+   "topqImps": 28,
+   "topqPos": 53.9,
+   "pos": 33.2
+  },
+  "/how-the-one-big-beautiful-bill-affects-real-estate-investors/": {
+   "clicks": 1,
+   "imps": 248,
+   "queries": 19,
+   "topq": "big beautiful bill rental property",
+   "topqClicks": 0,
+   "topqImps": 11,
+   "topqPos": 39.2,
+   "pos": 28.4
+  },
+  "/how-to-build-real-estate-portfolio/": {
+   "clicks": 1,
+   "imps": 19684,
+   "queries": 175,
+   "topq": "how to build a real estate portfolio",
+   "topqClicks": 0,
+   "topqImps": 486,
+   "topqPos": 55.1,
+   "pos": 57.9
+  },
+  "/how-to-choose-a-dst-sponsor/": {
+   "clicks": 1,
+   "imps": 854,
+   "queries": 34,
+   "topq": "delaware statutory trust sponsors",
+   "topqClicks": 0,
+   "topqImps": 61,
+   "topqPos": 20.7,
+   "pos": 11.1
+  },
+  "/how-to-defer-capital-gains-tax-with-a-1031-exchange/": {
+   "clicks": 1,
+   "imps": 681,
+   "queries": 64,
+   "topq": "capital gains deferral",
+   "topqClicks": 0,
+   "topqImps": 93,
+   "topqPos": 60.6,
+   "pos": 50.3
+  },
+  "/how-to-invest-ira/": {
+   "clicks": 1,
+   "imps": 6950,
+   "queries": 520,
+   "topq": "ira investment",
+   "topqClicks": 0,
+   "topqImps": 281,
+   "topqPos": 40.9,
+   "pos": 29.3
+  },
+  "/identify-properties-online-for-your-real-estate-exchange/": {
+   "clicks": 1,
+   "imps": 849,
+   "queries": 54,
+   "topq": "1031 exchange listings",
+   "topqClicks": 0,
+   "topqImps": 168,
+   "topqPos": 65.8,
+   "pos": 60.9
+  },
+  "/improvement-1031-exchange/": {
+   "clicks": 1,
+   "imps": 1277,
+   "queries": 62,
+   "topq": "improvement exchange",
+   "topqClicks": 0,
+   "topqImps": 151,
+   "topqPos": 23.4,
+   "pos": 29.5
+  },
+  "/invest-in-alternatives/": {
+   "clicks": 1,
+   "imps": 2245,
+   "queries": 88,
+   "topq": "alternative real estate investments",
+   "topqClicks": 0,
+   "topqImps": 279,
+   "topqPos": 45.3,
+   "pos": 42.1
+  },
+  "/multifamily-industry-trends/": {
+   "clicks": 1,
+   "imps": 1412,
+   "queries": 66,
+   "topq": "multifamily industry trends",
+   "topqClicks": 0,
+   "topqImps": 84,
+   "topqPos": 38.1,
+   "pos": 32
+  },
+  "/multiple-properties-1031-exchange/": {
+   "clicks": 1,
+   "imps": 2471,
+   "queries": 106,
+   "topq": "1031 exchange multiple properties",
+   "topqClicks": 0,
+   "topqImps": 160,
+   "topqPos": 41,
+   "pos": 49.2
+  },
+  "/private-vs-public-reits/": {
+   "clicks": 1,
+   "imps": 678,
+   "queries": 72,
+   "topq": "private reit vs public reit",
+   "topqClicks": 0,
+   "topqImps": 182,
+   "topqPos": 54.4,
+   "pos": 39.3
+  },
+  "/real-estate-investment-trusts/": {
+   "clicks": 1,
+   "imps": 163,
+   "queries": 25,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 1,
+   "topqImps": 32,
+   "topqPos": 1.3,
+   "pos": 20.5
+  },
+  "/register/": {
+   "clicks": 1,
+   "imps": 3039,
+   "queries": 23,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 1,
+   "topqImps": 1682,
+   "topqPos": 11.1,
+   "pos": 11.7
+  },
+  "/reit-vs-rental-property/": {
+   "clicks": 1,
+   "imps": 3451,
+   "queries": 146,
+   "topq": "reit vs rental property",
+   "topqClicks": 0,
+   "topqImps": 198,
+   "topqPos": 16.8,
+   "pos": 16.4
+  },
+  "/reits-hedge-against-inflation/": {
+   "clicks": 1,
+   "imps": 863,
+   "queries": 59,
+   "topq": "reits for inflationary markets",
+   "topqClicks": 1,
+   "topqImps": 1,
+   "topqPos": 2,
+   "pos": 16.9
+  },
+  "/securities-for-accredited-investors/": {
+   "clicks": 1,
+   "imps": 4131,
+   "queries": 272,
+   "topq": "alternative investments for accredited investors",
+   "topqClicks": 0,
+   "topqImps": 424,
+   "topqPos": 36.8,
+   "pos": 45.2
+  },
+  "/the-5-dos-and-donts-of-dsts-2/": {
+   "clicks": 1,
+   "imps": 1945,
+   "queries": 143,
+   "topq": "dst investment",
+   "topqClicks": 0,
+   "topqImps": 196,
+   "topqPos": 80.9,
+   "pos": 74.1
+  },
+  "/unleash-the-power-of-equity-reits/": {
+   "clicks": 1,
+   "imps": 362,
+   "queries": 48,
+   "topq": "1031 reits",
+   "topqClicks": 0,
+   "topqImps": 44,
+   "topqPos": 60.8,
+   "pos": 33.8
+  },
+  "/upreit-vs-downreit/": {
+   "clicks": 1,
+   "imps": 1111,
+   "queries": 28,
+   "topq": "upreit vs reit",
+   "topqClicks": 0,
+   "topqImps": 184,
+   "topqPos": 5.6,
+   "pos": 13.8
+  },
+  "/use-401k-for-real-estate-investing/": {
+   "clicks": 1,
+   "imps": 2326,
+   "queries": 109,
+   "topq": "can i use my 401k to invest in real estate crowdfunding",
+   "topqClicks": 1,
+   "topqImps": 46,
+   "topqPos": 12.1,
+   "pos": 41.4
+  },
+  "/what-is-a-reverse-1031-exchange/": {
+   "clicks": 1,
+   "imps": 4523,
+   "queries": 95,
+   "topq": "reverse 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 1003,
+   "topqPos": 61.7,
+   "pos": 55.3
+  },
+  "/what-is-not-allowed-in-a-1031-exchange/": {
+   "clicks": 1,
+   "imps": 486,
+   "queries": 46,
+   "topq": "what is not allowed in a 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 82,
+   "topqPos": 16.1,
+   "pos": 21.8
+  },
+  "/what-to-know-before-your-1031-exchange-process-begins/": {
+   "clicks": 1,
+   "imps": 322,
+   "queries": 47,
+   "topq": "1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 10,
+   "topqPos": 4,
+   "pos": 16
+  },
+  "/wp-content/uploads/2022/08/1031-Exchanges-Made-Easy-Second-Edition.pdf": {
+   "clicks": 1,
+   "imps": 2101,
+   "queries": 16,
+   "topq": "1031 exchange pdf",
+   "topqClicks": 0,
+   "topqImps": 12,
+   "topqPos": 34.8,
+   "pos": 25
+  },
+  "/education-center/blog/41-understanding-dst-1301-exchanges-part-1": {
+   "clicks": 0,
+   "imps": 5,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5.6
+  },
+  "/education-center/blog/70-real-estate-exchanges-made-easy": {
+   "clicks": 0,
+   "imps": 6,
+   "queries": 2,
+   "topq": "dst 1031 benefits",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 92,
+   "pos": 48.2
+  },
+  "/c/exchange-qualified/o/1176": {
+   "clicks": 0,
+   "imps": 3,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3.7
+  },
+  "/login/password-reset": {
+   "clicks": 0,
+   "imps": 27,
+   "queries": 1,
+   "topq": "site:https://1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 2,
+   "pos": 24.2
+  },
+  "/10-reasons-to-consider-a-dst-1031-exchange-part-2/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7
+  },
+  "/10-reasons-to-consider-a-dst-1031-exchange/": {
+   "clicks": 0,
+   "imps": 971,
+   "queries": 127,
+   "topq": "dst 1031",
+   "topqClicks": 0,
+   "topqImps": 58,
+   "topqPos": 94.8,
+   "pos": 85.1
+  },
+  "/1031-crowdfunding-accepted-into-forbes-business-council/": {
+   "clicks": 0,
+   "imps": 27,
+   "queries": 2,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 92.5,
+   "pos": 12.6
+  },
+  "/1031-crowdfunding-celebrates-its-10-year-anniversary/": {
+   "clicks": 0,
+   "imps": 121,
+   "queries": 5,
+   "topq": "1031crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 95,
+   "pos": 16.4
+  },
+  "/1031-crowdfunding-ceo-our-unique-investment-model-is-fueling-fast-growth/": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 1,
+   "topq": "1031 exchange senior housing investment",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 99,
+   "pos": 26.2
+  },
+  "/1031-crowdfunding-launches-first-private-reit-with-strategic-holdings-nationwide-3/": {
+   "clicks": 0,
+   "imps": 79,
+   "queries": 2,
+   "topq": "1031 cf properties",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 49.5,
+   "pos": 10.7
+  },
+  "/1031-crowdfunding-launches-private-reit/": {
+   "clicks": 0,
+   "imps": 102,
+   "queries": 5,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 8,
+   "topqPos": 95.5,
+   "pos": 21.7
+  },
+  "/1031-crowdfunding-launches-private-senior-housing-reit-aimed-at-lower-volatility/": {
+   "clicks": 0,
+   "imps": 78,
+   "queries": 4,
+   "topq": "1031 exchange senior housing investment",
+   "topqClicks": 0,
+   "topqImps": 4,
+   "topqPos": 95.8,
+   "pos": 24.6
+  },
+  "/1031-crowdfunding-launches-seniors-housing-reit-with-initial-all-cash-acquisition-plan/": {
+   "clicks": 0,
+   "imps": 35,
+   "queries": 1,
+   "topq": "senior housing debt reit",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 75.5,
+   "pos": 15.6
+  },
+  "/1031-crowdfunding-llc-named-1-for-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 6,
+   "queries": 1,
+   "topq": "1031 crowdfunding reviews",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 84.5,
+   "pos": 31.5
+  },
+  "/1031-crowdfunding-moves-up-rankings-to-4-among-top-real-estate-crowdfunding-sites/": {
+   "clicks": 0,
+   "imps": 36,
+   "queries": 5,
+   "topq": "1031 crowdfunding reviews",
+   "topqClicks": 0,
+   "topqImps": 7,
+   "topqPos": 57.3,
+   "pos": 26.8
+  },
+  "/1031-crowdfunding-ranks-no-1348-on-the-2022-inc-5000-annual-list/": {
+   "clicks": 0,
+   "imps": 42,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 8.5
+  },
+  "/1031-crowdfunding-ranks-no-2886-on-the-2025-inc-5000-list/": {
+   "clicks": 0,
+   "imps": 33,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 12.8
+  },
+  "/1031-crowdfunding-ranks-no-53-on-the-2025-inc-pacific-regionals-list/": {
+   "clicks": 0,
+   "imps": 24,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3.1
+  },
+  "/1031-crowdfunding-ranks-no-75-on-inc-s-2022-regionals-pacific-list/": {
+   "clicks": 0,
+   "imps": 13,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.4
+  },
+  "/1031-crowdfunding-ranks-no-931-among-americas-fastest-growing-private-companies/": {
+   "clicks": 0,
+   "imps": 62,
+   "queries": 3,
+   "topq": "1031 crowdfunding reviews",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 92,
+   "pos": 19.2
+  },
+  "/1031-crowdfunding-receives-accolade-in-benzingas-latest-review/": {
+   "clicks": 0,
+   "imps": 52,
+   "queries": 2,
+   "topq": "1031 crowdfunding complaints",
+   "topqClicks": 0,
+   "topqImps": 16,
+   "topqPos": 50.7,
+   "pos": 44
+  },
+  "/1031-crowdfunding-review-yield-talk-gives-1031-crowdfunding-an-excellent-4-stars/": {
+   "clicks": 0,
+   "imps": 62,
+   "queries": 4,
+   "topq": "1031 crowdfunding reviews",
+   "topqClicks": 0,
+   "topqImps": 14,
+   "topqPos": 61.6,
+   "pos": 36.8
+  },
+  "/1031-crowdfunding-sees-opportunity-to-buy-fannie-mae-loans/": {
+   "clicks": 0,
+   "imps": 20,
+   "queries": 3,
+   "topq": "fannie mae 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 11,
+   "topqPos": 11.4,
+   "pos": 11.8
+  },
+  "/1031-crowdfundings-2015-review/": {
+   "clicks": 0,
+   "imps": 57,
+   "queries": 5,
+   "topq": "1031 crowdfunding reviews",
+   "topqClicks": 0,
+   "topqImps": 10,
+   "topqPos": 56.9,
+   "pos": 39.6
+  },
+  "/1031-exchange-backup-plan/": {
+   "clicks": 0,
+   "imps": 15,
+   "queries": 3,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 6,
+   "topqPos": 57.7,
+   "pos": 46.9
+  },
+  "/1031-exchange-stock-market-volatility/": {
+   "clicks": 0,
+   "imps": 8,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 8.3
+  },
+  "/1031-exchange-texas/": {
+   "clicks": 0,
+   "imps": 1053,
+   "queries": 64,
+   "topq": "1031 exchange texas",
+   "topqClicks": 0,
+   "topqImps": 136,
+   "topqPos": 63.1,
+   "pos": 62.9
+  },
+  "/1031-exchange-timing/": {
+   "clicks": 0,
+   "imps": 43,
+   "queries": 8,
+   "topq": "1031 exchange timing",
+   "topqClicks": 0,
+   "topqImps": 24,
+   "topqPos": 66.4,
+   "pos": 61
+  },
+  "/1031-exchange-title-company-2/": {
+   "clicks": 0,
+   "imps": 1755,
+   "queries": 68,
+   "topq": "1031 exchange company",
+   "topqClicks": 0,
+   "topqImps": 245,
+   "topqPos": 51.3,
+   "pos": 41.1
+  },
+  "/1031-exchange-with-foreign-property/": {
+   "clicks": 0,
+   "imps": 79,
+   "queries": 1,
+   "topq": "are there any specific rules for international property 1031 exchanges?",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 94,
+   "pos": 25.6
+  },
+  "/1031-exchanges-a-2023-cre-market-update-with-edward-fernandez/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 9
+  },
+  "/1031-exchanges-can-help-clients-defer-taxes/": {
+   "clicks": 0,
+   "imps": 3,
+   "queries": 1,
+   "topq": "gateway 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 89.5,
+   "pos": 82.3
+  },
+  "/1031-exchanges-for-highly-appreciated-properties/": {
+   "clicks": 0,
+   "imps": 13,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7.8
+  },
+  "/1031-exchanges-in-oregon/": {
+   "clicks": 0,
+   "imps": 1758,
+   "queries": 38,
+   "topq": "1031 exchange oregon",
+   "topqClicks": 0,
+   "topqImps": 158,
+   "topqPos": 50,
+   "pos": 48
+  },
+  "/1031-exchanges-key-considerations-for-california-property-owners/": {
+   "clicks": 0,
+   "imps": 406,
+   "queries": 37,
+   "topq": "1031 exchange california",
+   "topqClicks": 0,
+   "topqImps": 75,
+   "topqPos": 91,
+   "pos": 85.2
+  },
+  "/1031-investment-strategies-maximize-your-real-estate-portfolio/": {
+   "clicks": 0,
+   "imps": 364,
+   "queries": 36,
+   "topq": "1031 exchange investment strategy",
+   "topqClicks": 0,
+   "topqImps": 111,
+   "topqPos": 65.1,
+   "pos": 49.3
+  },
+  "/1031-strategies-for-high-net-investors/": {
+   "clicks": 0,
+   "imps": 27,
+   "queries": 9,
+   "topq": "1031 exchange dst investments",
+   "topqClicks": 0,
+   "topqImps": 4,
+   "topqPos": 84,
+   "pos": 48.6
+  },
+  "/1031-vs-1035-exchange/": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 6.1
+  },
+  "/1031cf-portfolio-5-dst/": {
+   "clicks": 0,
+   "imps": 946,
+   "queries": 5,
+   "topq": "1031 dst properties florida",
+   "topqClicks": 0,
+   "topqImps": 6,
+   "topqPos": 22.3,
+   "pos": 5.8
+  },
+  "/5-donts-of-dsts/": {
+   "clicks": 0,
+   "imps": 8,
+   "queries": 2,
+   "topq": "site:https://1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 4,
+   "topqPos": 81,
+   "pos": 55.6
+  },
+  "/5-dos-of-dsts/": {
+   "clicks": 0,
+   "imps": 104,
+   "queries": 22,
+   "topq": "how to choose dst sponsor",
+   "topqClicks": 0,
+   "topqImps": 9,
+   "topqPos": 72.2,
+   "pos": 60.2
+  },
+  "/a-beginners-guide-to-reit-investing/": {
+   "clicks": 0,
+   "imps": 289,
+   "queries": 44,
+   "topq": "how to invest in reits for beginners",
+   "topqClicks": 0,
+   "topqImps": 36,
+   "topqPos": 63.4,
+   "pos": 59.7
+  },
+  "/a-guide-to-1031-exchanges-in-california/": {
+   "clicks": 0,
+   "imps": 1087,
+   "queries": 120,
+   "topq": "1031 exchange california",
+   "topqClicks": 0,
+   "topqImps": 104,
+   "topqPos": 59.3,
+   "pos": 64.1
+  },
+  "/a-smart-spin-on-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 31
+  },
+  "/a-solution-for-your-1031-exchange-who-we-are/": {
+   "clicks": 0,
+   "imps": 8,
+   "queries": 1,
+   "topq": "1031 exchange investment groups",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 93,
+   "pos": 38.6
+  },
+  "/adding-a-triple-net-lease-investment/": {
+   "clicks": 0,
+   "imps": 1115,
+   "queries": 50,
+   "topq": "1031 exchange triple net lease properties",
+   "topqClicks": 0,
+   "topqImps": 112,
+   "topqPos": 44.8,
+   "pos": 30.2
+  },
+  "/aging-america-driving-the-demand-for-healthcare-real-estate/": {
+   "clicks": 0,
+   "imps": 244,
+   "queries": 12,
+   "topq": "healthcare real estate trends",
+   "topqClicks": 0,
+   "topqImps": 50,
+   "topqPos": 41.9,
+   "pos": 24.7
+  },
+  "/alternative-investment-strategies-for-2026/": {
+   "clicks": 0,
+   "imps": 756,
+   "queries": 37,
+   "topq": "portfolio diversification beyond stocks trends 2026 -site:vertexaisearch.cloud.google.com -site:cloud.google.com -site:googleapis.com -site:youtube.com -site:youtu.be -site:vimeo.com -site:dailymotion.com -site:tiktok.com -site:timesofindia.com -site:indiatimes.com -site:economictimes.com -site:thehindu.com -site:thehindubusinessline.com -site:business-standard.com -site:livemint.com -site:ndtv.com -site:moneycontrol.com -site:upstox.com -site:goodreturns.in -site:indmoney.com -site:5paisa.com -site:etnet.com.hk -site:etnet.com -site:aastocks.com -site:cnyes.com -site:futunn.com -site:swissinfo.ch -site:scmp.com -site:rt.com -site:sputniknews.com -site:globaltimes.cn -site:xinhuanet.com -site:ainvest.com -site:newser.com -site:net.au -site:nbcpalmsprings.com -site:netscape.com -site:citizentribune.com -site:zerohedge.com -site:247wallst.com -site:everyticker.com -site:wealthwayfx.com -site:theglobeandmail.com -site:globeandmail.com -site:bnnbloomberg.ca -site:cp24.com -site:plan.be -site:channelnewsasia.com -site:france24.com -site:dailybreeze.com -site:tribtoday.com -site:tradingeconomics.com -site:facebook.com -site:instagram.com -site:linkedin.com -site:threads.net after:2026-06-17",
+   "topqClicks": 0,
+   "topqImps": 46,
+   "topqPos": 2.1,
+   "pos": 12.3
+  },
+  "/alternative-lenders-striking-bank-partnerships-to-restructure-acquiring-maturing-loans/": {
+   "clicks": 0,
+   "imps": 6,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 8.5
+  },
+  "/america-is-aging-rising-demand-for-healthcare-real-estate-2/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 6.5
+  },
+  "/amortization-real-estate-planning/": {
+   "clicks": 0,
+   "imps": 33,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7.1
+  },
+  "/are-alternative-assets-still-the-place-for-smart-money/": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 35
+  },
+  "/author/edward-e-fernandez/page/14/": {
+   "clicks": 0,
+   "imps": 10,
+   "queries": 1,
+   "topq": "1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 2,
+   "pos": 4.1
+  },
+  "/author/edward-e-fernandez/page/3/": {
+   "clicks": 0,
+   "imps": 11,
+   "queries": 1,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 122,
+   "pos": 21.4
+  },
+  "/author/edward-e-fernandez/page/4/": {
+   "clicks": 0,
+   "imps": 68,
+   "queries": 1,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 140,
+   "pos": 8.7
+  },
+  "/author/edward-e-fernandez/page/9/": {
+   "clicks": 0,
+   "imps": 39,
+   "queries": 1,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 79,
+   "pos": 13.8
+  },
+  "/author/madison-hamby/": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.5
+  },
+  "/author/thomas-p-roussel/page/3/": {
+   "clicks": 0,
+   "imps": 34,
+   "queries": 3,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 57,
+   "pos": 14.2
+  },
+  "/author/thomas-p-roussel/page/5/": {
+   "clicks": 0,
+   "imps": 78,
+   "queries": 1,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 133,
+   "pos": 6.5
+  },
+  "/author/wade-curtis-mba/page/2/": {
+   "clicks": 0,
+   "imps": 6,
+   "queries": 1,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 124,
+   "pos": 23.5
+  },
+  "/benefits-of-reits/": {
+   "clicks": 0,
+   "imps": 364,
+   "queries": 34,
+   "topq": "benefits of reits",
+   "topqClicks": 0,
+   "topqImps": 90,
+   "topqPos": 63.3,
+   "pos": 66.1
+  },
+  "/benefits-risks-fees-of-delaware-statutory-trusts-2/": {
+   "clicks": 0,
+   "imps": 1315,
+   "queries": 114,
+   "topq": "dst funds",
+   "topqClicks": 0,
+   "topqImps": 121,
+   "topqPos": 79,
+   "pos": 58
+  },
+  "/bidens-proposed-2024-budget-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 74,
+   "queries": 5,
+   "topq": "1031 exchange biden",
+   "topqClicks": 0,
+   "topqImps": 26,
+   "topqPos": 55.2,
+   "pos": 50.7
+  },
+  "/bidens-proposed-2025-budget-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 374,
+   "queries": 28,
+   "topq": "1031 exchange elimination",
+   "topqClicks": 0,
+   "topqImps": 62,
+   "topqPos": 47.2,
+   "pos": 45.4
+  },
+  "/boot-in-a-1031-exchange-what-it-is-and-how-to-minimize-tax-implications/": {
+   "clicks": 0,
+   "imps": 3,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 60.7
+  },
+  "/boroughs-burbs-the-weekly-real-estate-conversation/": {
+   "clicks": 0,
+   "imps": 25,
+   "queries": 4,
+   "topq": "boroughs & burbs real estate",
+   "topqClicks": 0,
+   "topqImps": 5,
+   "topqPos": 11.2,
+   "pos": 9.5
+  },
+  "/build-a-resilient-portfolio-with-safe-harbor-rules-for-real-estate/": {
+   "clicks": 0,
+   "imps": 411,
+   "queries": 35,
+   "topq": "safe harbor 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 42,
+   "topqPos": 49.5,
+   "pos": 31.4
+  },
+  "/build-the-right-culture-by-building-the-right-team-heres-how-and-what-you-need-to-look-for/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7
+  },
+  "/california-wildfires-irs-disaster-relief-available-for-section-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 17,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 30.8
+  },
+  "/can-a-corporation-do-a-1031-exchange/": {
+   "clicks": 0,
+   "imps": 900,
+   "queries": 30,
+   "topq": "can a corporation do a 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 53,
+   "topqPos": 15.8,
+   "pos": 15.9
+  },
+  "/can-you-1031-exchange-into-a-reit/": {
+   "clicks": 0,
+   "imps": 6068,
+   "queries": 75,
+   "topq": "1031 exchange reit",
+   "topqClicks": 0,
+   "topqImps": 336,
+   "topqPos": 49.4,
+   "pos": 34
+  },
+  "/cap-rates-are-crushing-cre-deals-even-more-than-before/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5.3
+  },
+  "/capital-gains-got-you-down/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 11
+  },
+  "/capital-gains-yield/": {
+   "clicks": 0,
+   "imps": 182,
+   "queries": 22,
+   "topq": "capital gains yield",
+   "topqClicks": 0,
+   "topqImps": 30,
+   "topqPos": 23.8,
+   "pos": 24.2
+  },
+  "/ceo-of-1031-crowdfunding-discusses-reit-opportunities-with-investmentnews/": {
+   "clicks": 0,
+   "imps": 36,
+   "queries": 1,
+   "topq": "1031crowdfunding.com ceo",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 10,
+   "pos": 18
+  },
+  "/chasing-quick-wins-can-sabotage-your-businesss-long-term-success-heres-what-to-focus-on-instead/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 2
+  },
+  "/commercial-real-estate-under-trump/": {
+   "clicks": 0,
+   "imps": 177,
+   "queries": 14,
+   "topq": "donald trump 1031",
+   "topqClicks": 0,
+   "topqImps": 15,
+   "topqPos": 34.5,
+   "pos": 26.3
+  },
+  "/diversify-your-portfolio-how-to-qualify-for-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 327,
+   "queries": 44,
+   "topq": "1031 exchange investment opportunities",
+   "topqClicks": 0,
+   "topqImps": 41,
+   "topqPos": 77.6,
+   "pos": 65.8
+  },
+  "/diversifying-your-real-estate-investment-portfolio/": {
+   "clicks": 0,
+   "imps": 860,
+   "queries": 75,
+   "topq": "real estate diversification",
+   "topqClicks": 0,
+   "topqImps": 119,
+   "topqPos": 46,
+   "pos": 53
+  },
+  "/drop-and-swap-1031-exchange/": {
+   "clicks": 0,
+   "imps": 65,
+   "queries": 16,
+   "topq": "drop and swap 1031",
+   "topqClicks": 0,
+   "topqImps": 7,
+   "topqPos": 57,
+   "pos": 50.9
+  },
+  "/dst-properties/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 6
+  },
+  "/ebook/": {
+   "clicks": 0,
+   "imps": 692,
+   "queries": 13,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 324,
+   "topqPos": 1.3,
+   "pos": 10.7
+  },
+  "/ed-fernandez-president-and-ceo-of-1031-crowdfunding-was-featured-in-aarthi-swaminathans-the-big-move-column-in-marketwatch/": {
+   "clicks": 0,
+   "imps": 10,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7.9
+  },
+  "/education-center/1031-exchange-services/": {
+   "clicks": 0,
+   "imps": 3467,
+   "queries": 201,
+   "topq": "1031 exchange services",
+   "topqClicks": 0,
+   "topqImps": 665,
+   "topqPos": 41.1,
+   "pos": 49.3
+  },
+  "/education-center/blog/": {
+   "clicks": 0,
+   "imps": 1103,
+   "queries": 38,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 160,
+   "topqPos": 1.2,
+   "pos": 12.9
+  },
+  "/education-center/blog/51-why-real-estate-investors-are-choosing-dst-s-over-reit-s": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7.5
+  },
+  "/education-center/blog/76-1031-crowdfunding-a-solution-for-your-1031-exchange-part-1-who-we-are": {
+   "clicks": 0,
+   "imps": 19,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 14.3
+  },
+  "/education-center/blog/79-1031-crowdfunding-a-solution-for-your-1031-how-it-works": {
+   "clicks": 0,
+   "imps": 3,
+   "queries": 2,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 1,
+   "pos": 1.7
+  },
+  "/education-center/blog/page/11/": {
+   "clicks": 0,
+   "imps": 13,
+   "queries": 4,
+   "topq": "1031 reits",
+   "topqClicks": 0,
+   "topqImps": 6,
+   "topqPos": 23.7,
+   "pos": 26.7
+  },
+  "/education-center/blog/page/15/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.3
+  },
+  "/education-center/blog/page/2/": {
+   "clicks": 0,
+   "imps": 20,
+   "queries": 2,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 1,
+   "pos": 12
+  },
+  "/education-center/blog/page/32/": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 1.5
+  },
+  "/education-center/blog/page/33/": {
+   "clicks": 0,
+   "imps": 12,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 8
+  },
+  "/education-center/blog/page/35/": {
+   "clicks": 0,
+   "imps": 15,
+   "queries": 3,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 7,
+   "topqPos": 94.9,
+   "pos": 82.5
+  },
+  "/education-center/blog/page/40/": {
+   "clicks": 0,
+   "imps": 43,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 6.3
+  },
+  "/education-center/blog/page/41/": {
+   "clicks": 0,
+   "imps": 11,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 6.4
+  },
+  "/education-center/blog/page/5/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 1,
+   "topq": "1031crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 97,
+   "pos": 97
+  },
+  "/education-center/blog/page/6/": {
+   "clicks": 0,
+   "imps": 5,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.4
+  },
+  "/edward-fernandez-president-and-ceo-of-1031-crowdfunding-featured-in-financial-advisor-magazine/": {
+   "clicks": 0,
+   "imps": 102,
+   "queries": 2,
+   "topq": "1031crowdfunding.com ceo",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 5,
+   "pos": 13.7
+  },
+  "/edward-fernandez-president-and-founder-of-1031-crowdfunding-shares-insight-with-anna-marie-beal-at-real-estate-capital-usa-about-the-cost-of-renovating-existing-buildings-to-meet-esg-standards/": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.6
+  },
+  "/equity-reits-vs-mortgage-reits/": {
+   "clicks": 0,
+   "imps": 843,
+   "queries": 60,
+   "topq": "mortgage reit",
+   "topqClicks": 0,
+   "topqImps": 253,
+   "topqPos": 86.2,
+   "pos": 51.9
+  },
+  "/establishing-a-replacement-property-backup-plan/": {
+   "clicks": 0,
+   "imps": 35,
+   "queries": 3,
+   "topq": "failed 1031 exchange dst backup",
+   "topqClicks": 0,
+   "topqImps": 3,
+   "topqPos": 61,
+   "pos": 15.7
+  },
+  "/evaluating-a-delaware-statutory-trust/": {
+   "clicks": 0,
+   "imps": 459,
+   "queries": 21,
+   "topq": "delaware statutory trust reviews",
+   "topqClicks": 0,
+   "topqImps": 99,
+   "topqPos": 46.2,
+   "pos": 29.6
+  },
+  "/everything-you-need-to-know-about-reits/": {
+   "clicks": 0,
+   "imps": 4934,
+   "queries": 426,
+   "topq": "reits",
+   "topqClicks": 0,
+   "topqImps": 628,
+   "topqPos": 62.1,
+   "pos": 65.7
+  },
+  "/exchanging-personal-property-part-2/": {
+   "clicks": 0,
+   "imps": 10,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 13.7
+  },
+  "/exploring-wealth-strategies-what-is-a-disregarded-entity/": {
+   "clicks": 0,
+   "imps": 1275,
+   "queries": 123,
+   "topq": "disregarded entity",
+   "topqClicks": 0,
+   "topqImps": 162,
+   "topqPos": 69.1,
+   "pos": 67.4
+  },
+  "/featured-video-1031-exchanges-and-tax-deferral/": {
+   "clicks": 0,
+   "imps": 18,
+   "queries": 4,
+   "topq": "deferred 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 3,
+   "topqPos": 73.3,
+   "pos": 54.5
+  },
+  "/featured-video-1031-exchanges-rules-and-timelines/": {
+   "clicks": 0,
+   "imps": 4401,
+   "queries": 442,
+   "topq": "1031 exchange deadlines",
+   "topqClicks": 0,
+   "topqImps": 193,
+   "topqPos": 94.5,
+   "pos": 83.1
+  },
+  "/featured-video-721-exchanges-and-delaware-statutory-trusts-dsts/": {
+   "clicks": 0,
+   "imps": 13261,
+   "queries": 495,
+   "topq": "dst investment",
+   "topqClicks": 0,
+   "topqImps": 311,
+   "topqPos": 85.6,
+   "pos": 83.9
+  },
+  "/featured-video-how-to-perform-your-dst-due-diligence/": {
+   "clicks": 0,
+   "imps": 90,
+   "queries": 5,
+   "topq": "dst property illiquidity",
+   "topqClicks": 0,
+   "topqImps": 8,
+   "topqPos": 27,
+   "pos": 14.9
+  },
+  "/featured-video-opportunity-zones-vs-delaware-statutory-trusts/": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 9.5
+  },
+  "/featured-video-senior-housing-real-estate-investment-opportunities/": {
+   "clicks": 0,
+   "imps": 1691,
+   "queries": 176,
+   "topq": "senior housing investment",
+   "topqClicks": 0,
+   "topqImps": 83,
+   "topqPos": 79.8,
+   "pos": 66.5
+  },
+  "/featured-video-what-investor-would-be-suitable-for-a-dst/": {
+   "clicks": 0,
+   "imps": 60,
+   "queries": 6,
+   "topq": "dst opportunities",
+   "topqClicks": 0,
+   "topqImps": 16,
+   "topqPos": 88.3,
+   "pos": 52.9
+  },
+  "/featured-video-what-is-a-partial-1031-exchange/": {
+   "clicks": 0,
+   "imps": 121,
+   "queries": 8,
+   "topq": "partial 1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 44,
+   "topqPos": 72.8,
+   "pos": 72.1
+  },
+  "/featured-video-what-is-like-kind-in-a-1031-exchange/": {
+   "clicks": 0,
+   "imps": 32,
+   "queries": 3,
+   "topq": "1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 10,
+   "topqPos": 7.7,
+   "pos": 11.1
+  },
+  "/fed-keeps-interest-rates-unchanged-at-july-fomc-meeting/": {
+   "clicks": 0,
+   "imps": 6,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 28.7
+  },
+  "/federal-reserve-cuts-interest-rates-for-the-first-time-in-2025/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5
+  },
+  "/fractional-ownership-real-estate/": {
+   "clicks": 0,
+   "imps": 96,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7.3
+  },
+  "/getting-started-in-real-estate-investments/": {
+   "clicks": 0,
+   "imps": 8,
+   "queries": 2,
+   "topq": "finance",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 1,
+   "pos": 21.5
+  },
+  "/gop-tax-plan-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 2,
+   "topq": "donald trump 1031",
+   "topqClicks": 0,
+   "topqImps": 6,
+   "topqPos": 19.7,
+   "pos": 15.8
+  },
+  "/harnessing-the-power-of-1031-exchanges-with-ed-fernandez/": {
+   "clicks": 0,
+   "imps": 26,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 21.8
+  },
+  "/how-ai-is-shaping-commercial-real-estate-in-2026/": {
+   "clicks": 0,
+   "imps": 4531,
+   "queries": 84,
+   "topq": "ai tools for real estate investors 2026",
+   "topqClicks": 0,
+   "topqImps": 49,
+   "topqPos": 8.3,
+   "pos": 7.3
+  },
+  "/how-do-i-break-even/": {
+   "clicks": 0,
+   "imps": 32,
+   "queries": 2,
+   "topq": "how do real estate investors make money in dst",
+   "topqClicks": 0,
+   "topqImps": 3,
+   "topqPos": 13,
+   "pos": 6.8
+  },
+  "/how-do-interest-rates-affect-real-estate/": {
+   "clicks": 0,
+   "imps": 851,
+   "queries": 54,
+   "topq": "interest rates and real estate",
+   "topqClicks": 0,
+   "topqImps": 24,
+   "topqPos": 26.9,
+   "pos": 26.9
+  },
+  "/how-do-tariffs-impact-real-estate/": {
+   "clicks": 0,
+   "imps": 31,
+   "queries": 3,
+   "topq": "construction companies seo investment new tariffs 2025 benefits",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 97,
+   "pos": 15.7
+  },
+  "/how-real-estate-helps-against-inflation/": {
+   "clicks": 0,
+   "imps": 640,
+   "queries": 49,
+   "topq": "real estate inflation hedge",
+   "topqClicks": 0,
+   "topqImps": 32,
+   "topqPos": 35,
+   "pos": 26.5
+  },
+  "/how-taking-calculated-risks-can-grow-your-business/": {
+   "clicks": 0,
+   "imps": 27,
+   "queries": 1,
+   "topq": "calculated risk advisors",
+   "topqClicks": 0,
+   "topqImps": 5,
+   "topqPos": 19.2,
+   "pos": 11.7
+  },
+  "/how-the-jobs-act-of-2012-revolutionized-the-real-estate-crowdfunding-space/": {
+   "clicks": 0,
+   "imps": 3,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 2.7
+  },
+  "/how-to-invest-in-qualified-opportunity-zones/": {
+   "clicks": 0,
+   "imps": 2148,
+   "queries": 214,
+   "topq": "opportunity zones investments",
+   "topqClicks": 0,
+   "topqImps": 84,
+   "topqPos": 74.5,
+   "pos": 71.2
+  },
+  "/how-to-know-if-student-housing-investments-are-for-you/": {
+   "clicks": 0,
+   "imps": 438,
+   "queries": 42,
+   "topq": "student housing investment",
+   "topqClicks": 0,
+   "topqImps": 82,
+   "topqPos": 75.3,
+   "pos": 43.3
+  },
+  "/how-to-know-when-its-time-to-find-a-mentor/": {
+   "clicks": 0,
+   "imps": 18,
+   "queries": 1,
+   "topq": "1031crowdfunding.com ceo",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 11,
+   "pos": 6.7
+  },
+  "/how-to-stay-humble-amidst-success-actionable-advice-for-self-made-entrepreneurs/": {
+   "clicks": 0,
+   "imps": 7,
+   "queries": 1,
+   "topq": "1031 exchange pace",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 28.5,
+   "pos": 14.9
+  },
+  "/how-trumps-one-big-beautiful-bill-will-affect-us-housing-market/": {
+   "clicks": 0,
+   "imps": 46,
+   "queries": 5,
+   "topq": "donald trump 1031",
+   "topqClicks": 0,
+   "topqImps": 30,
+   "topqPos": 19.9,
+   "pos": 32.8
+  },
+  "/https-www-youtube-com-1031crowdfunding/": {
+   "clicks": 0,
+   "imps": 31,
+   "queries": 2,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 101,
+   "pos": 19
+  },
+  "/investing-in-commercial-vs-residential-real-estate/": {
+   "clicks": 0,
+   "imps": 206,
+   "queries": 7,
+   "topq": "commercial vs residential real estate investing",
+   "topqClicks": 0,
+   "topqImps": 24,
+   "topqPos": 13.3,
+   "pos": 9.3
+  },
+  "/investing-in-mortgage-reits/": {
+   "clicks": 0,
+   "imps": 1458,
+   "queries": 92,
+   "topq": "mortgage reit",
+   "topqClicks": 0,
+   "topqImps": 276,
+   "topqPos": 57.3,
+   "pos": 39.5
+  },
+  "/investing-in-private-reits/": {
+   "clicks": 0,
+   "imps": 1260,
+   "queries": 52,
+   "topq": "private reit",
+   "topqClicks": 0,
+   "topqImps": 370,
+   "topqPos": 74.9,
+   "pos": 61.9
+  },
+  "/investing-in-senior-housing-what-you-need-to-know/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 1,
+   "topq": "1031 exchange senior housing investment",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 97,
+   "pos": 94.3
+  },
+  "/investing-in-senior-housing-why-2025-might-be-the-sectors-best-year-yet/": {
+   "clicks": 0,
+   "imps": 8,
+   "queries": 1,
+   "topq": "1031 exchange senior housing investment",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 95,
+   "pos": 30.1
+  },
+  "/investing-in-the-real-estate-market-through-fractional-investment-ownership/": {
+   "clicks": 0,
+   "imps": 98,
+   "queries": 5,
+   "topq": "fractional dst exchange",
+   "topqClicks": 0,
+   "topqImps": 70,
+   "topqPos": 67.8,
+   "pos": 68.2
+  },
+  "/investment-platform/": {
+   "clicks": 0,
+   "imps": 1309,
+   "queries": 44,
+   "topq": "1031 crowdfunding",
+   "topqClicks": 0,
+   "topqImps": 385,
+   "topqPos": 1.5,
+   "pos": 14.2
+  },
+  "/ira-when-to-invest/": {
+   "clicks": 0,
+   "imps": 759,
+   "queries": 55,
+   "topq": "when to fund ira",
+   "topqClicks": 0,
+   "topqImps": 66,
+   "topqPos": 51,
+   "pos": 59.5
+  },
+  "/iras-as-retirement-plans/": {
+   "clicks": 0,
+   "imps": 1231,
+   "queries": 150,
+   "topq": "what is a qualified ira",
+   "topqClicks": 0,
+   "topqImps": 50,
+   "topqPos": 53.8,
+   "pos": 42.1
+  },
+  "/irc-1031-explained-deferring-taxes-for-real-estate-investments/": {
+   "clicks": 0,
+   "imps": 558,
+   "queries": 81,
+   "topq": "section 1031 of the internal revenue code",
+   "topqClicks": 0,
+   "topqImps": 34,
+   "topqPos": 73,
+   "pos": 46.1
+  },
+  "/irs-disaster-relief-available-for-section-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 17,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 24.8
+  },
+  "/irs-releases-2026-tax-inflation-adjustments-what-to-know-about-the-latest-changes/": {
+   "clicks": 0,
+   "imps": 89,
+   "queries": 10,
+   "topq": "2026 irs tax brackets married jointly",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 3,
+   "pos": 9.2
+  },
+  "/kiplinger-how-non-traded-reits-could-give-your-roth-ira-a-boost/": {
+   "clicks": 0,
+   "imps": 39,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 11.1
+  },
+  "/marketwatch-should-a-couple-pay-off-their-mortgage/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 10
+  },
+  "/nasaq-tradetalks-what-to-consider-when-making-an-investment-in-private-alternative-assets/": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3.5
+  },
+  "/navigating-1031-exchanges-recording-and-compliance/": {
+   "clicks": 0,
+   "imps": 2183,
+   "queries": 111,
+   "topq": "1031 commercial exchange",
+   "topqClicks": 0,
+   "topqImps": 182,
+   "topqPos": 94.2,
+   "pos": 74.6
+  },
+  "/negative-leverage-borrowers-bridge-to-the-future/": {
+   "clicks": 0,
+   "imps": 6,
+   "queries": 3,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 85.5,
+   "pos": 55.7
+  },
+  "/negative-leverage-looms-for-sponsors-as-cap-rates-interest-rates-diverge/": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 2,
+   "topq": "negative leverage",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 55,
+   "pos": 26.1
+  },
+  "/net-absorption-real-estate/": {
+   "clicks": 0,
+   "imps": 1367,
+   "queries": 51,
+   "topq": "market absorption commercial real estate",
+   "topqClicks": 0,
+   "topqImps": 190,
+   "topqPos": 45.4,
+   "pos": 24
+  },
+  "/new-fund-capitalized-on-senior-housing/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5.8
+  },
+  "/new-ira-and-401k-contribution-limits-for-2025-what-you-need-to-know/": {
+   "clicks": 0,
+   "imps": 3402,
+   "queries": 575,
+   "topq": "roth ira contribution limits 2025",
+   "topqClicks": 0,
+   "topqImps": 258,
+   "topqPos": 72.7,
+   "pos": 75.8
+  },
+  "/new-look-new-resource-library/": {
+   "clicks": 0,
+   "imps": 12,
+   "queries": 1,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 105,
+   "pos": 33.6
+  },
+  "/newswatch-the-future-of-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 1,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 137,
+   "pos": 38.7
+  },
+  "/non-traded-reits-2/": {
+   "clicks": 0,
+   "imps": 2640,
+   "queries": 162,
+   "topq": "private reit vs public reit",
+   "topqClicks": 0,
+   "topqImps": 184,
+   "topqPos": 76,
+   "pos": 45.8
+  },
+  "/offices-struggle-senior-housing-could-see-demand/": {
+   "clicks": 0,
+   "imps": 13,
+   "queries": 2,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 91,
+   "pos": 23.7
+  },
+  "/opportunity-zone-vs-1031-exchange/": {
+   "clicks": 0,
+   "imps": 333,
+   "queries": 17,
+   "topq": "dst vs opportunity zone",
+   "topqClicks": 0,
+   "topqImps": 85,
+   "topqPos": 71,
+   "pos": 77.4
+  },
+  "/opportunity-zones-2-0-bill-what-you-need-to-know/": {
+   "clicks": 0,
+   "imps": 74,
+   "queries": 3,
+   "topq": "what is an open opportunity ira",
+   "topqClicks": 0,
+   "topqImps": 48,
+   "topqPos": 51.8,
+   "pos": 45.7
+  },
+  "/partnering-for-success-the-benefits-of-real-estate-joint-ventures/": {
+   "clicks": 0,
+   "imps": 1736,
+   "queries": 88,
+   "topq": "joint venture real estate",
+   "topqClicks": 0,
+   "topqImps": 311,
+   "topqPos": 41.1,
+   "pos": 34.8
+  },
+  "/present-value-vs-net-present-value-whats-the-difference/": {
+   "clicks": 0,
+   "imps": 718,
+   "queries": 84,
+   "topq": "present cost vs net present cost",
+   "topqClicks": 0,
+   "topqImps": 39,
+   "topqPos": 47.7,
+   "pos": 24.1
+  },
+  "/preserve-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 11,
+   "queries": 5,
+   "topq": "1031 exchange biden",
+   "topqClicks": 0,
+   "topqImps": 3,
+   "topqPos": 6.7,
+   "pos": 12.3
+  },
+  "/publicly-traded-reits-vs-non-traded-reits-whats-the-difference/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 1,
+   "topq": "non traded reits vs traded reits",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 100,
+   "pos": 100
+  },
+  "/real-estate-bridge-funds-an-expert-guide-to-investing-in-a-volatile-market/": {
+   "clicks": 0,
+   "imps": 83,
+   "queries": 5,
+   "topq": "1031 reit",
+   "topqClicks": 0,
+   "topqImps": 42,
+   "topqPos": 76.3,
+   "pos": 65.6
+  },
+  "/real-estate-deals-at-standstill-as-tariffs-loom-industry-execs-say/": {
+   "clicks": 0,
+   "imps": 3,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 85.3
+  },
+  "/reasons-why-people-choose-to-invest-in-senior-housing/": {
+   "clicks": 0,
+   "imps": 14,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 10.5
+  },
+  "/recession-resilient-investment-options/": {
+   "clicks": 0,
+   "imps": 4981,
+   "queries": 307,
+   "topq": "recession proof investments",
+   "topqClicks": 0,
+   "topqImps": 194,
+   "topqPos": 60.1,
+   "pos": 57.8
+  },
+  "/refinancing-commercial-real-estate/": {
+   "clicks": 0,
+   "imps": 368,
+   "queries": 16,
+   "topq": "leveraged finance refinancing maturity wall after:2026-06-23",
+   "topqClicks": 0,
+   "topqImps": 5,
+   "topqPos": 2,
+   "pos": 7.9
+  },
+  "/reit-market-2/": {
+   "clicks": 0,
+   "imps": 1094,
+   "queries": 122,
+   "topq": "reit",
+   "topqClicks": 0,
+   "topqImps": 33,
+   "topqPos": 3.4,
+   "pos": 19.3
+  },
+  "/reit-taxation/": {
+   "clicks": 0,
+   "imps": 1878,
+   "queries": 194,
+   "topq": "return of capital reit",
+   "topqClicks": 0,
+   "topqImps": 94,
+   "topqPos": 46.7,
+   "pos": 58.9
+  },
+  "/reits-vs-real-estate/": {
+   "clicks": 0,
+   "imps": 37,
+   "queries": 3,
+   "topq": "site:https://1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 4,
+   "topqPos": 62,
+   "pos": 29.1
+  },
+  "/reits-vs-stocks/": {
+   "clicks": 0,
+   "imps": 1473,
+   "queries": 204,
+   "topq": "what is reit stock",
+   "topqClicks": 0,
+   "topqImps": 69,
+   "topqPos": 86,
+   "pos": 35.6
+  },
+  "/relinquished-property-with-a-1031-exchange/": {
+   "clicks": 0,
+   "imps": 138,
+   "queries": 13,
+   "topq": "relinquished property",
+   "topqClicks": 0,
+   "topqImps": 60,
+   "topqPos": 46.5,
+   "pos": 41.2
+  },
+  "/replacement-property-identification/": {
+   "clicks": 0,
+   "imps": 2157,
+   "queries": 73,
+   "topq": "1031 exchange identification rules",
+   "topqClicks": 0,
+   "topqImps": 351,
+   "topqPos": 32.3,
+   "pos": 34
+  },
+  "/senior-housing-investing/": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 2,
+   "topq": "senior housing investment",
+   "topqClicks": 0,
+   "topqImps": 3,
+   "topqPos": 66.3,
+   "pos": 66
+  },
+  "/single-family-versus-multifamily-investing/": {
+   "clicks": 0,
+   "imps": 5448,
+   "queries": 144,
+   "topq": "single family vs multi family",
+   "topqClicks": 0,
+   "topqImps": 342,
+   "topqPos": 24.5,
+   "pos": 13.8
+  },
+  "/sitemap/": {
+   "clicks": 0,
+   "imps": 171,
+   "queries": 5,
+   "topq": "site:www.1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 41,
+   "topqPos": 6.6,
+   "pos": 6.9
+  },
+  "/starker-exchange-101-essential-insights-for-1031-investors/": {
+   "clicks": 0,
+   "imps": 919,
+   "queries": 23,
+   "topq": "starker exchange",
+   "topqClicks": 0,
+   "topqImps": 244,
+   "topqPos": 44.3,
+   "pos": 37.5
+  },
+  "/taking-the-stress-out-of-debt-with-a-1031-property-exchange/": {
+   "clicks": 0,
+   "imps": 7,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 6.6
+  },
+  "/tax-day-2025-what-you-need-to-know-before-the-deadline-hits/": {
+   "clicks": 0,
+   "imps": 114,
+   "queries": 9,
+   "topq": "when is tax day 2025",
+   "topqClicks": 0,
+   "topqImps": 69,
+   "topqPos": 80,
+   "pos": 67
+  },
+  "/tenant-in-common-1031-exchanges-explained/": {
+   "clicks": 0,
+   "imps": 2383,
+   "queries": 94,
+   "topq": "1031 tenants in common",
+   "topqClicks": 0,
+   "topqImps": 218,
+   "topqPos": 25.6,
+   "pos": 30.5
+  },
+  "/the-audra-lambert-podcast-smart-real-estate-investing-tips/": {
+   "clicks": 0,
+   "imps": 189,
+   "queries": 4,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 6,
+   "topqPos": 62.2,
+   "pos": 14.2
+  },
+  "/the-deal-scout-faith-and-purpose-in-real-estate/": {
+   "clicks": 0,
+   "imps": 20,
+   "queries": 1,
+   "topq": "site:1031crowdfunding.com",
+   "topqClicks": 0,
+   "topqImps": 5,
+   "topqPos": 64.6,
+   "pos": 31
+  },
+  "/the-future-of-1031-exchanges-under-trump-looks-bright/": {
+   "clicks": 0,
+   "imps": 40,
+   "queries": 8,
+   "topq": "donald trump 1031",
+   "topqClicks": 0,
+   "topqImps": 11,
+   "topqPos": 41.8,
+   "pos": 44.9
+  },
+  "/the-history-of-1031-exchanges-a-look-at-its-evolution-and-impact/": {
+   "clicks": 0,
+   "imps": 147,
+   "queries": 7,
+   "topq": "1031 exchange history",
+   "topqClicks": 0,
+   "topqImps": 54,
+   "topqPos": 41.3,
+   "pos": 30.5
+  },
+  "/the-role-of-a-qualified-intermediary-in-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 1047,
+   "queries": 90,
+   "topq": "qualified intermediary",
+   "topqClicks": 0,
+   "topqImps": 79,
+   "topqPos": 90,
+   "pos": 74.7
+  },
+  "/the-three-property-rule-in-1031-exchanges-2/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 11
+  },
+  "/tips-for-selecting-1031-investment-properties-2/": {
+   "clicks": 0,
+   "imps": 5,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 9.6
+  },
+  "/to-defer-capital-gains-taxes-consider-a-721-exchange/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 17
+  },
+  "/traded-vs-non-traded-reits/": {
+   "clicks": 0,
+   "imps": 1210,
+   "queries": 58,
+   "topq": "non public reits",
+   "topqClicks": 0,
+   "topqImps": 101,
+   "topqPos": 84.7,
+   "pos": 71.7
+  },
+  "/types-of-commercial-real-estate-to-invest-in/": {
+   "clicks": 0,
+   "imps": 1046,
+   "queries": 83,
+   "topq": "best commercial property investments",
+   "topqClicks": 0,
+   "topqImps": 155,
+   "topqPos": 56.8,
+   "pos": 55
+  },
+  "/types-of-reits-and-how-to-invest-in-them/": {
+   "clicks": 0,
+   "imps": 1338,
+   "queries": 93,
+   "topq": "equity reit",
+   "topqClicks": 0,
+   "topqImps": 275,
+   "topqPos": 38.4,
+   "pos": 47
+  },
+  "/understanding-dst-1031-exchanges-part-2/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5
+  },
+  "/understanding-housing-inventory-and-what-it-means-for-you/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/vacation-homes-tax-deferred-1031-exchanges/": {
+   "clicks": 0,
+   "imps": 216,
+   "queries": 28,
+   "topq": "1031 vacation home rules",
+   "topqClicks": 0,
+   "topqImps": 41,
+   "topqPos": 54.3,
+   "pos": 55.9
+  },
+  "/what-are-self-directed-iras-2/": {
+   "clicks": 0,
+   "imps": 476,
+   "queries": 36,
+   "topq": "what is a self directed ira",
+   "topqClicks": 0,
+   "topqImps": 180,
+   "topqPos": 18.8,
+   "pos": 21.1
+  },
+  "/what-are-soft-costs-in-real-estate/": {
+   "clicks": 0,
+   "imps": 3182,
+   "queries": 100,
+   "topq": "soft costs",
+   "topqClicks": 0,
+   "topqImps": 330,
+   "topqPos": 60.6,
+   "pos": 47.4
+  },
+  "/what-bidens-proposed-limits-to-1031-exchanges-mean-for-investors-and-the-economy/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/what-financial-advisors-need-to-know-about-delaware-statutory-trusts/": {
+   "clicks": 0,
+   "imps": 54,
+   "queries": 3,
+   "topq": "dsts",
+   "topqClicks": 0,
+   "topqImps": 45,
+   "topqPos": 86.9,
+   "pos": 77.7
+  },
+  "/what-is-a-1031-exchange-holding-period-part-2/": {
+   "clicks": 0,
+   "imps": 188,
+   "queries": 11,
+   "topq": "1031 holding period",
+   "topqClicks": 0,
+   "topqImps": 80,
+   "topqPos": 87.5,
+   "pos": 76.4
+  },
+  "/what-is-a-reit-and-how-does-it-work/": {
+   "clicks": 0,
+   "imps": 3120,
+   "queries": 329,
+   "topq": "reit",
+   "topqClicks": 0,
+   "topqImps": 269,
+   "topqPos": 70.8,
+   "pos": 70
+  },
+  "/what-is-a-reit-dividend-tax-rate/": {
+   "clicks": 0,
+   "imps": 850,
+   "queries": 121,
+   "topq": "how are reits taxed",
+   "topqClicks": 0,
+   "topqImps": 37,
+   "topqPos": 87.9,
+   "pos": 76.6
+  },
+  "/what-makes-a-great-leader-vs-a-great-manager/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 10
+  },
+  "/what-the-feds-rate-changes-mean-for-commercial-real-estate-investors/": {
+   "clicks": 0,
+   "imps": 515,
+   "queries": 23,
+   "topq": "how do interest rates affect commercial real estate",
+   "topqClicks": 0,
+   "topqImps": 80,
+   "topqPos": 58.5,
+   "pos": 28.5
+  },
+  "/what-the-future-of-721-upreit-products-means-for-real-estate-investing/": {
+   "clicks": 0,
+   "imps": 20,
+   "queries": 2,
+   "topq": "what is 721",
+   "topqClicks": 0,
+   "topqImps": 3,
+   "topqPos": 85.3,
+   "pos": 34.1
+  },
+  "/what-would-accreditation-change-mean-for-real-estate-investors/": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 10
+  },
+  "/why-1031-crowdfunding-is-launching-its-first-private-reit/": {
+   "clicks": 0,
+   "imps": 71,
+   "queries": 3,
+   "topq": "1031 cf properties",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 100,
+   "pos": 14.1
+  },
+  "/why-partnering-with-a-cpa-is-essential-for-real-estate-investments/": {
+   "clicks": 0,
+   "imps": 66,
+   "queries": 7,
+   "topq": "1031 exchange cpa",
+   "topqClicks": 0,
+   "topqImps": 19,
+   "topqPos": 51.9,
+   "pos": 50.7
+  },
+  "/will-tax-day-cut-your-180-days-short-how-to-complete-a-1031-exchange/": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.5
+  },
+  "/with-a-two-year-revenue-growth-of-418-percent-1031-crowdfunding-ranks-no-33-on-inc-magazines-list-of-the-pacific-regions-fastest-growing-private-companies/": {
+   "clicks": 0,
+   "imps": 7,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.4
+  },
+  "/wp-content/uploads/2020/02/02-calculate-adjusted-basis.png": {
+   "clicks": 0,
+   "imps": 10,
+   "queries": 1,
+   "topq": "how to avoid capital gains tax on real estate",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 6,
+   "pos": 5.4
+  },
+  "/wp-content/uploads/2020/02/04-calculate-capital-gains.png": {
+   "clicks": 0,
+   "imps": 11,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.6
+  },
+  "/wp-content/uploads/2021/07/04_Depricate-Inherited-Real-Estate.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/wp-content/uploads/2021/10/01_Partial-1031-Exchange.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7
+  },
+  "/wp-content/uploads/2021/10/06_Start-Partial-1031-1.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5
+  },
+  "/wp-content/uploads/2021/10/Untitled-4-414x1024.png": {
+   "clicks": 0,
+   "imps": 14,
+   "queries": 1,
+   "topq": "1031 exchange",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 6.5,
+   "pos": 5.2
+  },
+  "/wp-content/uploads/2022/01/10-How-to-Calculate-Boot-512x1024.png": {
+   "clicks": 0,
+   "imps": 9,
+   "queries": 1,
+   "topq": "1031 exchange boot",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 3,
+   "pos": 5
+  },
+  "/wp-content/uploads/2022/02/02-The-Benefits-of-Earning-Passive-Income-Through-Real-Estate.png": {
+   "clicks": 0,
+   "imps": 34,
+   "queries": 11,
+   "topq": "best passive income",
+   "topqClicks": 0,
+   "topqImps": 5,
+   "topqPos": 4.4,
+   "pos": 4.2
+  },
+  "/wp-content/uploads/2022/03/amazon_copy_deals_image_2_hro.jpeg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/wp-content/uploads/2022/05/01-guide-to-healthcare-REITS.jpg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3
+  },
+  "/wp-content/uploads/2022/05/guide-to-healthcare-REITs.jpg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 1,
+   "topq": "healthcare reits that pay monthly dividends",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 4,
+   "pos": 3.5
+  },
+  "/wp-content/uploads/2022/05/pros-delaware-statutory-trusts-520x1024.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3
+  },
+  "/wp-content/uploads/2022/06/03-Benefits-of-investing-in-self-storage-properties-pinterest-rev1.jpeg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3
+  },
+  "/wp-content/uploads/2022/07/05-200-percent-of-fair-market-value.png": {
+   "clicks": 0,
+   "imps": 3,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5.7
+  },
+  "/wp-content/uploads/2022/07/self-storage-blog2-1024x576.jpg": {
+   "clicks": 0,
+   "imps": 4,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.3
+  },
+  "/wp-content/uploads/2022/08/Mobile-exchange-timeline-no-title-2-1.png": {
+   "clicks": 0,
+   "imps": 20,
+   "queries": 2,
+   "topq": "dst 1031 exchange explained",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 6,
+   "pos": 6.4
+  },
+  "/wp-content/uploads/2022/09/04-when-to-convert.jpg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/wp-content/uploads/2022/09/drop-and-swap-requirements.jpg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/wp-content/uploads/2022/10/03-How-to-Calculate-Depreciation-Recapture-Pinterest.png": {
+   "clicks": 0,
+   "imps": 6,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5.7
+  },
+  "/wp-content/uploads/2022/11/03-Types-of-Income-Producing-Real-Estate-Investments-RE-1-min.jpg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 1,
+   "topq": "what are the best income producing assets",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 4,
+   "pos": 4.5
+  },
+  "/wp-content/uploads/2022/12/04-What-to-Look-for-When-Investing-in-Multifamily-Properties.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 7
+  },
+  "/wp-content/uploads/2022/12/06-How-to-Choose-Which-Type-of-Industrial-Real-Estate-to-Invest-In-R01.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/wp-content/uploads/2023/01/02-Types-of-REITs-RE-2-min-580x1024.jpg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 1,
+   "topq": "best reits to invest in for beginners",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 8,
+   "pos": 8
+  },
+  "/wp-content/uploads/2023/04/IG-capital-gains-tax-rate-by-state-scaled.jpg": {
+   "clicks": 0,
+   "imps": 7,
+   "queries": 1,
+   "topq": "if you sell your house and buy another do you pay taxes",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 4,
+   "pos": 4.9
+  },
+  "/wp-content/uploads/2023/09/DSC06585-HQ-2.jpg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 1,
+   "topq": "best dst 1031 exchange companies",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 7,
+   "pos": 7
+  },
+  "/wp-content/uploads/2023/11/02-combined-value.jpg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/wp-content/uploads/2023/11/02-vacant-land-qualifies-for-1031-exchanges.png": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4.5
+  },
+  "/wp-content/uploads/2023/11/AdobeStock_285834116-scaled.jpg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 4
+  },
+  "/wp-content/uploads/2023/12/02-Benefits-of-Investing-in-REITs-Through-Your-Roth-IRA-R02-1024x512.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 1,
+   "topq": "best ira investments for beginners",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 6,
+   "pos": 6
+  },
+  "/wp-content/uploads/2024/03/04-How-to-Open-an-IRA-Pinterest.jpg": {
+   "clicks": 0,
+   "imps": 2,
+   "queries": 1,
+   "topq": "can you start an ira at any age",
+   "topqClicks": 0,
+   "topqImps": 2,
+   "topqPos": 8,
+   "pos": 8
+  },
+  "/wp-content/uploads/2025/07/desktopPhone.png": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3
+  },
+  "/wp-content/uploads/2025/10/desktop.svg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3
+  },
+  "/wp-content/uploads/2025/10/mobile.svg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 3
+  },
+  "/wp-content/uploads/2025/12/5x4-1.jpg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 1,
+   "topq": "best dst 1031 exchange companies",
+   "topqClicks": 0,
+   "topqImps": 1,
+   "topqPos": 7,
+   "pos": 7
+  },
+  "/wp-content/uploads/2025/12/shutterstock_2507546273-scaled.jpg": {
+   "clicks": 0,
+   "imps": 1,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 5
+  },
+  "/wsr-pathfinder-awards-hispanic-top-industry-leaders/": {
+   "clicks": 0,
+   "imps": 452,
+   "queries": 7,
+   "topq": "edward fernandez",
+   "topqClicks": 0,
+   "topqImps": 200,
+   "topqPos": 4.4,
+   "pos": 7
+  },
+  "/youtube-what-is-a-dst/": {
+   "clicks": 0,
+   "imps": 13,
+   "queries": 0,
+   "topq": null,
+   "topqClicks": 0,
+   "topqImps": 0,
+   "topqPos": null,
+   "pos": 6.3
+  }
+ },
+ "inspect": {
+  "/use-401k-for-real-estate-investing/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:35:49.824Z"
+  },
+  "/bidens-proposed-2025-budget-1031-exchanges/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:35:49.921Z"
+  },
+  "/1031-exchanges-back-to-the-basics-2/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:35:49.953Z"
+  },
+  "/pros-and-cons-of-investing-in-a-delaware-statutory-trust/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:35:49.994Z"
+  },
+  "/10-reasons-to-consider-a-dst-1031-exchange/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:35:56.205Z"
+  },
+  "/chreit/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:35:56.320Z"
+  },
+  "/a-guide-to-1031-exchanges-in-california/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:35:56.507Z"
+  },
+  "/1031cf-bridge-fund-iii/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:35:56.511Z"
+  },
+  "/bidens-proposed-2024-budget-1031-exchanges/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:36:02.596Z"
+  },
+  "/what-is-a-1031-exchange-holding-period-part-2/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:02.716Z"
+  },
+  "/1031-crowdfunding-a-solution-for-your-1031-exchange-how-it-works/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:02.860Z"
+  },
+  "/what-to-know-before-your-1031-exchange-process-begins/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:36:02.880Z"
+  },
+  "/1031-crowdfunding-llc-named-1-for-1031-exchanges/": {
+   "state": "live",
+   "cov": "Excluded by ‘noindex’ tag",
+   "at": "2026-08-31T19:36:08.960Z"
+  },
+  "/1031-exchangers-through-jobs-act/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:09.096Z"
+  },
+  "/1031-exchanges-meet-goals-dsts-reduce-challenges/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:09.315Z"
+  },
+  "/13-benefits-of-dsts-in-1031-exchanges-real-estate-1031-exchanges-made-easy/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:09.316Z"
+  },
+  "/a-solution-for-your-1031-exchange-why-choose-1031-crowdfunding/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:15.397Z"
+  },
+  "/a-surge-in-syndicated-1031-exchanges/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:15.492Z"
+  },
+  "/anticipating-demand-for-syndicated-1031-exchanges/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:15.801Z"
+  },
+  "/apartments-and-student-housing-attracting-investors/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:15.802Z"
+  },
+  "/are-delaware-statutory-trusts-right-for-you/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:21.800Z"
+  },
+  "/baby-boomers-controlling-wealth-influencing-the-economy/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:21.893Z"
+  },
+  "/comparing-cap-rates-cash-on-cash-returns/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:22.204Z"
+  },
+  "/bridge-financing-fund/": {
+   "state": "live",
+   "cov": "Crawled - currently not indexed",
+   "at": "2026-08-31T19:36:22.287Z"
+  },
+  "/compressing-cap-rates-shift-buyers-market/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:28.234Z"
+  },
+  "/comparing-investment-valuation-tools-part-1/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:28.428Z"
+  },
+  "/education-center/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:28.620Z"
+  },
+  "/glossary-taxonomy/0-9/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:28.709Z"
+  },
+  "/glossary-taxonomy/a-e/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:34.745Z"
+  },
+  "/glossary-taxonomy/f-j/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:34.805Z"
+  },
+  "/glossary-taxonomy/k-o/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:35.057Z"
+  },
+  "/glossary-taxonomy/p-s/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:35.182Z"
+  },
+  "/glossary-taxonomy/t-z/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:41.192Z"
+  },
+  "/impact-of-the-tax-cut-and-jobs-act-on-sec-1031/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:41.193Z"
+  },
+  "/leverage-income-for-greater-returns/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:41.447Z"
+  },
+  "/parental-guarantors-secure-student-housing/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:41.551Z"
+  },
+  "/reit-investing-for-beginners-2/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:36:47.589Z"
+  },
+  "/paying-too-much-tax-for-your-crowdfunded-investments/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:47.704Z"
+  },
+  "/six-benefits-to-furnishing-student-housing/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:47.815Z"
+  },
+  "/sp-500-new-sector-to-benefit-dsts/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:47.942Z"
+  },
+  "/state-of-the-1031-exchange-industry/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:36:54.001Z"
+  },
+  "/student-housing-success-stories/": {
+   "state": "",
+   "cov": "URL is unknown to Google",
+   "at": "2026-08-31T19:36:54.048Z"
+  },
+  "/the-1031-exchange-quick-guide/": {
+   "state": "live",
+   "cov": "Crawled - currently not indexed",
+   "at": "2026-08-31T19:36:54.176Z"
+  },
+  "/the-rules-and-steps-to-execute-a-1031-exchange/": {
+   "state": "live",
+   "cov": "Crawled - currently not indexed",
+   "at": "2026-08-31T19:36:54.282Z"
+  },
+  "/traded-vs-non-traded-reits-2/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:37:00.441Z"
+  },
+  "/understanding-dst-1031-exchanges-part-2/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:37:00.536Z"
+  },
+  "/understanding-dst-1031-exchanges-part-3/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:37:00.544Z"
+  },
+  "/understanding-dst-1031-exchanges/": {
+   "state": "redirect",
+   "cov": "Page with redirect",
+   "at": "2026-08-31T19:37:00.692Z"
+  },
+  "/what-states-do-not-conform-with-qoz-tax-benefits-2/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:37:06.796Z"
+  },
+  "/what-you-need-to-know-before-investing-in-a-medical-office-building/": {
+   "state": "live",
+   "cov": "Crawled - currently not indexed",
+   "at": "2026-08-31T19:37:07.015Z"
+  },
+  "/will-tax-day-cut-your-180-days-short-how-to-complete-a-1031-exchange/": {
+   "state": "live",
+   "cov": "Discovered - currently not indexed",
+   "at": "2026-08-31T19:37:07.027Z"
+  },
+  "/the-role-of-a-qualified-intermediary-in-1031-exchanges/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:37:07.057Z"
+  },
+  "/choosing-the-right-1031-exchange-qualified-intermediary/": {
+   "state": "live",
+   "cov": "Submitted and indexed",
+   "at": "2026-08-31T19:37:13.273Z"
+  }
+ }
 }
