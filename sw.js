@@ -1,5 +1,5 @@
 /* 1031CF Content Map — service worker. Shell cache-first; data network-first. */
-const VERSION = 'v2026-08-24-5';
+const VERSION = 'v2026-08-24-6';
 const SHELL = 'shell-' + VERSION;
 const SHELL_FILES = ['./', 'index.html', 'app.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 const DATA_CACHE = 'data-v1';

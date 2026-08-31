@@ -261,6 +261,7 @@ let TAB = 'map';
 const FILTER = { q:'', cluster:'', tier:'', status:'', label:'', notes:'', compact:false };
 async function boot() {
   await Store.open();
+  await gscInit();
   const [annL, dataL, syncL] = [await Store.get('ann'), await Store.get('data'), await Store.get('sync')];
   if (syncL) Object.assign(SYNC, syncL, { busy:false, queued:false });
   let dataR = null;
@@ -326,7 +327,7 @@ async function doRefresh() {
 /* ============================== chrome: tabs, toast, tooltip ============================== */
 function calEntries() { return (ANN.cal || []).filter(e => !(ANN.calDel || []).includes(e.id)); }
 function renderTabs() {
-  const t = [['map','Topic map'],['cal','Editorial calendar'],['pages','All pages'],['insights','Audit insights'],['redirects','Redirects'],['notes','My notes']];
+  const t = [['map','Topic map'],['cal','Editorial calendar'],['pages','All pages'],['insights','Audit insights'],['gsc','GSC overlaps'],['redirects','Redirects'],['notes','My notes']];
   $('#tabs').innerHTML = t.map(([id, name]) => {
     let n = '';
     if (id === 'insights') n = '<span class="n">' + DATA.insights.filter(i => ['critical','serious'].includes(i.sev)).length + '</span>';
@@ -389,6 +390,7 @@ function redraw() {
   else if (TAB === 'cal') m.innerHTML = viewCal();
   else if (TAB === 'pages') m.innerHTML = viewPages();
   else if (TAB === 'insights') m.innerHTML = viewInsights();
+  else if (TAB === 'gsc') m.innerHTML = viewGsc();
   else if (TAB === 'redirects') m.innerHTML = viewRedirects();
   else m.innerHTML = viewNotes();
   wire(m);
@@ -699,6 +701,165 @@ function calEditor(id, opts) {
   });
 }
 
+/* ============================== GSC overlaps ============================== */
+/* Her workflow (8/25): 1 pull query/page from GSC (code) · 2 group queries with
+   multiple impression-earning pages (code) · 3 join clusters/tiers (code) ·
+   4 merge-vs-split judgment (Claude, via the published gsc-overlap.json).
+   Auth is a browser-side Google Identity Services token — nothing stored beyond
+   her chosen client ID + property; the access token lives ~1h in memory. */
+const GSC = { cfg: null, cache: null, token: '', busy: false, sites: null, err: '' };
+const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
+async function gscInit() {
+  if (GSC.cfg === null) GSC.cfg = (await Store.get('gsc_cfg')) || { clientId: '', property: '' };
+  if (GSC.cache === null) GSC.cache = (await Store.get('gsc_cache')) || null;
+}
+function gisLoad() {
+  return new Promise((res, rej) => {
+    if (window.google && google.accounts && google.accounts.oauth2) return res();
+    const s = document.createElement('script');
+    s.src = 'https://accounts.google.com/gsi/client';
+    s.onload = () => res(); s.onerror = () => rej(new Error('Could not load Google sign-in (offline?)'));
+    document.head.appendChild(s);
+  });
+}
+function gscToken() {
+  return new Promise((res, rej) => {
+    try {
+      const tc = google.accounts.oauth2.initTokenClient({
+        client_id: GSC.cfg.clientId, scope: GSC_SCOPE,
+        callback: t => t && t.access_token ? res(t.access_token) : rej(new Error(t && t.error ? t.error : 'No token')),
+        error_callback: e => rej(new Error(e && e.type ? e.type : 'Auth cancelled')),
+      });
+      tc.requestAccessToken();
+    } catch (e) { rej(e); }
+  });
+}
+async function gscApi(path, body) {
+  const r = await fetch('https://searchconsole.googleapis.com/webmasters/v3/' + path, {
+    method: body ? 'POST' : 'GET',
+    headers: { Authorization: 'Bearer ' + GSC.token, 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!r.ok) throw new Error('GSC API ' + r.status + ' — ' + (await r.text()).slice(0, 300));
+  return r.json();
+}
+async function gscConnect() {
+  if (GSC.busy) return;
+  GSC.busy = true; GSC.err = ''; redraw();
+  try {
+    await gisLoad();
+    GSC.token = await gscToken();
+    if (!GSC.cfg.property) {
+      const s = await gscApi('sites');
+      GSC.sites = (s.siteEntry || []).filter(x => x.permissionLevel !== 'siteUnverifiedUser').map(x => x.siteUrl);
+      const guess = GSC.sites.find(u => u.includes('1031crowdfunding.com'));
+      if (GSC.sites.length === 1 || guess) { GSC.cfg.property = guess || GSC.sites[0]; await Store.set('gsc_cfg', GSC.cfg); }
+      else { GSC.busy = false; redraw(); return; }   // let her pick from the list
+    }
+    await gscPull();
+  } catch (e) { GSC.err = e.message; }
+  GSC.busy = false; redraw();
+}
+async function gscPull() {
+  const end = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
+  const start = new Date(Date.now() - 92 * 864e5).toISOString().slice(0, 10);
+  let rows = [], startRow = 0;
+  for (let i = 0; i < 5; i++) {  // ≤125k rows
+    const j = await gscApi('sites/' + encodeURIComponent(GSC.cfg.property) + '/searchAnalytics/query', {
+      startDate: start, endDate: end, dimensions: ['query', 'page'], rowLimit: 25000, startRow, dataState: 'final' });
+    const batch = j.rows || [];
+    rows = rows.concat(batch);
+    if (batch.length < 25000) break;
+    startRow += 25000;
+  }
+  const overlaps = computeOverlaps(rows);
+  GSC.cache = { fetched: nowISO(), range: start + ' → ' + end, property: GSC.cfg.property,
+    totalRows: rows.length, queries: new Set(rows.map(r => r.keys[0])).size, overlaps };
+  await Store.set('gsc_cache', GSC.cache);
+  toast('GSC: ' + rows.length + ' query+page rows pulled · ' + overlaps.length + ' overlapping queries.');
+  gscPublish();
+}
+function computeOverlaps(rows) {
+  const byQ = new Map();
+  for (const r of rows) {
+    const q = r.keys[0];
+    let path;
+    try { const u = new URL(r.keys[1]); if (!u.hostname.endsWith('1031crowdfunding.com')) continue; path = u.pathname; } catch (e) { continue; }
+    let e = byQ.get(q); if (!e) { e = { q, imps: 0, clicks: 0, pages: new Map() } ; byQ.set(q, e); }
+    e.imps += r.impressions; e.clicks += r.clicks;
+    let p = e.pages.get(path); if (!p) { p = { path, imps: 0, clicks: 0, posW: 0 }; e.pages.set(path, p); }
+    p.imps += r.impressions; p.clicks += r.clicks; p.posW += r.position * r.impressions;
+  }
+  const out = [];
+  for (const e of byQ.values()) {
+    const pages = [...e.pages.values()].filter(p => p.imps > 0);
+    if (pages.length < 2 || e.imps < 10) continue;   // noise floor
+    pages.sort((a, b) => b.imps - a.imps);
+    const enrich = pages.map(p => {
+      const pg = PAGE[p.path];
+      return { path: p.path, imps: p.imps, clicks: p.clicks, pos: p.imps ? Math.round(p.posW / p.imps * 10) / 10 : null,
+        cat: pg ? effCat(pg) : null, tier: pg ? effTier(pg) : null };
+    });
+    const cats = new Set(enrich.filter(p => p.cat).map(p => p.cat));
+    const pillar = enrich.find(p => p.tier === 'pillar');
+    out.push({ q: e.q, imps: e.imps, clicks: e.clicks, n: pages.length, pages: enrich,
+      cross: cats.size > 1, pillarLoses: !!(pillar && enrich[0].tier !== 'pillar'),
+      atStake: e.imps - enrich[0].imps });
+  }
+  out.sort((a, b) => b.atStake - a.atStake || b.imps - a.imps);
+  return out.slice(0, 400);
+}
+async function gscPublish() {
+  if (!SYNC.token || !GSC.cache) return;
+  try {
+    const g = await Sync.api('gsc-overlap.json?ref=main');
+    const sha = g.ok ? (await g.json()).sha : undefined;
+    const body = JSON.stringify({ note: 'Machine-written by the app after each GSC pull. Read by the weekly Claude report for merge/split judgment. Public like the rest of the repo.',
+      fetched: GSC.cache.fetched, range: GSC.cache.range, property: GSC.cache.property,
+      totalRows: GSC.cache.totalRows, queries: GSC.cache.queries, overlaps: GSC.cache.overlaps }, null, 1);
+    const put = await Sync.api('gsc-overlap.json', { method: 'PUT', body: JSON.stringify({
+      message: 'gsc-overlap: ' + GSC.cache.fetched, branch: 'main', sha,
+      content: btoa(unescape(encodeURIComponent(body))) }) });
+    if (put.ok) toast('Overlap data published for the weekly report.');
+  } catch (e) {}
+}
+function viewGsc() {
+  const c = GSC.cache;
+  let html = '<p class="intro">Search Console, joined to your clusters: every query where two or more of your pages earn impressions (last ~90 days). Pull on demand; the result also publishes to the repo so the weekly report can recommend merge vs. split. Data stays in Google + this browser + your repo.</p>';
+  if (!GSC.cfg || !GSC.cfg.clientId) {
+    return html + '<div class="group" style="max-width:640px"><h4>One-time setup</h4>' +
+      '<p style="font-size:13px;color:var(--muted)">Follow <b>GSC-SETUP.md</b> (in the repo): create a Google Cloud OAuth client for <code>jennf000.github.io</code>, enable the Search Console API, then paste the client ID here. No keys or passwords — you approve read-only access in a Google popup each session.</p>' +
+      '<div class="addc" style="margin-top:8px"><input type="text" id="gsc-cid" placeholder="1234567890-abc123.apps.googleusercontent.com"><button class="btn" id="gsc-savecid">Save</button></div>' +
+      '</div>';
+  }
+  html += '<div class="toolbar">' +
+    '<button class="btn" id="gsc-connect" ' + (GSC.busy ? 'disabled' : '') + '>' + (GSC.busy ? 'Pulling…' : (c ? 'Refresh from GSC' : 'Connect GSC')) + '</button>' +
+    (c ? '<span class="chip">Pulled ' + esc((c.fetched || '').slice(0, 10)) + ' · ' + esc(c.range) + '</span><span class="chip">' + esc(c.property) + '</span>' : '') +
+    '<input type="search" id="gsc-q" placeholder="Filter queries…" value="' + esc(FILTER.gscq || '') + '">' +
+    '<a href="#" id="gsc-reset" class="mini" style="margin-left:auto">change setup</a></div>';
+  if (GSC.err) html += '<div class="note-strip">⚠ ' + esc(GSC.err) + '</div>';
+  if (GSC.sites && !GSC.cfg.property) {
+    html += '<div class="group"><h4>Pick the property</h4>' + GSC.sites.map(s => '<div class="u"><a href="#" data-gscprop="' + esc(s) + '">' + esc(s) + '</a></div>').join('') + '</div>';
+  }
+  if (!c) return html + '<p class="mini">Nothing pulled yet on this device.</p>';
+  const ov = (c.overlaps || []).filter(o => !FILTER.gscq || o.q.includes(FILTER.gscq.toLowerCase()));
+  html += '<div class="tiles">' +
+    '<div class="tile"><div class="v">' + fmt(c.queries) + '</div><div class="l">Queries with impressions</div></div>' +
+    '<div class="tile"><div class="v">' + fmt((c.overlaps || []).length) + '</div><div class="l">Split across 2+ pages</div></div>' +
+    '<div class="tile"><div class="v">' + fmt((c.overlaps || []).filter(o => o.cross).length) + '</div><div class="l">Across different clusters</div></div>' +
+    '<div class="tile"><div class="v">' + fmt((c.overlaps || []).filter(o => o.pillarLoses).length) + '</div><div class="l">Pillar not winning</div></div></div>';
+  html += '<div class="tablewrap"><table class="grid"><thead><tr><th>Query</th><th class="num">Impressions</th><th class="num">Clicks</th><th class="num">Imps not on the top page</th><th>Pages splitting it</th><th>Flags</th></tr></thead><tbody>' +
+    ov.slice(0, 150).map(o => '<tr><td><b>' + esc(o.q) + '</b></td><td class="num">' + fmt(o.imps) + '</td><td class="num">' + fmt(o.clicks) + '</td><td class="num">' + fmt(o.atStake) + '</td>' +
+      '<td>' + o.pages.slice(0, 5).map(p => '<div class="u" style="gap:8px">' + (PAGE[p.path] ? '<a href="#" data-open="' + esc(p.path) + '">' + esc(p.path) + '</a>' : esc(p.path)) +
+        (p.tier ? ' <span class="badge tier-' + p.tier + '">' + TIERNAME[p.tier] + '</span>' : '') +
+        '<span class="mini">' + fmt(p.imps) + ' imps · pos ' + (p.pos == null ? '—' : p.pos) + (p.cat ? ' · ' + esc(p.cat) : '') + '</span></div>').join('') +
+      (o.pages.length > 5 ? '<div class="mini">+' + (o.pages.length - 5) + ' more</div>' : '') + '</td>' +
+      '<td>' + (o.pillarLoses ? '<span class="badge soft">pillar loses</span> ' : '') + (o.cross ? '<span class="badge sm">cross-cluster</span>' : '') + '</td></tr>').join('') +
+    '</tbody></table></div>' +
+    (ov.length > 150 ? '<p class="mini">Showing 150 of ' + ov.length + ' — narrow with the filter.</p>' : '');
+  return html;
+}
+
 /* ============================== wiring ============================== */
 function wire(root) {
   const q = $('#f-q', root);
@@ -726,6 +887,21 @@ function wire(root) {
   }
   $$('[data-cal]', root).forEach(tr => tr.addEventListener('click', ev => { if (ev.target.closest('a') || ev.target.closest('[data-sched]')) return; calEditor(tr.dataset.cal); }));
   $$('[data-sched]', root).forEach(b => b.addEventListener('click', ev => { ev.stopPropagation(); calEditor(b.dataset.sched, { promote: true }); }));
+  const gc = $('#gsc-connect', root); gc && gc.addEventListener('click', gscConnect);
+  const gs = $('#gsc-savecid', root); gs && gs.addEventListener('click', async () => {
+    const v = $('#gsc-cid', root).value.trim(); if (!v) return;
+    GSC.cfg = { clientId: v, property: '' }; await Store.set('gsc_cfg', GSC.cfg); redraw();
+  });
+  const gr = $('#gsc-reset', root); gr && gr.addEventListener('click', async ev => {
+    ev.preventDefault(); GSC.cfg = { clientId: '', property: '' }; GSC.sites = null; await Store.set('gsc_cfg', GSC.cfg); redraw();
+  });
+  const gq = $('#gsc-q', root); gq && gq.addEventListener('input', debounce(() => { FILTER.gscq = gq.value.trim().toLowerCase(); redrawKeepFocus('gsc-q'); }, 220));
+  $$('[data-gscprop]', root).forEach(a => a.addEventListener('click', async ev => {
+    ev.preventDefault(); GSC.cfg.property = a.dataset.gscprop; await Store.set('gsc_cfg', GSC.cfg);
+    GSC.busy = true; redraw();
+    try { await gscPull(); GSC.err = ''; } catch (e) { GSC.err = e.message; }
+    GSC.busy = false; redraw();
+  }));
   const ia = $('#idea-add', root);
   if (ia) {
     const addIdea = () => {
