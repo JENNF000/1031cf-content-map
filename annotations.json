@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-28T18:33:29.409Z",
+ "updated": "2026-08-31T18:01:33.093Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -407,16 +407,17 @@
    "comments": [],
    "delc": [],
    "f": {
+    "status": "2026-08-28T18:33:29.409Z",
     "target": "2026-08-28T18:33:28.571Z",
-    "status": "2026-08-28T18:33:29.409Z"
+    "cluster": "2026-08-28T18:33:40.769Z"
    },
+   "updated": "2026-08-28T18:33:40.769Z",
    "status": "published",
    "labels": [],
    "target": "731 exchange",
-   "cluster": "",
+   "cluster": "721 Exchange",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-08-28T18:33:29.409Z"
+   "offFlags": []
   }
  },
  "live": {},
@@ -564,10 +565,10 @@
   {
    "id": "bd512154-b192-45c9-96a7-3fc2dd8b82a2",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T22:30:06.924Z",
+   "u": "2026-08-31T18:01:33.093Z",
    "bucket": "sched",
    "date": "2026-08-31",
-   "status": "draft",
+   "status": "published",
    "types": [
     "rewrite",
     "consolidate"
@@ -578,7 +579,7 @@
    "kd": 22,
    "prompts": "What Is a Qualified Intermediary?",
    "gdoc": "https://docs.google.com/document/d/1_nedrF7pYh3qAZ91bum1Tw2EonsJOCM9dizpTNsl9Y8/edit?usp=drive_link",
-   "url": "",
+   "url": "https://www.1031crowdfunding.com/what-is-a-qualified-intermediary/",
    "oldurl": "https://www.1031crowdfunding.com/what-is-a-qualified-intermediary/, https://www.1031crowdfunding.com/the-role-of-a-qualified-intermediary-in-1031-exchanges/, https://www.1031crowdfunding.com/choosing-the-right-1031-exchange-qualified-intermediary/",
    "lastpub": "2025-09-29"
   },
