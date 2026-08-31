@@ -429,32 +429,64 @@ function redraw() {
 }
 function pageMatches(p) {
   const e = annOf(p.path) || {};
-  if (FILTER.q) {
-    const q = FILTER.q.toLowerCase();
-    if (!(p.path.toLowerCase().includes(q) || p.label.toLowerCase().includes(q) || (p.pkw || '').toLowerCase().includes(q) || (e.target || '').toLowerCase().includes(q))) return false;
+  return matchesF(p, e, FILTER);
+}
+/* shared matcher — each tab passes its OWN filter state */
+function matchesF(p, e, F) {
+  const q = (F.q || '').trim().toLowerCase();
+  if (q) {
+    const g = gm(p.path);
+    if (!(p.path.toLowerCase().includes(q) || p.label.toLowerCase().includes(q) || (p.pkw || '').toLowerCase().includes(q) || ((g && g.topq) || '').toLowerCase().includes(q) || (e.target || '').toLowerCase().includes(q))) return false;
   }
-  if (FILTER.cluster && effCat(p) !== FILTER.cluster) return false;
-  if (FILTER.tier && effTier(p) !== FILTER.tier) return false;
-  if (FILTER.status && (e.status || 'none') !== FILTER.status) return false;
-  if (FILTER.label && !effLabels(p).includes(FILTER.label)) return false;
-  if (FILTER.notes === 'any' && !(e.status || (e.labels||[]).length || (e.comments||[]).filter(c=>!(e.delc||[]).includes(c.id)).length || e.target || e.cluster || e.tier)) return false;
-  if (FILTER.notes === 'comments' && !((e.comments||[]).filter(c=>!(e.delc||[]).includes(c.id)).length)) return false;
-  if (FILTER.notes === 'nodata' && !p.no_metrics) return false;
-  if (FILTER.notes === 'moved' && !((e.cluster && e.cluster !== p.cat) || (e.tier && e.tier !== p.tier) || statusChanged(p))) return false;
+  if (F.cluster && effCat(p) !== F.cluster) return false;
+  if (F.tier && effTier(p) !== F.tier) return false;
+  if (F.status && (e.status || 'none') !== F.status) return false;
+  if (F.label && !effLabels(p).includes(F.label)) return false;
+  if (F.notes === 'any' && !(e.status || (e.labels||[]).length || (e.comments||[]).filter(c=>!(e.delc||[]).includes(c.id)).length || e.target || e.cluster || e.tier)) return false;
+  if (F.notes === 'comments' && !((e.comments||[]).filter(c=>!(e.delc||[]).includes(c.id)).length)) return false;
+  if (F.notes === 'nodata' && !p.no_metrics) return false;
+  if (F.notes === 'moved' && !((e.cluster && e.cluster !== p.cat) || (e.tier && e.tier !== p.tier) || statusChanged(p))) return false;
   return true;
 }
-function toolbarHTML(hideTier) {
-  const statuses = visibleStatuses(true);
-  const labels = ANN.labels.filter(l => !isHiddenL(l.id));
+const PGF = { q:'', cluster:'', tier:'', status:'', label:'' };   // All pages — its own bar
+const RDF = { q:'', cluster:'', flag:'' };                        // Redirects — its own bar
+function pageMatchesP(p) { return matchesF(p, annOf(p.path) || {}, PGF); }
+function clusterOpts(sel) { return '<option value="">All clusters</option>' + DATA.cats.map(c => '<option ' + (sel === c ? 'selected' : '') + '>' + esc(c) + '</option>').join(''); }
+function tierOpts(sel) { return '<option value="">All tiers</option>' + TIERS.map(t => '<option value="' + t + '" ' + (sel === t ? 'selected' : '') + '>' + TIERNAME[t] + '</option>').join(''); }
+function statusOpts(sel) { return '<option value="">Any status</option>' + visibleStatuses(true).map(s => '<option value="' + s.id + '" ' + (sel === s.id ? 'selected' : '') + '>' + esc(s.name) + '</option>').join(''); }
+function labelOpts(sel) { return '<option value="">Any label</option>' + ANN.labels.filter(l => !isHiddenL(l.id)).map(l => '<option value="' + l.id + '" ' + (sel === l.id ? 'selected' : '') + '>' + esc(l.name) + (l.derived ? ' (auto)' : '') + '</option>').join(''); }
+function toolbarHTML() {   // Topic map only
   return '<div class="toolbar">' +
     '<input type="search" id="f-q" placeholder="Search pages, slugs, keywords…" value="' + esc(FILTER.q) + '">' +
-    '<select id="f-cluster"><option value="">All clusters</option>' + DATA.cats.map(c => '<option ' + (FILTER.cluster === c ? 'selected' : '') + '>' + esc(c) + '</option>').join('') + '</select>' +
-    (hideTier ? '' : '<select id="f-tier"><option value="">All tiers</option>' + TIERS.map(t => '<option value="' + t + '" ' + (FILTER.tier === t ? 'selected' : '') + '>' + TIERNAME[t] + '</option>').join('') + '</select>') +
-    '<select id="f-status"><option value="">Any status</option>' + statuses.map(s => '<option value="' + s.id + '" ' + (FILTER.status === s.id ? 'selected' : '') + '>' + esc(s.name) + '</option>').join('') + '</select>' +
-    '<select id="f-label"><option value="">Any label</option>' + labels.map(l => '<option value="' + l.id + '" ' + (FILTER.label === l.id ? 'selected' : '') + '>' + esc(l.name) + (l.derived ? ' (auto)' : '') + '</option>').join('') + '</select>' +
+    '<select id="f-cluster">' + clusterOpts(FILTER.cluster) + '</select>' +
+    '<select id="f-tier">' + tierOpts(FILTER.tier) + '</select>' +
+    '<select id="f-status">' + statusOpts(FILTER.status) + '</select>' +
+    '<select id="f-label">' + labelOpts(FILTER.label) + '</select>' +
     '<select id="f-notes"><option value="">Everything</option><option value="any" ' + (FILTER.notes === 'any' ? 'selected' : '') + '>Any of my notes</option><option value="comments" ' + (FILTER.notes === 'comments' ? 'selected' : '') + '>Has comments</option><option value="moved" ' + (FILTER.notes === 'moved' ? 'selected' : '') + '>Pages I moved / re-checked</option><option value="nodata" ' + (FILTER.notes === 'nodata' ? 'selected' : '') + '>No data yet</option></select>' +
     '<label class="tog"><input type="checkbox" id="f-compact" ' + (FILTER.compact ? 'checked' : '') + '> Compact</label>' +
     '<span class="count" id="f-count"></span></div>';
+}
+function pagesToolbar() {  // All pages — independent state
+  return '<div class="toolbar">' +
+    '<input type="search" id="pf-q" placeholder="Search pages, slugs, keywords…" value="' + esc(PGF.q) + '">' +
+    '<select id="pf-cluster">' + clusterOpts(PGF.cluster) + '</select>' +
+    '<select id="pf-tier">' + tierOpts(PGF.tier) + '</select>' +
+    '<select id="pf-status">' + statusOpts(PGF.status) + '</select>' +
+    '<select id="pf-label">' + labelOpts(PGF.label) + '</select>' +
+    '<span class="count" id="pf-count"></span></div>';
+}
+function redirToolbar() {  // Redirects — independent state
+  return '<div class="toolbar">' +
+    '<input type="search" id="rf-q" placeholder="Search old or new URL…" value="' + esc(RDF.q) + '">' +
+    '<select id="rf-cluster">' + clusterOpts(RDF.cluster) + '</select>' +
+    '<select id="rf-flag"><option value="">All redirects</option>' +
+      '<option value="issues" ' + (RDF.flag === 'issues' ? 'selected' : '') + '>⚠ Chains / loops / dead ends</option>' +
+      '<option value="imps" ' + (RDF.flag === 'imps' ? 'selected' : '') + '>Still earning impressions</option>' +
+      '<option value="gscok" ' + (RDF.flag === 'gscok' ? 'selected' : '') + '>GSC-verified</option>' +
+      '<option value="disagree" ' + (RDF.flag === 'disagree' ? 'selected' : '') + '>Google disagrees (live?)</option>' +
+      '<option value="soft" ' + (RDF.flag === 'soft' ? 'selected' : '') + '>Soft-404 (to listing pages)</option>' +
+      '<option value="sitemap" ' + (RDF.flag === 'sitemap' ? 'selected' : '') + '>Still in sitemap</option></select>' +
+    '<span class="count" id="rf-count"></span></div>';
 }
 function statusPill(p) {
   const e = annOf(p.path); if (!e || !e.status || isHiddenS(e.status)) return '';
@@ -522,10 +554,23 @@ function intentTop(p) {
   const parts = INTENTS.map(([k, n]) => [n, p[k]]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]);
   return parts.length ? parts[0][0] : '—';
 }
-let SORT = { k:'kw', dir:-1 };
+const SORTS = {
+  pages: { k:'kw', dir:-1 },        // 'kw' maps to GSC clicks when GSC data exists
+  redirects: { k:'old', dir:1 },
+  cal: { k:'date', dir:1 },
+  gsc: { k:'atStake', dir:-1 },
+  slugs: { k:'vol', dir:-1 },
+};
+const SORT = SORTS.pages;   // legacy alias used by viewPages
 const sortKey = () => (SORT.k === 'kw' && GSC.cache && GSC.cache.pages) ? 'gclicks' : SORT.k;
+/* every table header: <th data-tbl data-sort> — click sorts asc, click again desc */
+const mkTh = (tbl, k, label, num) => {
+  const st = SORTS[tbl];
+  return '<th class="' + (num ? 'num' : '') + '" data-tbl="' + tbl + '" data-sort="' + k + '">' + label + (st.k === k ? (st.dir < 0 ? ' ▾' : ' ▴') : '') + '</th>';
+};
+const cmpV = (va, vb, dir) => (va < vb ? -1 : va > vb ? 1 : 0) * dir;
 function viewPages() {
-  const rows = DATA.pages.filter(pageMatches).sort((a, b) => {
+  const rows = DATA.pages.filter(pageMatchesP).sort((a, b) => {
     let va, vb;
     const SK = sortKey();
     const ga = gm(a.path) || {}, gb = gm(b.path) || {};
@@ -541,7 +586,7 @@ function viewPages() {
     else { va = a[SK] || 0; vb = b[SK] || 0; }
     return (va < vb ? -1 : va > vb ? 1 : 0) * SORT.dir;
   });
-  const th = (k, n, num) => '<th class="' + (num ? 'num' : '') + '" data-sort="' + k + '">' + n + (SORT.k === k ? (SORT.dir < 0 ? ' ▾' : ' ▴') : '') + '</th>';
+  const th = (k, n, num) => mkTh('pages', k, n, num);
   const useG = !!(GSC.cache && GSC.cache.pages);
   const head = useG
     ? th('path', 'Page') + th('cat', 'Cluster') + th('tier', 'Tier') +
@@ -550,7 +595,7 @@ function viewPages() {
     : th('path', 'Page') + th('cat', 'Cluster') + th('tier', 'Tier') +
       th('kw', 'Keywords', 1) + th('traffic', 'Est. traffic', 1) + th('pkw', 'Top keyword') + th('vol', 'Volume', 1) + th('pos', 'Position', 1) +
       '<th>Intent</th><th>Status / labels</th>';
-  return toolbarHTML() +
+  return pagesToolbar() +
     '<div style="margin:-4px 0 10px"><button class="btn sub" id="btn-csv">Export CSV</button>' + (useG ? ' <span class="mini">GSC = last 90 days, real Search data · pulled ' + esc((GSC.cache.fetched || '').slice(0, 10)) + '. Volume stays SEMrush (Google has no volumes).</span>' : '') + '</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr>' + head +
     '</tr></thead><tbody>' +
@@ -604,38 +649,102 @@ function viewInsights() {
       '<p style="font-size:12.5px;color:#3d4a46;margin:6px 0 0">' + esc(g.note) + '</p></div>';
   }).join('');
   const slugs = DATA.slugs.filter(s => PAGE[s.url] && effTier(PAGE[s.url]) !== 'redirect');
+  const sst = SORTS.slugs;
+  slugs.sort((a, b) => sst.k === 'vol' ? cmpV(a.vol || 0, b.vol || 0, sst.dir) : cmpV((a[sst.k] || '').toLowerCase(), (b[sst.k] || '').toLowerCase(), sst.dir));
   html += '<h2 style="font-size:16px;margin:22px 0 10px">Slug-update candidates (' + slugs.length + ' live)</h2>' +
-    '<div class="tablewrap"><table class="grid"><thead><tr><th>URL</th><th>Ranking kw</th><th class="num">Vol</th><th>Suggested</th><th>Why</th></tr></thead><tbody>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr>' + mkTh('slugs','url','URL') + mkTh('slugs','kw','Ranking kw') + mkTh('slugs','vol','Vol',1) + '<th>Suggested</th><th>Why</th></tr></thead><tbody>' +
     slugs.map(s => '<tr><td><a href="#" data-open="' + esc(s.url) + '">' + esc(s.url) + '</a></td><td>' + esc(s.kw) + '</td><td class="num">' + fmt(s.vol) + '</td><td><code style="font-size:12px">' + esc(s.suggest) + '</code></td><td style="font-size:12px">' + esc(s.reason) + '</td></tr>').join('') +
     '</tbody></table></div>';
   return html;
 }
+/* chains / loops / dead destinations — computed from the verified map + known 404s + Google verdicts */
+function analyzeRedirects() {
+  const map = {};
+  for (const r of DATA.redirects) map[r.old] = r.to;
+  const gone = new Set(((DATA.insights.find(i => i.id === 'p404') || {}).items) || []);
+  const insp = (GSC.cache && GSC.cache.inspect) || {};
+  for (const [path, i] of Object.entries(insp)) if (i.state === 'gone') gone.add(path);
+  const out = {};
+  for (const old of Object.keys(map)) {
+    const hops = [old]; const seen = new Set([old]);
+    let cur = map[old], loop = false;
+    while (cur != null) {
+      if (seen.has(cur)) { loop = true; hops.push(cur); break; }
+      seen.add(cur); hops.push(cur);
+      if (map[cur] != null) { cur = map[cur]; continue; }
+      // destination itself marked redirecting (by her or by Google) but crawl has no target yet
+      if (PAGE[cur] && effTier(PAGE[cur]) === 'redirect' && !map[cur]) { hops.push('(redirects — target unknown until next crawl)'); }
+      break;
+    }
+    const finalDest = hops[hops.length - 1];
+    out[old] = { hops, loop, chain: !loop && hops.length > 2, dead: !loop && gone.has(finalDest) };
+  }
+  return out;
+}
 function viewRedirects() {
   const insp = (GSC.cache && GSC.cache.inspect) || {};
+  const RA = analyzeRedirects();
   const manual = Object.entries(ANN.live).filter(([path, v]) => v.s === 'redirect' && !(PAGE[path] && PAGE[path].tier === 'redirect'));
   const gscRows = Object.entries(insp).filter(([path, i]) => i.state === 'redirect' && !(PAGE[path] && PAGE[path].tier === 'redirect') && !(ANN.live[path] && ANN.live[path].s === 'redirect'));
-  const rows = DATA.redirects.map(r => ({ ...r, manual:false }))
+  const q = (RDF.q || '').trim().toLowerCase();
+  let rows = DATA.redirects.map(r => ({ ...r, manual:false }))
     .concat(gscRows.map(([path, i]) => ({ old: path, to: '(Google reports a redirect — destination on next crawl)', cat: PAGE[path] ? effCat(PAGE[path]) : '—', kw_old: PAGE[path] ? PAGE[path].kw : 0, pkw_old: PAGE[path] ? PAGE[path].pkw : null, kw_new: null, pkw_new: null, to_listing: false, in_sitemap: PAGE[path] ? PAGE[path].in_sitemap : false, manual: false, gsc: true, at: i.at })))
-    .concat(manual.map(([path, v]) => ({ old: path, to: '(not verified yet — the next crawl records the destination)', cat: PAGE[path] ? effCat(PAGE[path]) : '—', kw_old: PAGE[path] ? PAGE[path].kw : 0, pkw_old: PAGE[path] ? PAGE[path].pkw : null, kw_new: null, pkw_new: null, to_listing:false, in_sitemap: PAGE[path] ? PAGE[path].in_sitemap : false, manual:true, at: v.at })))
-    .filter(r => !FILTER.q || r.old.includes(FILTER.q.toLowerCase()) || (r.to || '').includes(FILTER.q.toLowerCase()))
-    .filter(r => !FILTER.cluster || r.cat === FILTER.cluster);
-  const relive = Object.entries(ANN.live).filter(([path, v]) => v.s === 'live' && PAGE[path] && PAGE[path].tier === 'redirect');
-  return '<p class="intro">Every verified redirect: <b>' + DATA.redirects.length + '</b> confirmed by the ' + esc(DATA.stats.crawl_date) + ' crawl' + (gscRows.length ? ', <b>' + gscRows.length + '</b> newly detected by Google (URL Inspection)' : '') + (manual.length ? ', <b>' + manual.length + '</b> marked by you' : '') + '.' + (GSC.cache && GSC.cache.inspect && Object.keys(insp).length ? ' Every Refresh re-verifies against Google\'s own index (GSC ✓ = Google confirms; "GSC: live?" = Google disagrees with the crawl; an impressions badge = the old URL is still earning impressions).' : ' Connect GSC and each Refresh will verify these against Google\'s own index automatically.') + '</p>' +
-    toolbarHTML(true) +
-    '<div class="tablewrap"><table class="grid"><thead><tr><th>Old slug</th><th>Redirects to</th><th>Cluster</th><th class="num">KW on old URL</th><th>Top kw (old)</th><th class="num">KW on target</th><th>Top kw (target)</th><th>Flags</th></tr></thead><tbody>' +
+    .concat(manual.map(([path, v]) => ({ old: path, to: '(not verified yet — the next crawl records the destination)', cat: PAGE[path] ? effCat(PAGE[path]) : '—', kw_old: PAGE[path] ? PAGE[path].kw : 0, pkw_old: PAGE[path] ? PAGE[path].pkw : null, kw_new: null, pkw_new: null, to_listing:false, in_sitemap: PAGE[path] ? PAGE[path].in_sitemap : false, manual:true, at: v.at })));
+  rows = rows
+    .filter(r => !q || r.old.toLowerCase().includes(q) || (r.to || '').toLowerCase().includes(q))
+    .filter(r => !RDF.cluster || r.cat === RDF.cluster)
+    .filter(r => {
+      const a = RA[r.old] || {};
+      if (RDF.flag === 'issues') return a.chain || a.loop || a.dead;
+      if (RDF.flag === 'imps') return gm(r.old) && gm(r.old).imps > 0;
+      if (RDF.flag === 'gscok') return r.gsc || (insp[r.old] && insp[r.old].state === 'redirect');
+      if (RDF.flag === 'disagree') return insp[r.old] && insp[r.old].state === 'live';
+      if (RDF.flag === 'soft') return r.to_listing;
+      if (RDF.flag === 'sitemap') return r.in_sitemap;
+      return true;
+    });
+  const st = SORTS.redirects;
+  rows.sort((a, b) => {
+    let va, vb;
+    if (st.k === 'kw_old') { va = a.kw_old || 0; vb = b.kw_old || 0; }
+    else if (st.k === 'kw_new') { va = a.kw_new == null ? -1 : a.kw_new; vb = b.kw_new == null ? -1 : b.kw_new; }
+    else if (st.k === 'imps') { va = (gm(a.old) || {}).imps || 0; vb = (gm(b.old) || {}).imps || 0; }
+    else { va = (a[st.k] || '').toString().toLowerCase(); vb = (b[st.k] || '').toString().toLowerCase(); }
+    return cmpV(va, vb, st.dir);
+  });
+  const issues = Object.entries(RA).filter(([, a]) => a.chain || a.loop || a.dead);
+  const strip = issues.length
+    ? '<div class="note-strip">⚠ <b>' + issues.length + ' redirect' + (issues.length > 1 ? 's have' : ' has') + ' problems:</b> ' +
+      issues.slice(0, 6).map(([old, a]) => esc(old) + ' — ' + (a.loop ? 'LOOP (' + esc(a.hops.join(' → ')) + ')' : a.dead ? 'dead end (final destination 404s)' : 'chain of ' + (a.hops.length - 1) + ' hops') ).join(' · ') +
+      (issues.length > 6 ? ' · +' + (issues.length - 6) + ' more (filter: Chains / loops / dead ends)' : '') + '</div>'
+    : '';
+  const issueBadges = r => {
+    const a = RA[r.old]; if (!a) return '';
+    return (a.loop ? '<span class="badge soft" title="' + esc(a.hops.join(' → ')) + '">loop!</span> ' : '') +
+      (a.chain ? '<span class="badge soft" title="' + esc(a.hops.join(' → ')) + '">chain ×' + (a.hops.length - 1) + '</span> ' : '') +
+      (a.dead ? '<span class="badge soft" title="final destination returns 404">dead end</span> ' : '');
+  };
+  return '<p class="intro">Every verified redirect: <b>' + DATA.redirects.length + '</b> confirmed by the ' + esc(DATA.stats.crawl_date) + ' crawl' + (gscRows.length ? ', <b>' + gscRows.length + '</b> newly detected by Google (URL Inspection)' : '') + (manual.length ? ', <b>' + manual.length + '</b> marked by you' : '') + '.' + (Object.keys(insp).length ? ' Every Refresh re-verifies against Google\'s own index (GSC ✓ = Google confirms; "GSC: live?" = Google disagrees with the crawl; an impressions badge = the old URL is still earning impressions). Chains, loops and dead ends are checked on every render.' : ' Connect GSC and each Refresh will verify these against Google\'s own index automatically.') + '</p>' +
+    redirToolbar() + strip +
+    '<div class="tablewrap"><table class="grid"><thead><tr>' +
+    mkTh('redirects', 'old', 'Old slug') + mkTh('redirects', 'to', 'Redirects to') + mkTh('redirects', 'cat', 'Cluster') +
+    mkTh('redirects', 'kw_old', 'KW on old URL', 1) + '<th>Top kw (old)</th>' + mkTh('redirects', 'kw_new', 'KW on target', 1) + '<th>Top kw (target)</th>' +
+    (GSC.cache && GSC.cache.pages ? mkTh('redirects', 'imps', 'Imps 90d (old)', 1) : '') + '<th>Flags</th></tr></thead><tbody>' +
     rows.map(r => '<tr><td>' + (PAGE[r.old] ? '<a href="#" data-open="' + esc(r.old) + '">' + esc(r.old) + '</a>' : esc(r.old)) + '</td>' +
       '<td>' + esc(r.to) + '</td><td>' + esc(r.cat) + '</td>' +
       '<td class="num">' + fmt(r.kw_old) + '</td><td>' + esc(r.pkw_old || '—') + '</td>' +
       '<td class="num">' + (r.kw_new == null ? '—' : fmt(r.kw_new)) + '</td><td>' + esc(r.pkw_new || '—') + '</td>' +
-      '<td>' + (r.to_listing ? '<span class="badge soft" title="redirects into a listing page — passes no topical relevance (soft-404 pattern)">soft-404</span> ' : '') +
+      (GSC.cache && GSC.cache.pages ? '<td class="num">' + (gm(r.old) ? fmt(gm(r.old).imps) : '0') + '</td>' : '') +
+      '<td>' + issueBadges(r) +
+      (r.to_listing ? '<span class="badge soft" title="redirects into a listing page — passes no topical relevance (soft-404 pattern)">soft-404</span> ' : '') +
       (r.in_sitemap ? '<span class="badge sm" title="this redirecting URL is still advertised in the sitemap">in sitemap</span> ' : '') +
       (r.manual ? '<span class="badge tier-redirect" title="marked by you, not yet verified by a crawl">yours · ' + esc((r.at || '').slice(0, 10)) + '</span> ' : '') +
       (r.gsc ? '<span class="badge tier-pillar" title="URL Inspection: Google itself reports this URL as a redirect">GSC ✓ · ' + esc((r.at || '').slice(0, 10)) + '</span> ' : '') +
       (!r.gsc && insp[r.old] && insp[r.old].state === 'redirect' ? '<span class="badge tier-pillar" title="URL Inspection confirms Google sees the redirect">GSC ✓</span> ' : '') +
       (!r.gsc && insp[r.old] && insp[r.old].state === 'live' ? '<span class="badge soft" title="URL Inspection: Google reports this URL as LIVE, not redirecting — check it">GSC: live?</span> ' : '') +
-      (gm(r.old) && gm(r.old).imps > 0 ? '<span class="badge sm" title="this old URL still earned ' + fmt(gm(r.old).imps) + ' impressions in the last 90 days — Google hasn\'t fully processed the redirect yet, or it regressed">' + fmt(gm(r.old).imps) + ' imps</span>' : '') + '</td></tr>').join('') +
+      (gm(r.old) && gm(r.old).imps > 0 && !(GSC.cache && GSC.cache.pages) ? '<span class="badge sm">' + fmt(gm(r.old).imps) + ' imps</span>' : '') + '</td></tr>').join('') +
     '</tbody></table></div>' +
-    (relive.length ? '<h3 style="font-size:14px;margin:16px 0 6px">Marked live by you (build says redirect)</h3>' + relive.map(([path]) => '<div class="u" style="font-size:13px"><span class="tag live">LIVE (yours)</span> <a href="#" data-open="' + esc(path) + '">' + esc(path) + '</a></div>').join('') : '');
+    (Object.entries(ANN.live).filter(([path, v]) => v.s === 'live' && PAGE[path] && PAGE[path].tier === 'redirect').length ? '<h3 style="font-size:14px;margin:16px 0 6px">Marked live by you (build says redirect)</h3>' + Object.entries(ANN.live).filter(([path, v]) => v.s === 'live' && PAGE[path] && PAGE[path].tier === 'redirect').map(([path]) => '<div class="u" style="font-size:13px"><span class="tag live">LIVE (yours)</span> <a href="#" data-open="' + esc(path) + '">' + esc(path) + '</a></div>').join('') : '');
 }
 function viewNotes() {
   const entries = DATA.pages.filter(p => { const e = annOf(p.path); return e && (e.status || (e.labels||[]).length || (e.comments||[]).filter(c => !(e.delc||[]).includes(c.id)).length || e.target || e.cluster || e.tier); });
@@ -670,19 +779,29 @@ const fmtDate = d => {
 const isIdea = e => e.bucket === 'idea';
 function viewCal() {
   let all = calEntries();
-  if (CALF.q) { const q = CALF.q.toLowerCase(); all = all.filter(e => ((e.topic||'') + ' ' + (e.kw||'') + ' ' + (e.url||'') + ' ' + (e.oldurl||'') + ' ' + (e.prompts||'')).toLowerCase().includes(q)); }
+  if ((CALF.q || '').trim()) { const q = CALF.q.trim().toLowerCase(); all = all.filter(e => ((e.topic||'') + ' ' + (e.kw||'') + ' ' + (e.url||'') + ' ' + (e.oldurl||'') + ' ' + (e.prompts||'')).toLowerCase().includes(q)); }
   if (CALF.type) all = all.filter(e => (e.types || []).includes(CALF.type));
   let ideas = all.filter(isIdea);
   let list = all.filter(e => !isIdea(e));
   if (CALF.status) list = list.filter(e => e.status === CALF.status);
-  list.sort((a, b) => ((a.date || '9999') < (b.date || '9999') ? -1 : (a.date || '9999') > (b.date || '9999') ? 1 : ((a.topic||'') < (b.topic||'') ? -1 : 1)));
+  const cst = SORTS.cal;
+  const grouped = cst.k === 'date' && cst.dir === 1;   // month headers only in default order
+  const stOrder = id => { const i = CAL_STATUSES.findIndex(s => s[0] === id); return i < 0 ? 99 : i; };
+  list.sort((a, b) => {
+    let va, vb;
+    if (cst.k === 'date') { va = a.date || '9999'; vb = b.date || '9999'; }
+    else if (cst.k === 'status') { va = stOrder(a.status); vb = stOrder(b.status); }
+    else if (cst.k === 'lastpub') { va = a.lastpub || '9999'; vb = b.lastpub || '9999'; }
+    else { va = (a[cst.k] || '').toString().toLowerCase(); vb = (b[cst.k] || '').toString().toLowerCase(); }
+    return cmpV(va, vb, cst.dir) || cmpV((a.topic || ''), (b.topic || ''), 1);
+  });
   ideas.sort((a, b) => ((a.created||'') < (b.created||'') ? -1 : 1));
   const monthOf = e => e.date ? e.date.slice(0, 7) : '';
   const monthName = k => k ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][Number(k.slice(5, 7)) - 1] + ' ' + k.slice(0, 4) : 'Unscheduled';
   let rows = '', lastMonth = null;
   for (const e of list) {
     const mk = monthOf(e);
-    if (mk !== lastMonth) { rows += '<tr class="mrow"><td colspan="10" style="background:#f6f6f4;font-weight:650;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#52514e">' + monthName(mk) + '</td></tr>'; lastMonth = mk; }
+    if (grouped && mk !== lastMonth) { rows += '<tr class="mrow"><td colspan="10" style="background:#f6f6f4;font-weight:650;font-size:11px;letter-spacing:.4px;text-transform:uppercase;color:#52514e">' + monthName(mk) + '</td></tr>'; lastMonth = mk; }
     const oldLinks = (e.oldurl || '').split(',').map(x => x.trim()).filter(Boolean).map(x => linkA(x)).join('<br>') || '—';
     rows += '<tr data-cal="' + e.id + '" style="cursor:pointer" title="Click to edit">' +
       '<td style="white-space:nowrap">' + (fmtDate(e.date) || '—') + '</td>' +
@@ -716,7 +835,7 @@ function viewCal() {
     '<select id="cal-type"><option value="">Any type</option>' + CAL_TYPES.map(t => '<option value="' + t[0] + '" ' + (CALF.type === t[0] ? 'selected' : '') + '>' + t[1] + '</option>').join('') + '</select>' +
     '<span class="count">' + list.length + ' shown</span></div>' +
     '<h2 style="font-size:15px;margin:4px 0 8px">Scheduled</h2>' +
-    '<div class="tablewrap"><table class="grid"><thead><tr><th>Publish date</th><th>Status</th><th>Content type</th><th>Topic</th><th>Primary target kw</th><th>Target prompts</th><th>Draft</th><th>Publish URL</th><th>Old URL</th><th>Last publish</th></tr></thead><tbody>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr>' + mkTh('cal','date','Publish date') + mkTh('cal','status','Status') + '<th>Content type</th>' + mkTh('cal','topic','Topic') + mkTh('cal','kw','Primary target kw') + '<th>Target prompts</th><th>Draft</th>' + mkTh('cal','url','Publish URL') + '<th>Old URL</th>' + mkTh('cal','lastpub','Last publish') + '</tr></thead><tbody>' +
     (rows || '<tr><td colspan="10" class="mini" style="padding:18px">Nothing scheduled yet — hit + New entry, or promote an idea below.</td></tr>') +
     '</tbody></table></div>' +
     '<h2 style="font-size:15px;margin:20px 0 8px">Ideas <span class="mini">' + ideas.length + '</span></h2>' +
@@ -1019,13 +1138,16 @@ function viewGsc() {
     html += '<div class="group"><h4>Pick the property</h4>' + GSC.sites.map(s => '<div class="u"><a href="#" data-gscprop="' + esc(s) + '">' + esc(s) + '</a></div>').join('') + '</div>';
   }
   if (!c) return html + '<p class="mini">Nothing pulled yet on this device.</p>';
-  const ov = (c.overlaps || []).filter(o => !FILTER.gscq || o.q.includes(FILTER.gscq.toLowerCase()));
+  const gq2 = (FILTER.gscq || '').trim().toLowerCase();
+  const gst = SORTS.gsc;
+  const ov = (c.overlaps || []).filter(o => !gq2 || o.q.includes(gq2))
+    .slice().sort((a, b) => gst.k === 'q' ? cmpV(a.q, b.q, gst.dir) : cmpV(a[gst.k] || 0, b[gst.k] || 0, gst.dir));
   html += '<div class="tiles">' +
     '<div class="tile"><div class="v">' + fmt(c.queries) + '</div><div class="l">Queries with impressions</div></div>' +
     '<div class="tile"><div class="v">' + fmt((c.overlaps || []).length) + '</div><div class="l">Split across 2+ pages</div></div>' +
     '<div class="tile"><div class="v">' + fmt((c.overlaps || []).filter(o => o.cross).length) + '</div><div class="l">Across different clusters</div></div>' +
     '<div class="tile"><div class="v">' + fmt((c.overlaps || []).filter(o => o.pillarLoses).length) + '</div><div class="l">Pillar not winning</div></div></div>';
-  html += '<div class="tablewrap"><table class="grid"><thead><tr><th>Query</th><th class="num">Impressions</th><th class="num">Clicks</th><th class="num">Imps not on the top page</th><th>Pages splitting it</th><th>Flags</th></tr></thead><tbody>' +
+  html += '<div class="tablewrap"><table class="grid"><thead><tr>' + mkTh('gsc','q','Query') + mkTh('gsc','imps','Impressions',1) + mkTh('gsc','clicks','Clicks',1) + mkTh('gsc','atStake','Imps not on the top page',1) + '<th>Pages splitting it</th><th>Flags</th></tr></thead><tbody>' +
     ov.slice(0, 150).map(o => '<tr><td><b>' + esc(o.q) + '</b></td><td class="num">' + fmt(o.imps) + '</td><td class="num">' + fmt(o.clicks) + '</td><td class="num">' + fmt(o.atStake) + '</td>' +
       '<td>' + o.pages.slice(0, 5).map(p => '<div class="u" style="gap:8px">' + (PAGE[p.path] ? '<a href="#" data-open="' + esc(p.path) + '">' + esc(p.path) + '</a>' : esc(p.path)) +
         (p.tier ? ' <span class="badge tier-' + p.tier + '">' + TIERNAME[p.tier] + '</span>' : '') +
@@ -1041,7 +1163,7 @@ function viewGsc() {
 function wire(root) {
   const q = $('#f-q', root);
   if (q) {
-    q.addEventListener('input', debounce(() => { FILTER.q = q.value.trim(); redrawKeepFocus('f-q'); }, 220));
+    q.addEventListener('input', debounce(() => { FILTER.q = q.value; redrawKeepFocus('f-q'); }, 220));  // no trim — a trailing space must survive the redraw
     const bind = (id, key) => { const el = $('#' + id, root); el && el.addEventListener('change', () => { FILTER[key] = el.value; redraw(); }); };
     bind('f-cluster', 'cluster'); bind('f-tier', 'tier'); bind('f-status', 'status'); bind('f-label', 'label'); bind('f-notes', 'notes');
     const c = $('#f-compact', root); c && c.addEventListener('change', () => { FILTER.compact = c.checked; document.body.classList.toggle('compact', c.checked); });
@@ -1049,16 +1171,33 @@ function wire(root) {
     const n = DATA.pages.filter(pageMatches).length;
     const fc = $('#f-count', root); if (fc) fc.textContent = n + ' of ' + DATA.pages.length + ' pages';
   }
+  const pq = $('#pf-q', root);
+  if (pq) {
+    pq.addEventListener('input', debounce(() => { PGF.q = pq.value; redrawKeepFocus('pf-q'); }, 220));
+    const bindP = (id, key) => { const el = $('#' + id, root); el && el.addEventListener('change', () => { PGF[key] = el.value; redraw(); }); };
+    bindP('pf-cluster', 'cluster'); bindP('pf-tier', 'tier'); bindP('pf-status', 'status'); bindP('pf-label', 'label');
+    const pc = $('#pf-count', root); if (pc) pc.textContent = DATA.pages.filter(pageMatchesP).length + ' of ' + DATA.pages.length + ' pages';
+  }
+  const rq = $('#rf-q', root);
+  if (rq) {
+    rq.addEventListener('input', debounce(() => { RDF.q = rq.value; redrawKeepFocus('rf-q'); }, 220));
+    const bindR = (id, key) => { const el = $('#' + id, root); el && el.addEventListener('change', () => { RDF[key] = el.value; redraw(); }); };
+    bindR('rf-cluster', 'cluster'); bindR('rf-flag', 'flag');
+    const rc2 = $('#rf-count', root); if (rc2) rc2.textContent = $$('table.grid tbody tr', root).length + ' shown';
+  }
   $$('[data-open]', root).forEach(el => el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); openDrawer(el.dataset.open); }));
   $$('th[data-sort]', root).forEach(th => th.addEventListener('click', () => {
-    const k = th.dataset.sort; if (SORT.k === k) SORT.dir *= -1; else { SORT.k = k; SORT.dir = k === 'path' || k === 'cat' || k === 'pkw' ? 1 : -1; } redraw();
+    const st = SORTS[th.dataset.tbl || 'pages'];
+    const k = th.dataset.sort;
+    if (st.k === k) st.dir *= -1; else { st.k = k; st.dir = 1; }   // her spec: 1st click asc, 2nd desc
+    redraw();
   }));
   const csv = $('#btn-csv', root); csv && csv.addEventListener('click', exportCSV);
   const libs = $('#btn-libs', root); libs && libs.addEventListener('click', libraryModal);
   const cn = $('#cal-new', root); cn && cn.addEventListener('click', () => calEditor(null));
   const cq = $('#cal-q', root);
   if (cq) {
-    cq.addEventListener('input', debounce(() => { CALF.q = cq.value.trim(); redrawKeepFocus('cal-q'); }, 220));
+    cq.addEventListener('input', debounce(() => { CALF.q = cq.value; redrawKeepFocus('cal-q'); }, 220));
     const bindC = (fid, key) => { const el = $('#' + fid, root); el && el.addEventListener('change', () => { CALF[key] = el.value; redraw(); }); };
     bindC('cal-status', 'status'); bindC('cal-type', 'type');
   }
@@ -1072,7 +1211,7 @@ function wire(root) {
   const gr = $('#gsc-reset', root); gr && gr.addEventListener('click', async ev => {
     ev.preventDefault(); GSC.cfg = { clientId: '', property: '' }; GSC.sites = null; await Store.set('gsc_cfg', GSC.cfg); redraw();
   });
-  const gq = $('#gsc-q', root); gq && gq.addEventListener('input', debounce(() => { FILTER.gscq = gq.value.trim().toLowerCase(); redrawKeepFocus('gsc-q'); }, 220));
+  const gq = $('#gsc-q', root); gq && gq.addEventListener('input', debounce(() => { FILTER.gscq = gq.value; redrawKeepFocus('gsc-q'); }, 220));
   $$('[data-gscprop]', root).forEach(a => a.addEventListener('click', async ev => {
     ev.preventDefault(); GSC.cfg.property = a.dataset.gscprop; await Store.set('gsc_cfg', GSC.cfg);
     GSC.busy = true; redraw();
@@ -1097,7 +1236,7 @@ function redrawKeepFocus(id) { redraw(); const el = $('#' + id); if (el) { el.fo
 function exportCSV() {
   const head = ['path','cluster','tier','status','labels','keywords','est_traffic','top_keyword','volume','position','intent_trans','intent_comm','intent_info','target_keyword','redirects_to','comments'];
   const lines = [head.join(',')];
-  for (const p of DATA.pages.filter(pageMatches)) {
+  for (const p of DATA.pages.filter(TAB === 'pages' ? pageMatchesP : pageMatches)) {
     const e = annOf(p.path) || {};
     const st = ANN.statuses.find(s => s.id === e.status);
     const cm = (e.comments||[]).filter(c => !(e.delc||[]).includes(c.id)).map(c => c.text).join(' | ');
