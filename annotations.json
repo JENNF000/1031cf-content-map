@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-31T19:40:39.506Z",
+ "updated": "2026-08-31T19:44:21.849Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -439,13 +439,13 @@
    "f": {
     "tier": "2026-08-31T19:40:39.506Z"
    },
+   "updated": "2026-08-31T19:40:39.506Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "fanout",
-   "offFlags": [],
-   "updated": "2026-08-31T19:40:39.506Z"
+   "offFlags": []
   }
  },
  "live": {
@@ -699,6 +699,24 @@
    "gdoc": "",
    "url": "",
    "oldurl": "https://www.1031crowdfunding.com/identify-properties-online-for-your-real-estate-exchange/",
+   "lastpub": ""
+  },
+  {
+   "id": "4438616e-5e3f-41a6-b9bd-955b526ee75d",
+   "created": "2026-08-31T19:44:21.849Z",
+   "u": "2026-08-31T19:44:21.849Z",
+   "bucket": "idea",
+   "date": "",
+   "status": "",
+   "types": [],
+   "topic": "Lazy 1031 exchange",
+   "kw": "",
+   "vol": "",
+   "kd": "",
+   "prompts": "",
+   "gdoc": "",
+   "url": "",
+   "oldurl": "",
    "lastpub": ""
   }
  ],
