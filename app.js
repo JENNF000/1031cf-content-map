@@ -475,7 +475,8 @@ function cellHTML(p) {
   const nc = (e.comments || []).filter(c => !(e.delc || []).includes(c.id)).length;
   const t = effTier(p);
   const g = gm(p.path);
-  const kwn = g ? '<span class="kwn">' + fmt(g.queries || 0) + ' q · ' + fmt(g.clicks) + ' cl</span>'
+  const gp = g ? (g.topqPos != null ? g.topqPos : g.pos) : null;
+  const kwn = g ? '<span class="kwn">' + fmt(g.queries || 0) + ' q' + (gp != null ? ' · #' + gp : '') + '</span>'
     : p.no_metrics ? '<span class="kwn">·no data</span>' : (p.kw ? '<span class="kwn">' + fmt(p.kw) + ' kw</span>' : '');
   return '<a class="cell' + (t === 'redirect' ? ' redir-cell' : '') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-drag="' + esc(p.path) + '" data-tip="' + esc(p.path) + '">' +
     esc(p.label) + kwn + (nc ? ' <span class="cmt">💬' + nc + '</span>' : '') +
