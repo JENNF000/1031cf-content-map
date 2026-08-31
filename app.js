@@ -171,7 +171,8 @@ const isHiddenS = id => (ANN.hiddenS||[]).includes(id);
 const annOf = path => ANN.pages[path];
 const liveOverride = path => (ANN.live[path] || {}).s || '';
 function effTier(p) {
-  const lo = liveOverride(p.path);
+  // precedence: her manual mark > Google's URL-Inspection verdict (if fresher than the crawl) > the build
+  const lo = liveOverride(p.path) || (typeof inspOverride === 'function' ? inspOverride(p.path) : '');
   const e = annOf(p.path);
   if (lo === 'redirect') return 'redirect';
   if (p.tier === 'redirect' && lo !== 'live') return 'redirect';
@@ -192,17 +193,23 @@ function statusChanged(p) {
   const lo = liveOverride(p.path);
   return lo && ((lo === 'redirect') !== (p.tier === 'redirect'));
 }
+function inspChanged(p) {
+  const io = inspOverride(p.path);
+  return io && ((io === 'redirect') !== (p.tier === 'redirect'));
+}
 function labelDef(id) { return ANN.labels.find(l => l.id === id); }
 function visibleStatuses(withNone) {
   return ANN.statuses.filter(s => !isHiddenS(s.id) && (withNone || s.id !== 'none')).sort((a, b) => (a.o||0) - (b.o||0));
 }
 function liveStats() {
-  const s = { total:0, redirects:0, keywords:0, traffic:0, ranking:0, byTier:{transactional:0,pillar:0,fanout:0,redirect:0} };
+  const s = { total:0, redirects:0, keywords:0, traffic:0, ranking:0, gclicks:0, gimps:0, gqueries:0, byTier:{transactional:0,pillar:0,fanout:0,redirect:0} };
   for (const p of DATA.pages) {
     const t = effTier(p);
     s.byTier[t]++;
     if (t === 'redirect') { s.redirects++; continue; }
     s.total++; s.keywords += p.kw; s.traffic += p.traffic; if (p.kw > 0) s.ranking++;
+    const g = gm(p.path);
+    if (g) { s.gclicks += g.clicks; s.gimps += g.imps; s.gqueries += g.queries || 0; }
   }
   return s;
 }
@@ -320,6 +327,17 @@ async function doRefresh() {
     } else msg = 'Could not reach the published data (HTTP ' + r.status + ').';
   } catch (e) { msg = 'Offline — showing the cached build.'; }
   await Sync.pullPublished();
+  // GSC rides along on every Refresh once connected — data, top queries, and
+  // redirect verification via URL Inspection. (May show a quick Google popup
+  // roughly once an hour when the token has expired.)
+  if (gscReady()) {
+    try {
+      await gisLoad();
+      GSC.token = await gscToken();
+      await gscPull();
+      msg += ' GSC refreshed.';
+    } catch (e) { msg += ' (GSC pull skipped: ' + e.message + ')'; }
+  }
   updateChips(); redraw(); toast(msg);
   b.classList.remove('spin'); b.disabled = false;
 }
@@ -350,11 +368,23 @@ function toast(msg, undo) {
 const tipEl = () => { let e = $('#tooltip'); if (!e) { e = document.createElement('div'); e.id = 'tooltip'; document.body.appendChild(e); } return e; };
 function tipHTML(p) {
   const e = annOf(p.path) || {};
+  const g = gm(p.path);
   const intents = INTENTS.filter(([k]) => p[k] > 0).map(([k, n]) => n + ' ' + p[k]).join(' · ') || (p.kw ? '—' : '');
   let rows;
-  if (p.no_metrics) rows = '<tr><td colspan="2" class="nodata">No SEMrush data yet — new or never-ranking page. Next refresh with API units will fill this in.</td></tr>';
+  if (g) {
+    // GSC first — real data. SEMrush keeps only what Google doesn't have (volume, intent).
+    rows = [
+      ['Queries (GSC 90d)', fmt(g.queries || 0)],
+      ['Top query', g.topq ? esc(g.topq) : '—'],
+      ['Clicks / 90d', fmt(g.clicks)],
+      ['Impressions / 90d', fmt(g.imps)],
+      ['Position (top query)', g.topqPos != null ? '#' + g.topqPos : (g.pos != null ? '#' + g.pos : '—')],
+      ['Volume (SEMrush' + (p.pkw_stale ? ', Aug 3' : '') + ')', p.pkw ? fmt(p.vol) + ' — ' + esc(p.pkw) : '—'],
+      ['Intent (SEMrush)', intents || '—'],
+    ].map(([k, v]) => '<tr><td>' + k + '</td><td>' + v + '</td></tr>').join('');
+  } else if (p.no_metrics) rows = '<tr><td colspan="2" class="nodata">No data yet — not in SEMrush' + (GSC.cache ? ' and no GSC impressions in 90d' : '') + '.</td></tr>';
   else rows = [
-    ['Keywords', fmt(p.kw)],
+    ['Keywords (SEMrush)', fmt(p.kw)],
     ['Top keyword', p.pkw ? esc(p.pkw) : '—'],
     ['Est. traffic / mo', fmt(p.traffic)],
     ['Volume (top kw)', p.pkw ? fmt(p.vol) : '—'],
@@ -362,12 +392,13 @@ function tipHTML(p) {
     ['Intent (positions)', intents || '—'],
   ].map(([k, v]) => '<tr><td>' + k + '</td><td>' + v + '</td></tr>').join('');
   const extra = [];
-  if (p.pkw_stale && !p.no_metrics) extra.push('Top keyword / position from Aug 3 pull (not re-pulled — API units).');
+  if (!g && p.pkw_stale && !p.no_metrics) extra.push('SEMrush values carried from Aug 3 (no GSC data for this page).');
   if (p.tier === 'redirect') extra.push('301 → ' + p.redirects_to);
   if (statusChanged(p)) extra.push('Redirect status changed by you (' + (liveOverride(p.path) === 'redirect' ? 'now redirects' : 'marked live') + ').');
+  else if (inspChanged(p)) extra.push(inspOverride(p.path) === 'redirect' ? 'Google reports this URL as a redirect (URL Inspection, ' + esc((GSC.cache.inspect[p.path].at || '').slice(0, 10)) + ').' : 'Google reports this URL as live again (URL Inspection).');
   if (e.target) extra.push('Target: ' + esc(e.target));
   return '<div class="t">' + esc(p.label) + '</div><table>' + rows + '</table>' +
-    (extra.length ? '<div class="stale">' + extra.map(esc).join('<br>') + '</div>' : '');
+    (extra.length ? '<div class="stale">' + extra.map(x => x).join('<br>') + '</div>' : '');
 }
 function bindTips(root) {
   $$('[data-tip]', root).forEach(el => {
@@ -443,7 +474,9 @@ function cellHTML(p) {
   const e = annOf(p.path) || {};
   const nc = (e.comments || []).filter(c => !(e.delc || []).includes(c.id)).length;
   const t = effTier(p);
-  const kwn = p.no_metrics ? '<span class="kwn">·no data</span>' : (p.kw ? '<span class="kwn">' + fmt(p.kw) + ' kw</span>' : '');
+  const g = gm(p.path);
+  const kwn = g ? '<span class="kwn">' + fmt(g.queries || 0) + ' q · ' + fmt(g.clicks) + ' cl</span>'
+    : p.no_metrics ? '<span class="kwn">·no data</span>' : (p.kw ? '<span class="kwn">' + fmt(p.kw) + ' kw</span>' : '');
   return '<a class="cell' + (t === 'redirect' ? ' redir-cell' : '') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener" data-drag="' + esc(p.path) + '" data-tip="' + esc(p.path) + '">' +
     esc(p.label) + kwn + (nc ? ' <span class="cmt">💬' + nc + '</span>' : '') +
     (t === 'redirect' ? '<span class="to">→ ' + esc((liveOverride(p.path) === 'redirect' && !p.redirects_to) ? '(marked by you)' : p.redirects_to || '') + '</span>' : '') +
@@ -452,17 +485,26 @@ function cellHTML(p) {
 }
 function viewMap() {
   const s = liveStats();
-  const tiles =
+  const tiles = GSC.cache && GSC.cache.pages ?
+    '<div class="tiles">' +
+    '<div class="tile"><div class="v">' + fmt(s.total) + '</div><div class="l">Live pages</div></div>' +
+    '<div class="tile"><div class="v">' + fmt(s.gqueries) + '</div><div class="l">Queries (GSC, 90d)</div></div>' +
+    '<div class="tile"><div class="v">' + fmt(s.gclicks) + '</div><div class="l">Clicks (GSC, 90d)</div></div>' +
+    '<div class="tile"><div class="v">' + fmt(s.gimps) + '</div><div class="l">Impressions (GSC, 90d)</div></div>' +
+    '</div>' :
     '<div class="tiles">' +
     '<div class="tile"><div class="v">' + fmt(s.total) + '</div><div class="l">Live pages</div></div>' +
     '<div class="tile"><div class="v">' + fmt(s.keywords) + '</div><div class="l">Ranking keywords</div></div>' +
     '<div class="tile"><div class="v">' + fmt(s.traffic) + '</div><div class="l">Est. monthly visits</div></div>' +
     '</div>';
-  const strip = DATA.stats.partial ? '<div class="note-strip">⚠ ' + esc(DATA.stats.partial) + '</div>' : '';
+  const strip = (GSC.cache && GSC.cache.pages)
+    ? '<div class="note-strip" style="background:#eef2f6;border-color:#c8d4e2;color:#1f3a5f">Query, click and impression numbers are real Search Console data (last 90 days, pulled ' + esc((GSC.cache.fetched || '').slice(0, 10)) + ' — re-pulled on every Refresh). SEMrush supplies only volumes and intent' + (DATA.stats.partial ? ', carried forward (API balance)' : '') + '.</div>'
+    : (DATA.stats.partial ? '<div class="note-strip">⚠ ' + esc(DATA.stats.partial) + '</div>' : '');
   let cols = '';
   for (const c of DATA.cats) {
     const inCat = DATA.pages.filter(p => effCat(p) === c);
-    const kw = inCat.filter(p => effTier(p) !== 'redirect').reduce((a, p) => a + p.kw, 0);
+    const useG = !!(GSC.cache && GSC.cache.pages);
+    const kw = inCat.filter(p => effTier(p) !== 'redirect').reduce((a, p) => a + (useG ? ((gm(p.path) || {}).queries || 0) : p.kw), 0);
     let bands = '';
     for (const t of TIERS) {
       const all = inCat.filter(p => effTier(p) === t).sort((a, b) => b.kw - a.kw || (a.path < b.path ? -1 : 1));
@@ -470,7 +512,7 @@ function viewMap() {
       bands += '<div class="band b-' + t + '" data-drop="' + esc(c) + '|' + t + '"><div class="bh"><span>' + TIERNAME[t] + '</span><span class="bn">' + all.length + '</span></div>' +
         '<div class="cells">' + vis.map(cellHTML).join('') + '</div></div>';
     }
-    cols += '<div class="col"><div class="head" data-drop="' + esc(c) + '|">' + esc(c) + ' <span class="k">' + fmt(kw) + ' kw</span></div>' + bands + '</div>';
+    cols += '<div class="col"><div class="head" data-drop="' + esc(c) + '|">' + esc(c) + ' <span class="k">' + fmt(kw) + (useG ? ' q' : ' kw') + '</span></div>' + bands + '</div>';
   }
   return strip + tiles + toolbarHTML() + '<div id="matrix">' + cols + '</div>' +
     '<p class="intro">Hover a page for its SEMrush metrics. Drag a card between clusters or tiers to re-categorize (long-press on touch), or use ✎ for the full editor. Counts on each band are the full count for that tier; search and filters hide cards without changing counts.</p>';
@@ -480,28 +522,50 @@ function intentTop(p) {
   return parts.length ? parts[0][0] : '—';
 }
 let SORT = { k:'kw', dir:-1 };
+const sortKey = () => (SORT.k === 'kw' && GSC.cache && GSC.cache.pages) ? 'gclicks' : SORT.k;
 function viewPages() {
   const rows = DATA.pages.filter(pageMatches).sort((a, b) => {
     let va, vb;
-    if (SORT.k === 'path') { va = a.path; vb = b.path; }
-    else if (SORT.k === 'cat') { va = effCat(a); vb = effCat(b); }
-    else if (SORT.k === 'tier') { va = TIERS.indexOf(effTier(a)); vb = TIERS.indexOf(effTier(b)); }
-    else if (SORT.k === 'pkw') { va = a.pkw || ''; vb = b.pkw || ''; }
-    else { va = a[SORT.k] || 0; vb = b[SORT.k] || 0; }
+    const SK = sortKey();
+    const ga = gm(a.path) || {}, gb = gm(b.path) || {};
+    if (SK === 'path') { va = a.path; vb = b.path; }
+    else if (SK === 'cat') { va = effCat(a); vb = effCat(b); }
+    else if (SK === 'tier') { va = TIERS.indexOf(effTier(a)); vb = TIERS.indexOf(effTier(b)); }
+    else if (SK === 'pkw') { va = a.pkw || ''; vb = b.pkw || ''; }
+    else if (SK === 'gq') { va = ga.queries || 0; vb = gb.queries || 0; }
+    else if (SK === 'gclicks') { va = ga.clicks || 0; vb = gb.clicks || 0; }
+    else if (SK === 'gimps') { va = ga.imps || 0; vb = gb.imps || 0; }
+    else if (SK === 'gtopq') { va = ga.topq || ''; vb = gb.topq || ''; }
+    else if (SK === 'gpos') { va = ga.topqPos == null ? 999 : ga.topqPos; vb = gb.topqPos == null ? 999 : gb.topqPos; }
+    else { va = a[SK] || 0; vb = b[SK] || 0; }
     return (va < vb ? -1 : va > vb ? 1 : 0) * SORT.dir;
   });
   const th = (k, n, num) => '<th class="' + (num ? 'num' : '') + '" data-sort="' + k + '">' + n + (SORT.k === k ? (SORT.dir < 0 ? ' ▾' : ' ▴') : '') + '</th>';
+  const useG = !!(GSC.cache && GSC.cache.pages);
+  const head = useG
+    ? th('path', 'Page') + th('cat', 'Cluster') + th('tier', 'Tier') +
+      th('gq', 'Queries (GSC)', 1) + th('gclicks', 'Clicks 90d', 1) + th('gimps', 'Imps 90d', 1) + th('gtopq', 'Top query (GSC)') + th('gpos', 'Pos', 1) + th('vol', 'Volume (SEMrush)', 1) +
+      '<th>Status / labels</th>'
+    : th('path', 'Page') + th('cat', 'Cluster') + th('tier', 'Tier') +
+      th('kw', 'Keywords', 1) + th('traffic', 'Est. traffic', 1) + th('pkw', 'Top keyword') + th('vol', 'Volume', 1) + th('pos', 'Position', 1) +
+      '<th>Intent</th><th>Status / labels</th>';
   return toolbarHTML() +
-    '<div style="margin:-4px 0 10px"><button class="btn sub" id="btn-csv">Export CSV</button></div>' +
-    '<div class="tablewrap"><table class="grid"><thead><tr>' +
-    th('path', 'Page') + th('cat', 'Cluster') + th('tier', 'Tier') +
-    th('kw', 'Keywords', 1) + th('traffic', 'Est. traffic', 1) + th('pkw', 'Top keyword') + th('vol', 'Volume', 1) + th('pos', 'Position', 1) +
-    '<th>Intent</th><th>Status / labels</th>' +
+    '<div style="margin:-4px 0 10px"><button class="btn sub" id="btn-csv">Export CSV</button>' + (useG ? ' <span class="mini">GSC = last 90 days, real Search data · pulled ' + esc((GSC.cache.fetched || '').slice(0, 10)) + '. Volume stays SEMrush (Google has no volumes).</span>' : '') + '</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr>' + head +
     '</tr></thead><tbody>' +
     rows.map(p => {
       const t = effTier(p);
-      return '<tr><td><a href="#" data-open="' + esc(p.path) + '">' + esc(p.label) + '</a><div class="mini">' + esc(p.path) + '</div></td>' +
-      '<td>' + esc(effCat(p)) + '</td><td><span class="badge tier-' + t + '">' + TIERNAME[t] + '</span>' + (t === 'redirect' && p.redirects_to ? '<div class="mini">→ ' + esc(p.redirects_to) + '</div>' : '') + '</td>' +
+      const g = gm(p.path);
+      const lead = '<tr><td><a href="#" data-open="' + esc(p.path) + '">' + esc(p.label) + '</a><div class="mini">' + esc(p.path) + '</div></td>' +
+      '<td>' + esc(effCat(p)) + '</td><td><span class="badge tier-' + t + '">' + TIERNAME[t] + '</span>' + (t === 'redirect' && p.redirects_to ? '<div class="mini">→ ' + esc(p.redirects_to) + '</div>' : '') + '</td>';
+      if (useG) {
+        return lead +
+          (g ? '<td class="num">' + fmt(g.queries || 0) + '</td><td class="num">' + fmt(g.clicks) + '</td><td class="num">' + fmt(g.imps) + '</td><td>' + esc(g.topq || '—') + '</td><td class="num">' + (g.topqPos != null ? g.topqPos : '—') + '</td>'
+             : '<td colspan="5" class="mini">no GSC impressions in 90d' + (p.kw ? ' (SEMrush: ' + fmt(p.kw) + ' kw)' : '') + '</td>') +
+          '<td class="num">' + (p.pkw ? fmt(p.vol) : '—') + '</td>' +
+          '<td>' + statusPill(p) + ' ' + labelPills(p, 4) + '</td></tr>';
+      }
+      return lead +
       (p.no_metrics ? '<td colspan="5" class="mini">no SEMrush data yet</td>' :
         '<td class="num">' + fmt(p.kw) + '</td><td class="num">' + fmt(p.traffic) + '</td><td>' + esc(p.pkw || '—') + (p.pkw_stale && p.pkw ? ' <span class="badge stale" title="top keyword/position from Aug 3">Aug 3</span>' : '') + '</td><td class="num">' + (p.pkw ? fmt(p.vol) : '—') + '</td><td class="num">' + (p.pos != null ? p.pos : '—') + '</td>') +
       '<td>' + (p.no_metrics ? '—' : intentTop(p)) + '</td><td>' + statusPill(p) + ' ' + labelPills(p, 4) + '</td></tr>';
@@ -513,6 +577,22 @@ function viewInsights() {
   let html = '<p class="intro">Findings from the ' + esc(DATA.stats.vintages.crawl) + '. Regenerated on every crawl; your labels and statuses live on top and survive refreshes.</p>';
   html += ins.map(i => '<div class="insight ' + i.sev + '"><span class="sev">' + i.sev + '</span><h3>' + esc(i.title) + '</h3><p>' + esc(i.body) + '</p>' +
     (i.items ? '<ul>' + i.items.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '</div>').join('');
+  if (GSC.cache && GSC.cache.pages) {
+    const insp2 = GSC.cache.inspect || {};
+    const stillEarning = DATA.pages.filter(p => p.tier === 'redirect' && gm(p.path) && gm(p.path).imps > 0)
+      .sort((a, b) => gm(b.path).imps - gm(a.path).imps);
+    const unknown = Object.keys(GSC.cache.pages).filter(path => !PAGE[path] && GSC.cache.pages[path].imps >= 10)
+      .sort((a, b) => GSC.cache.pages[b].imps - GSC.cache.pages[a].imps);
+    const zeroClick = DATA.pages.filter(p => effTier(p) !== 'redirect' && gm(p.path) && gm(p.path).imps >= 500 && gm(p.path).clicks / gm(p.path).imps < 0.005)
+      .sort((a, b) => gm(b.path).imps - gm(a.path).imps);
+    const disagree = DATA.pages.filter(p => inspChanged(p));
+    html += '<h2 style="font-size:16px;margin:22px 0 10px">From Search Console <span class="mini">(pulled ' + esc((GSC.cache.fetched || '').slice(0, 10)) + ', last 90 days — recomputed on every Refresh)</span></h2>';
+    if (disagree.length) html += '<div class="insight serious"><span class="sev">serious</span><h3>Google disagrees with the crawl on ' + disagree.length + ' URLs</h3><p>URL Inspection reports a different live/redirect status than the last crawl — the board follows Google until the next crawl confirms.</p><ul>' + disagree.slice(0, 12).map(p => '<li>' + esc(p.path) + ' — Google: ' + esc(inspOverride(p.path)) + '</li>').join('') + '</ul></div>';
+    if (stillEarning.length) html += '<div class="insight warning"><span class="sev">warning</span><h3>' + stillEarning.length + ' redirected URLs still earned impressions</h3><p>Google is still showing the old URLs in results — normal for a few weeks after a 301; worth a look if it persists.</p><ul>' + stillEarning.slice(0, 10).map(p => '<li>' + esc(p.path) + ' — ' + fmt(gm(p.path).imps) + ' imps</li>').join('') + '</ul></div>';
+    if (unknown.length) html += '<div class="insight warning"><span class="sev">warning</span><h3>' + unknown.length + ' URLs earn impressions but are not in the inventory</h3><p>Pages Google ranks that the sitemap crawl never saw — new pages, parameters, or strays worth checking.</p><ul>' + unknown.slice(0, 10).map(path => '<li>' + esc(path) + ' — ' + fmt(GSC.cache.pages[path].imps) + ' imps</li>').join('') + '</ul></div>';
+    if (zeroClick.length) html += '<div class="insight info"><span class="sev">info</span><h3>' + zeroClick.length + ' pages with heavy impressions and almost no clicks</h3><p>CTR under 0.5% on 500+ impressions — title/meta rewrites are the usual fix.</p><ul>' + zeroClick.slice(0, 10).map(p => '<li>' + esc(p.path) + ' — ' + fmt(gm(p.path).imps) + ' imps, ' + fmt(gm(p.path).clicks) + ' clicks</li>').join('') + '</ul></div>';
+    if (!disagree.length && !stillEarning.length && !unknown.length && !zeroClick.length) html += '<div class="insight ok"><span class="sev">ok</span><h3>Nothing flagged from GSC</h3><p>Redirects verified, no stray URLs earning impressions, no heavy-impression zero-click pages.</p></div>';
+  }
   html += '<h2 style="font-size:16px;margin:22px 0 10px">Consolidation groups (' + DATA.groups.filter(g => g.sev !== 'resolved').length + ' open)</h2>';
   const gRank = { critical:0, serious:1, warning:2, partial:3, resolved:4 };
   html += [...DATA.groups].sort((a, b) => gRank[a.sev] - gRank[b.sev]).map(g => {
@@ -530,13 +610,16 @@ function viewInsights() {
   return html;
 }
 function viewRedirects() {
+  const insp = (GSC.cache && GSC.cache.inspect) || {};
   const manual = Object.entries(ANN.live).filter(([path, v]) => v.s === 'redirect' && !(PAGE[path] && PAGE[path].tier === 'redirect'));
+  const gscRows = Object.entries(insp).filter(([path, i]) => i.state === 'redirect' && !(PAGE[path] && PAGE[path].tier === 'redirect') && !(ANN.live[path] && ANN.live[path].s === 'redirect'));
   const rows = DATA.redirects.map(r => ({ ...r, manual:false }))
+    .concat(gscRows.map(([path, i]) => ({ old: path, to: '(Google reports a redirect — destination on next crawl)', cat: PAGE[path] ? effCat(PAGE[path]) : '—', kw_old: PAGE[path] ? PAGE[path].kw : 0, pkw_old: PAGE[path] ? PAGE[path].pkw : null, kw_new: null, pkw_new: null, to_listing: false, in_sitemap: PAGE[path] ? PAGE[path].in_sitemap : false, manual: false, gsc: true, at: i.at })))
     .concat(manual.map(([path, v]) => ({ old: path, to: '(not verified yet — the next crawl records the destination)', cat: PAGE[path] ? effCat(PAGE[path]) : '—', kw_old: PAGE[path] ? PAGE[path].kw : 0, pkw_old: PAGE[path] ? PAGE[path].pkw : null, kw_new: null, pkw_new: null, to_listing:false, in_sitemap: PAGE[path] ? PAGE[path].in_sitemap : false, manual:true, at: v.at })))
     .filter(r => !FILTER.q || r.old.includes(FILTER.q.toLowerCase()) || (r.to || '').includes(FILTER.q.toLowerCase()))
     .filter(r => !FILTER.cluster || r.cat === FILTER.cluster);
   const relive = Object.entries(ANN.live).filter(([path, v]) => v.s === 'live' && PAGE[path] && PAGE[path].tier === 'redirect');
-  return '<p class="intro">Every verified redirect: <b>' + DATA.redirects.length + '</b> confirmed server-level 301/302s from the ' + esc(DATA.stats.crawl_date) + ' same-origin crawl' + (manual.length ? ', plus <b>' + manual.length + '</b> you marked by hand since' : '') + '. Keyword columns show what SEMrush still credits to each URL (old URL keywords normally migrate to the target within weeks of a correct 301). KW data: ' + esc(DATA.stats.vintages.semrush_pages.split(' — ')[0]) + '.</p>' +
+  return '<p class="intro">Every verified redirect: <b>' + DATA.redirects.length + '</b> confirmed by the ' + esc(DATA.stats.crawl_date) + ' crawl' + (gscRows.length ? ', <b>' + gscRows.length + '</b> newly detected by Google (URL Inspection)' : '') + (manual.length ? ', <b>' + manual.length + '</b> marked by you' : '') + '.' + (GSC.cache && GSC.cache.inspect && Object.keys(insp).length ? ' Every Refresh re-verifies against Google\'s own index (GSC ✓ = Google confirms; "GSC: live?" = Google disagrees with the crawl; an impressions badge = the old URL is still earning impressions).' : ' Connect GSC and each Refresh will verify these against Google\'s own index automatically.') + '</p>' +
     toolbarHTML(true) +
     '<div class="tablewrap"><table class="grid"><thead><tr><th>Old slug</th><th>Redirects to</th><th>Cluster</th><th class="num">KW on old URL</th><th>Top kw (old)</th><th class="num">KW on target</th><th>Top kw (target)</th><th>Flags</th></tr></thead><tbody>' +
     rows.map(r => '<tr><td>' + (PAGE[r.old] ? '<a href="#" data-open="' + esc(r.old) + '">' + esc(r.old) + '</a>' : esc(r.old)) + '</td>' +
@@ -545,7 +628,11 @@ function viewRedirects() {
       '<td class="num">' + (r.kw_new == null ? '—' : fmt(r.kw_new)) + '</td><td>' + esc(r.pkw_new || '—') + '</td>' +
       '<td>' + (r.to_listing ? '<span class="badge soft" title="redirects into a listing page — passes no topical relevance (soft-404 pattern)">soft-404</span> ' : '') +
       (r.in_sitemap ? '<span class="badge sm" title="this redirecting URL is still advertised in the sitemap">in sitemap</span> ' : '') +
-      (r.manual ? '<span class="badge tier-redirect" title="marked by you, not yet verified by a crawl">yours · ' + esc((r.at || '').slice(0, 10)) + '</span>' : '') + '</td></tr>').join('') +
+      (r.manual ? '<span class="badge tier-redirect" title="marked by you, not yet verified by a crawl">yours · ' + esc((r.at || '').slice(0, 10)) + '</span> ' : '') +
+      (r.gsc ? '<span class="badge tier-pillar" title="URL Inspection: Google itself reports this URL as a redirect">GSC ✓ · ' + esc((r.at || '').slice(0, 10)) + '</span> ' : '') +
+      (!r.gsc && insp[r.old] && insp[r.old].state === 'redirect' ? '<span class="badge tier-pillar" title="URL Inspection confirms Google sees the redirect">GSC ✓</span> ' : '') +
+      (!r.gsc && insp[r.old] && insp[r.old].state === 'live' ? '<span class="badge soft" title="URL Inspection: Google reports this URL as LIVE, not redirecting — check it">GSC: live?</span> ' : '') +
+      (gm(r.old) && gm(r.old).imps > 0 ? '<span class="badge sm" title="this old URL still earned ' + fmt(gm(r.old).imps) + ' impressions in the last 90 days — Google hasn\'t fully processed the redirect yet, or it regressed">' + fmt(gm(r.old).imps) + ' imps</span>' : '') + '</td></tr>').join('') +
     '</tbody></table></div>' +
     (relive.length ? '<h3 style="font-size:14px;margin:16px 0 6px">Marked live by you (build says redirect)</h3>' + relive.map(([path]) => '<div class="u" style="font-size:13px"><span class="tag live">LIVE (yours)</span> <a href="#" data-open="' + esc(path) + '">' + esc(path) + '</a></div>').join('') : '');
 }
@@ -707,7 +794,7 @@ function calEditor(id, opts) {
    4 merge-vs-split judgment (Claude, via the published gsc-overlap.json).
    Auth is a browser-side Google Identity Services token — nothing stored beyond
    her chosen client ID + property; the access token lives ~1h in memory. */
-const GSC = { cfg: null, cache: null, token: '', busy: false, sites: null, err: '' };
+const GSC = { cfg: null, cache: null, token: '', tokenExp: 0, busy: false, sites: null, err: '' };
 const GSC_SCOPE = 'https://www.googleapis.com/auth/webmasters.readonly';
 async function gscInit() {
   if (GSC.cfg === null) GSC.cfg = (await Store.get('gsc_cfg')) || { clientId: '', property: '' };
@@ -723,19 +810,36 @@ function gisLoad() {
   });
 }
 function gscToken() {
+  if (GSC.token && Date.now() < GSC.tokenExp) return Promise.resolve(GSC.token);
   return new Promise((res, rej) => {
     try {
       const tc = google.accounts.oauth2.initTokenClient({
         client_id: GSC.cfg.clientId, scope: GSC_SCOPE,
-        callback: t => t && t.access_token ? res(t.access_token) : rej(new Error(t && t.error ? t.error : 'No token')),
+        callback: t => {
+          if (t && t.access_token) { GSC.tokenExp = Date.now() + (Number(t.expires_in || 3600) - 90) * 1000; res(t.access_token); }
+          else rej(new Error(t && t.error ? t.error : 'No token'));
+        },
         error_callback: e => rej(new Error(e && e.type ? e.type : 'Auth cancelled')),
       });
       tc.requestAccessToken();
     } catch (e) { rej(e); }
   });
 }
+const gscReady = () => !!(GSC.cfg && GSC.cfg.clientId && GSC.cfg.property);
+/* per-page GSC metrics, or null */
+function gm(path) {
+  return (GSC.cache && GSC.cache.pages && GSC.cache.pages[path]) || null;
+}
+/* Google's own view of a URL (URL Inspection), only when fresher than the build crawl */
+function inspOverride(path) {
+  const i = GSC.cache && GSC.cache.inspect && GSC.cache.inspect[path];
+  if (!i || !i.state) return '';
+  if (DATA && DATA.stats && DATA.stats.crawl_date && (i.at || '').slice(0, 10) < DATA.stats.crawl_date) return '';
+  return i.state === 'redirect' || i.state === 'live' ? i.state : '';
+}
 async function gscApi(path, body) {
-  const r = await fetch('https://searchconsole.googleapis.com/webmasters/v3/' + path, {
+  const base = path.startsWith('v1/') ? 'https://searchconsole.googleapis.com/' : 'https://searchconsole.googleapis.com/webmasters/v3/';
+  const r = await fetch(base + path, {
     method: body ? 'POST' : 'GET',
     headers: { Authorization: 'Bearer ' + GSC.token, 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
@@ -760,24 +864,95 @@ async function gscConnect() {
   } catch (e) { GSC.err = e.message; }
   GSC.busy = false; redraw();
 }
+const toPath = u => { try { const x = new URL(u); return x.hostname.endsWith('1031crowdfunding.com') ? x.pathname : null; } catch (e) { return null; } };
 async function gscPull() {
   const end = new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10);
   const start = new Date(Date.now() - 92 * 864e5).toISOString().slice(0, 10);
+  const site = 'sites/' + encodeURIComponent(GSC.cfg.property);
+  // (a) accurate per-page totals — the page dimension is not privacy-filtered like query+page
+  const pj = await gscApi(site + '/searchAnalytics/query', {
+    startDate: start, endDate: end, dimensions: ['page'], rowLimit: 25000, dataState: 'final' });
+  const pages = {};
+  for (const r of (pj.rows || [])) {
+    const path = toPath(r.keys[0]); if (!path) continue;
+    const p = pages[path] = pages[path] || { clicks: 0, imps: 0, posW: 0, queries: 0, topq: null, topqClicks: 0, topqImps: 0, topqPos: null };
+    p.clicks += r.clicks; p.imps += r.impressions; p.posW += r.position * r.impressions;
+  }
+  // (b) query+page for top query, query counts, and the overlap analysis
   let rows = [], startRow = 0;
   for (let i = 0; i < 5; i++) {  // ≤125k rows
-    const j = await gscApi('sites/' + encodeURIComponent(GSC.cfg.property) + '/searchAnalytics/query', {
+    const j = await gscApi(site + '/searchAnalytics/query', {
       startDate: start, endDate: end, dimensions: ['query', 'page'], rowLimit: 25000, startRow, dataState: 'final' });
     const batch = j.rows || [];
     rows = rows.concat(batch);
     if (batch.length < 25000) break;
     startRow += 25000;
   }
+  const perPageQ = new Map();
+  for (const r of rows) {
+    const path = toPath(r.keys[1]); if (!path || r.impressions <= 0) continue;
+    let m = perPageQ.get(path); if (!m) { m = { n: 0, top: null }; perPageQ.set(path, m); }
+    m.n++;
+    if (!m.top || r.clicks > m.top.clicks || (r.clicks === m.top.clicks && r.impressions > m.top.impressions)) m.top = r;
+  }
+  for (const [path, m] of perPageQ) {
+    const p = pages[path] = pages[path] || { clicks: 0, imps: 0, posW: 0 };
+    p.queries = m.n;
+    if (m.top) { p.topq = m.top.keys[0]; p.topqClicks = m.top.clicks; p.topqImps = m.top.impressions; p.topqPos = Math.round(m.top.position * 10) / 10; }
+  }
+  for (const p of Object.values(pages)) { p.pos = p.imps ? Math.round(p.posW / p.imps * 10) / 10 : null; delete p.posW; }
   const overlaps = computeOverlaps(rows);
+  const prevInspect = (GSC.cache && GSC.cache.inspect) || {};
   GSC.cache = { fetched: nowISO(), range: start + ' → ' + end, property: GSC.cfg.property,
-    totalRows: rows.length, queries: new Set(rows.map(r => r.keys[0])).size, overlaps };
+    totalRows: rows.length, queries: new Set(rows.map(r => r.keys[0])).size, overlaps, pages, inspect: prevInspect };
+  await gscInspect();       // verify redirect status via URL Inspection (quota-aware)
   await Store.set('gsc_cache', GSC.cache);
-  toast('GSC: ' + rows.length + ' query+page rows pulled · ' + overlaps.length + ' overlapping queries.');
+  toast('GSC: ' + Object.keys(pages).length + ' pages · ' + overlaps.length + ' overlapping queries · ' + Object.keys(GSC.cache.inspect).length + ' URLs inspected.');
   gscPublish();
+  updateChips();
+}
+/* URL Inspection — Google's own verdict per URL ("Page with redirect" etc.).
+   Quota: 2,000/day/property, so inspect only what matters: URLs the build has as
+   redirects, her manual live-marks, pages labeled needs301, and anything Google
+   previously called a redirect. Results <20h old are not re-inspected. */
+function inspTargets() {
+  const t = new Set();
+  for (const p of DATA.pages) {
+    if (p.tier === 'redirect') t.add(p.path);
+    const e = annOf(p.path);
+    if (e && (e.labels || []).includes('needs301')) t.add(p.path);
+  }
+  for (const path of Object.keys(ANN.live || {})) t.add(path);
+  for (const [path, i] of Object.entries((GSC.cache && GSC.cache.inspect) || {})) if (i.state === 'redirect') t.add(path);
+  return [...t];
+}
+function inspState(res) {
+  const cov = ((res.inspectionResult || {}).indexStatusResult || {}).coverageState || '';
+  const c = cov.toLowerCase();
+  if (c.includes('redirect')) return 'redirect';
+  if (c.includes('404') || c.includes('not found')) return 'gone';
+  if (c.includes('index') || c.includes('crawled') || c.includes('discovered') || c.includes('excluded by')) return 'live';
+  return '';
+}
+async function gscInspect() {
+  const insp = GSC.cache.inspect = GSC.cache.inspect || {};
+  const cutoff = Date.now() - 20 * 3600e3;
+  const targets = inspTargets().filter(p => !(insp[p] && new Date(insp[p].at).getTime() > cutoff)).slice(0, 300);
+  let done = 0;
+  const worker = async () => {
+    while (targets.length) {
+      const path = targets.shift();
+      try {
+        const res = await gscApi('v1/urlInspection/index:inspect', {
+          inspectionUrl: 'https://www.1031crowdfunding.com' + path, siteUrl: GSC.cfg.property });
+        const s = inspState(res);
+        insp[path] = { state: s, cov: ((res.inspectionResult || {}).indexStatusResult || {}).coverageState || '', at: nowISO() };
+        done++;
+      } catch (e) { break; }  // quota or auth — keep what we have
+    }
+  };
+  await Promise.all([worker(), worker(), worker(), worker()]);
+  return done;
 }
 function computeOverlaps(rows) {
   const byQ = new Map();
@@ -814,9 +989,10 @@ async function gscPublish() {
   try {
     const g = await Sync.api('gsc-overlap.json?ref=main');
     const sha = g.ok ? (await g.json()).sha : undefined;
-    const body = JSON.stringify({ note: 'Machine-written by the app after each GSC pull. Read by the weekly Claude report for merge/split judgment. Public like the rest of the repo.',
+    const body = JSON.stringify({ note: 'Machine-written by the app after each GSC pull. Read by the weekly Claude report. Public like the rest of the repo.',
       fetched: GSC.cache.fetched, range: GSC.cache.range, property: GSC.cache.property,
-      totalRows: GSC.cache.totalRows, queries: GSC.cache.queries, overlaps: GSC.cache.overlaps }, null, 1);
+      totalRows: GSC.cache.totalRows, queries: GSC.cache.queries, overlaps: GSC.cache.overlaps,
+      pages: GSC.cache.pages || {}, inspect: GSC.cache.inspect || {} }, null, 1);
     const put = await Sync.api('gsc-overlap.json', { method: 'PUT', body: JSON.stringify({
       message: 'gsc-overlap: ' + GSC.cache.fetched, branch: 'main', sha,
       content: btoa(unescape(encodeURIComponent(body))) }) });
@@ -825,7 +1001,7 @@ async function gscPublish() {
 }
 function viewGsc() {
   const c = GSC.cache;
-  let html = '<p class="intro">Search Console, joined to your clusters: every query where two or more of your pages earn impressions (last ~90 days). Pull on demand; the result also publishes to the repo so the weekly report can recommend merge vs. split. Data stays in Google + this browser + your repo.</p>';
+  let html = '<p class="intro">Search Console, joined to your clusters: every query where two or more of your pages earn impressions (last ~90 days). Once connected, <b>every Refresh click re-pulls this automatically</b> — page metrics feed the whole app (Topic map, All pages, tooltips), URL Inspection re-verifies redirect status, and the result publishes to the repo for the weekly report.</p>';
   if (!GSC.cfg || !GSC.cfg.clientId) {
     return html + '<div class="group" style="max-width:640px"><h4>One-time setup</h4>' +
       '<p style="font-size:13px;color:var(--muted)">Follow <b>GSC-SETUP.md</b> (in the repo): create a Google Cloud OAuth client for <code>jennf000.github.io</code>, enable the Search Console API, then paste the client ID here. No keys or passwords — you approve read-only access in a Google popup each session.</p>' +
@@ -957,7 +1133,14 @@ function openDrawer(path) {
   const orphan = !p;
   d.innerHTML = '<div class="dh"><button class="dx">✕</button><h2>' + esc(p ? p.label : path) + '</h2><div class="p">' + esc(path) + (orphan ? ' · <b>not in inventory</b>' : '') + ' · <a href="https://www.1031crowdfunding.com' + esc(path) + '" target="_blank" rel="noopener">open ↗</a></div></div>' +
   '<div class="body">' +
-  (p ? '<div class="sec"><h5>SEMrush</h5>' + (p.no_metrics ? '<p class="mini">No data yet — new or never-ranking page.</p>' :
+  (p && gm(p.path) ? (() => { const g = gm(p.path); return '<div class="sec"><h5>Search Console (last 90 days)</h5><div class="kv">' +
+    '<span class="k">Queries</span><span>' + fmt(g.queries || 0) + '</span>' +
+    '<span class="k">Top query</span><span>' + esc(g.topq || '—') + (g.topqPos != null ? ' <span class="mini">#' + g.topqPos + '</span>' : '') + '</span>' +
+    '<span class="k">Clicks</span><span>' + fmt(g.clicks) + '</span>' +
+    '<span class="k">Impressions</span><span>' + fmt(g.imps) + '</span>' +
+    (GSC.cache.inspect && GSC.cache.inspect[p.path] ? '<span class="k">Google sees it as</span><span>' + esc(GSC.cache.inspect[p.path].cov || GSC.cache.inspect[p.path].state) + ' <span class="mini">' + esc((GSC.cache.inspect[p.path].at || '').slice(0, 10)) + '</span></span>' : '') +
+    '</div></div>'; })() : '') +
+  (p ? '<div class="sec"><h5>SEMrush' + (gm(p.path) ? ' (volume / intent only — the rest is above from GSC)' : '') + '</h5>' + (p.no_metrics ? '<p class="mini">No data yet — new or never-ranking page.</p>' :
     '<div class="kv"><span class="k">Keywords</span><span>' + fmt(p.kw) + '</span>' +
     '<span class="k">Top keyword</span><span>' + esc(p.pkw || '—') + (p.pkw_stale && p.pkw ? ' <span class="badge stale">Aug 3</span>' : '') + '</span>' +
     '<span class="k">Est. traffic / mo</span><span>' + fmt(p.traffic) + '</span>' +
