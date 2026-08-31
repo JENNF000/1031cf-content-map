@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-31T18:01:33.093Z",
+ "updated": "2026-08-31T18:04:10.081Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -420,7 +420,12 @@
    "offFlags": []
   }
  },
- "live": {},
+ "live": {
+  "/the-role-of-a-qualified-intermediary-in-1031-exchanges/": {
+   "s": "redirect",
+   "at": "2026-08-31T18:04:10.081Z"
+  }
+ },
  "cal": [
   {
    "id": "09976d2b-1682-400c-80d6-c6f1e4e9e427",
