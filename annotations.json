@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-01T05:52:46.078Z",
+ "updated": "2026-09-01T16:08:45.539Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -454,15 +454,30 @@
    "comments": [],
    "delc": [],
    "f": {
-    "status": "2026-09-01T05:52:46.078Z"
+    "status": "2026-09-01T05:52:46.078Z",
+    "target": "2026-09-01T05:53:26.641Z"
    },
+   "updated": "2026-09-01T05:53:26.641Z",
    "status": "published",
    "labels": [],
-   "target": "",
+   "target": "drop and swap 1031 exchange",
    "cluster": "",
    "tier": "",
+   "offFlags": []
+  },
+  "/education-center/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-09-01T16:08:45.539Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "Company",
+   "tier": "",
    "offFlags": [],
-   "updated": "2026-09-01T05:52:46.078Z"
+   "updated": "2026-09-01T16:08:45.539Z"
   }
  },
  "live": {
