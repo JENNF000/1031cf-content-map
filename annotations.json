@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-01T16:10:12.105Z",
+ "updated": "2026-09-01T16:12:03.734Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -485,13 +485,27 @@
    "f": {
     "cluster": "2026-09-01T16:10:12.105Z"
    },
+   "updated": "2026-09-01T16:10:12.105Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "DST",
    "tier": "",
+   "offFlags": []
+  },
+  "/a-beginners-guide-to-reit-investing/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "tier": "2026-09-01T16:12:03.734Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "pillar",
    "offFlags": [],
-   "updated": "2026-09-01T16:10:12.105Z"
+   "updated": "2026-09-01T16:12:03.734Z"
   }
  },
  "live": {
