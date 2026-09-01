@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-01T05:50:43.128Z",
+ "updated": "2026-09-01T05:52:46.078Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -449,6 +449,20 @@
    "cluster": "",
    "tier": "fanout",
    "offFlags": []
+  },
+  "/drop-and-swap-the-basics/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-09-01T05:52:46.078Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-09-01T05:52:46.078Z"
   }
  },
  "live": {
