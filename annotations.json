@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-08-31T19:44:21.849Z",
+ "updated": "2026-09-01T05:50:43.128Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -393,15 +393,18 @@
    "delc": [],
    "f": {
     "status": "2026-08-28T18:31:12.220Z",
-    "target": "2026-08-28T18:31:11.370Z"
+    "target": "2026-08-28T18:31:11.370Z",
+    "offFlags": "2026-09-01T05:50:43.128Z"
    },
-   "updated": "2026-08-28T18:31:12.220Z",
+   "updated": "2026-09-01T05:50:43.128Z",
    "status": "published",
    "labels": [],
    "target": "how to use 401k to invest in real estate",
    "cluster": "",
    "tier": "",
-   "offFlags": []
+   "offFlags": [
+    "consolidate"
+   ]
   },
   "/731-exchange/": {
    "comments": [],
@@ -704,11 +707,13 @@
   {
    "id": "4438616e-5e3f-41a6-b9bd-955b526ee75d",
    "created": "2026-08-31T19:44:21.849Z",
-   "u": "2026-08-31T19:44:21.849Z",
-   "bucket": "idea",
-   "date": "",
-   "status": "",
-   "types": [],
+   "u": "2026-08-31T19:44:47.818Z",
+   "bucket": "sched",
+   "date": "2026-09-14",
+   "status": "outline",
+   "types": [
+    "new"
+   ],
    "topic": "Lazy 1031 exchange",
    "kw": "",
    "vol": "",
