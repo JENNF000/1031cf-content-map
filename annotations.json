@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-01T16:12:03.734Z",
+ "updated": "2026-09-02T19:33:18.786Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -499,13 +499,32 @@
    "f": {
     "tier": "2026-09-01T16:12:03.734Z"
    },
+   "updated": "2026-09-01T16:12:03.734Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "pillar",
+   "offFlags": []
+  },
+  "/converting-1031-exchange-to-principal-residence/": {
+   "comments": [
+    {
+     "id": "313f8f66-4414-4c1f-b1fa-350b61893e99",
+     "ts": "2026-09-02T19:33:18.786Z",
+     "author": "Jennifer",
+     "text": "Consolidate with https://www.1031crowdfunding.com/5-year-holding-rule-1031-exchanges/"
+    }
+   ],
+   "delc": [],
+   "f": {},
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
    "offFlags": [],
-   "updated": "2026-09-01T16:12:03.734Z"
+   "updated": "2026-09-02T19:33:18.786Z"
   }
  },
  "live": {
