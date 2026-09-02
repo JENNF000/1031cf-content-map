@@ -1,0 +1,720 @@
+{
+ "consolidation_groups": [
+  {
+   "topic": "721 exchange / UPREIT core term",
+   "cat": "721 Exchange",
+   "keep": "/education-center/everything-you-should-know-about-upreits/",
+   "urls": [
+    "/education-center/everything-you-should-know-about-upreits/",
+    "/721-exchange-real-estate-investing/",
+    "/featured-video-1031-exchange-vs-721-exchange/",
+    "/featured-video-721-exchanges-and-delaware-statutory-trusts-dsts/",
+    "/featured-video-what-is-an-upreit-or-721-exchange/",
+    "/exchange-alternatives-with-upreits-and-721-exchanges/"
+   ],
+   "kw": "721 exchange",
+   "vol": 1900,
+   "note": "Six URLs all treat \"721 exchange\" (1,900/mo) as their primary term. Best position is only 38 \u2014 nothing ranks. The money term is split across an education-center hub, a landing page, three video pages, and a blog post."
+  },
+  {
+   "topic": "DST pros / cons / benefits",
+   "cat": "DST",
+   "keep": "/delaware-statutory-trust-pros-and-cons/",
+   "urls": [
+    "/pros-and-cons-of-investing-in-a-delaware-statutory-trust/",
+    "/delaware-statutory-trust-pros-and-cons/",
+    "/the-5-dos-and-donts-of-dsts-2/",
+    "/benefits-risks-fees-of-delaware-statutory-trusts-2/",
+    "/5-dos-of-dsts/",
+    "/5-donts-of-dsts/",
+    "/7-benefits-of-all-cash-dsts/",
+    "/13-benefits-of-dsts-in-1031-exchanges-real-estate-1031-exchanges-made-easy/",
+    "/are-delaware-statutory-trusts-right-for-you/"
+   ],
+   "kw": "dst pros / dst tax benefits",
+   "vol": 50,
+   "note": "Nine pages on DST advantages and disadvantages, including two near-identical titles and a dos/donts trio split into three posts."
+  },
+  {
+   "topic": "\"What is a REIT\" definition",
+   "cat": "REIT",
+   "keep": "/what-is-a-reit-and-how-does-it-work/",
+   "urls": [
+    "/what-is-a-reit-and-how-does-it-work/",
+    "/everything-you-need-to-know-about-reits/",
+    "/explore-the-potential-of-reits-a-guide-for-investors/",
+    "/a-beginners-guide-to-reit-investing/",
+    "/reit-investing-for-beginners/",
+    "/reit-investing-for-beginners-2/",
+    "/types-of-reits-and-how-to-invest-in-them/",
+    "/benefits-of-reits/"
+   ],
+   "kw": "reit",
+   "vol": 40500,
+   "note": "Eight overlapping REIT primers. \"reit\" (40,500/mo) has no single canonical page."
+  },
+  {
+   "topic": "REIT taxation",
+   "cat": "REIT",
+   "keep": "/reit-taxation/",
+   "urls": [
+    "/reit-tax-advantages/",
+    "/reit-taxation/",
+    "/what-is-a-reit-dividend-tax-rate/",
+    "/qualified-reit-dividends/"
+   ],
+   "kw": "reits and taxes / reit qualified dividend",
+   "vol": 170,
+   "note": "Four thin pages on one topic. /reit-tax-advantages/ (21) and /reit-taxation/ (75) share \"reits and taxes\"; three of the four share \"reit tax rate\"."
+  },
+  {
+   "topic": "Private / non-traded / public REITs",
+   "cat": "REIT",
+   "keep": "/private-vs-public-reits/",
+   "urls": [
+    "/private-vs-public-reits/",
+    "/non-traded-reits-2/",
+    "/investing-in-private-reits/",
+    "/traded-vs-non-traded-reits/",
+    "/traded-vs-non-traded-reits-2/",
+    "/reit-etfs-vs-private-reits/",
+    "/publicly-traded-reits-vs-non-traded-reits-whats-the-difference/"
+   ],
+   "kw": "public vs private reits",
+   "vol": 40,
+   "note": "Pages on the traded/non-traded/private distinction \u2014 now including a NEW 2026 post (publicly-traded-reits-vs-non-traded-reits) added while two older ones on the same query are still live."
+  },
+  {
+   "topic": "California 1031 exchange",
+   "cat": "1031 Exchange",
+   "keep": "/1031-exchange-california/",
+   "urls": [
+    "/1031-exchange-california/",
+    "/a-guide-to-1031-exchanges-in-california/",
+    "/1031-exchanges-key-considerations-for-california-property-owners/",
+    "/dsts-in-california/",
+    "/how-californians-can-utilize-dsts-to-avoid-capital-gains-tax-and-diversify-their-portfolios/"
+   ],
+   "kw": "california 1031 exchange",
+   "vol": 1300,
+   "note": "CA geo intent split across pages; the DST-in-CA pages can stay as DST fan-out but only one CA 1031 page should exist."
+  },
+  {
+   "topic": "Qualified intermediary",
+   "cat": "1031 Exchange",
+   "keep": "/what-is-a-qualified-intermediary/",
+   "urls": [
+    "/what-is-a-qualified-intermediary/",
+    "/choosing-the-right-1031-exchange-qualified-intermediary/",
+    "/the-role-of-a-qualified-intermediary-in-1031-exchanges/"
+   ],
+   "kw": "qualified intermediaries",
+   "vol": 70,
+   "note": "All three pages have \"qualified intermediaries\" as their top keyword, ranking 55\u201386. Three-way split with no winner."
+  },
+  {
+   "topic": "1031 identification rules",
+   "cat": "1031 Exchange Rules",
+   "keep": "/1031-exchange-rules/",
+   "urls": [
+    "/1031-exchange-rules/",
+    "/replacement-property-identification/",
+    "/education-center/dst-1031-exchange/",
+    "/the-three-property-rule-in-1031-exchanges/"
+   ],
+   "kw": "1031 exchange identification rules",
+   "vol": 320,
+   "note": "Three-way split. The dedicated identification page ranks worse than the DST page that only mentions the rule."
+  },
+  {
+   "topic": "1031 deadlines / timeline",
+   "cat": "1031 Exchange Rules",
+   "keep": "/1031-deadlines-extensions/",
+   "urls": [
+    "/1031-deadlines-extensions/",
+    "/education-center/dst-1031-exchange/",
+    "/1031-exchange-timing/",
+    "/featured-video-1031-exchanges-rules-and-timelines/",
+    "/will-tax-day-cut-your-180-days-short-how-to-complete-a-1031-exchange/"
+   ],
+   "kw": "1031 exchange timeline",
+   "vol": 1900,
+   "note": "/education-center/dst-1031-exchange/ owns \"1031 exchange timeline\" (1,900) and outranks the dedicated deadlines page on timing queries."
+  },
+  {
+   "topic": "1031 exchange beginner guide / basics",
+   "cat": "1031 Exchange",
+   "keep": "/education-center/guide-to-1031-exchanges/",
+   "urls": [
+    "/education-center/guide-to-1031-exchanges/",
+    "/1031-exchanges-back-to-the-basics-2/",
+    "/the-1031-exchange-quick-guide/",
+    "/the-rules-and-steps-to-execute-a-1031-exchange/",
+    "/irc-1031-explained-deferring-taxes-for-real-estate-investments/",
+    "/guide-to-like-kind-exchanges/"
+   ],
+   "kw": "1031 for dummies / how does a 1031 exchange work",
+   "vol": 1300,
+   "note": "Six intro-to-1031 assets competing for beginner queries."
+  },
+  {
+   "topic": "DST definition (hub duplication)",
+   "cat": "DST",
+   "keep": "/education-center/what-is-a-delaware-statutory-trust/",
+   "urls": [
+    "/education-center/what-is-a-delaware-statutory-trust/",
+    "/delaware-statutory-trusts/",
+    "/understanding-dst-1031-exchanges/",
+    "/understanding-dst-1031-exchanges-part-2/",
+    "/understanding-dst-1031-exchanges-part-3/",
+    "/10-reasons-to-consider-a-dst-1031-exchange/",
+    "/10-reasons-to-consider-a-dst-1031-exchange-part-2/"
+   ],
+   "kw": "dst real estate meaning",
+   "vol": 170,
+   "note": "The hub is your single biggest asset. A commercial /delaware-statutory-trusts/ page and multi-part blog series split definitional intent away from it."
+  },
+  {
+   "topic": "Converting a 1031 property to a primary residence",
+   "cat": "1031 Exchange Rules",
+   "keep": "/converting-1031-exchange-to-principal-residence/",
+   "urls": [
+    "/converting-1031-exchange-to-principal-residence/",
+    "/5-year-holding-rule-1031-exchanges/",
+    "/what-is-a-1031-exchange-holding-period-part-2/",
+    "/what-is-a-holding-period/"
+   ],
+   "kw": "1031 primary residence",
+   "vol": 590,
+   "note": "The conversion page is over-broad and cannibalizes several 1031 pages, including the 5-year-rule page that already ranks 8."
+  },
+  {
+   "topic": "Selling / exiting a 1031 property",
+   "cat": "1031 Exchange",
+   "keep": "/what-happens-when-you-sell-a-1031-exchange-property/",
+   "urls": [
+    "/what-happens-when-you-sell-a-1031-exchange-property/",
+    "/converting-1031-exchange-to-principal-residence/",
+    "/plan-your-exit/",
+    "/relinquished-property-with-a-1031-exchange/"
+   ],
+   "kw": "selling a 1031 exchange property",
+   "vol": 170,
+   "note": "Shares \"selling a 1031 exchange property\", \"1031 exchange property\" and \"exchanging a property 1031\" across pages."
+  },
+  {
+   "topic": "1031 into a REIT",
+   "cat": "REIT",
+   "keep": "/can-you-1031-exchange-into-a-reit/",
+   "urls": [
+    "/can-you-1031-exchange-into-a-reit/",
+    "/education-center/everything-you-should-know-about-upreits/",
+    "/converting-1031-exchange-to-principal-residence/"
+   ],
+   "kw": "1031 into reit",
+   "vol": 170,
+   "note": "Three URLs split the term; also splits \"1031 to reit\"."
+  },
+  {
+   "topic": "Equity vs mortgage REITs",
+   "cat": "REIT",
+   "keep": "/equity-reits-vs-mortgage-reits/",
+   "urls": [
+    "/equity-reits-vs-mortgage-reits/",
+    "/investing-in-mortgage-reits/",
+    "/unleash-the-power-of-equity-reits/"
+   ],
+   "kw": "mortgage reit vs equity reit",
+   "vol": 90,
+   "note": "Both comparison pages rank for the same term. The comparison page should own it."
+  },
+  {
+   "topic": "DST vs REIT",
+   "cat": "DST",
+   "keep": "/why-real-estate-investors-are-choosing-dsts-over-reits/",
+   "urls": [
+    "/why-real-estate-investors-are-choosing-dsts-over-reits/",
+    "/education-center/what-is-a-delaware-statutory-trust/",
+    "/featured-video-721-exchanges-and-delaware-statutory-trusts-dsts/"
+   ],
+   "kw": "dst vs reit",
+   "vol": 90,
+   "note": "Three URLs split the term. The dedicated comparison post should be the only one targeting it."
+  },
+  {
+   "topic": "Senior housing investing",
+   "cat": "Asset Classes",
+   "keep": "/education-center/senior-housing/",
+   "urls": [
+    "/education-center/senior-housing/",
+    "/investing-in-senior-housing-what-is-senior-housing-care/",
+    "/reasons-why-people-choose-to-invest-in-senior-housing/",
+    "/featured-video-senior-housing-real-estate-investment-opportunities/",
+    "/investing-in-assisted-living-facilities-using-1031-exchanges/",
+    "/investing-in-senior-housing-what-you-need-to-know/",
+    "/investing-in-senior-housing-why-2025-might-be-the-sectors-best-year-yet/",
+    "/senior-housing-boom-strategies-for-savvy-real-estate-investors/"
+   ],
+   "kw": "investing in senior living facilities",
+   "vol": 70,
+   "note": "Now EIGHT senior-housing assets \u2014 three newer posts joined the five from the last audit. Heavy overlap in a core asset class for the sponsor brand."
+  },
+  {
+   "topic": "Student housing investing",
+   "cat": "Asset Classes",
+   "keep": "/education-center/investing-in-student-housing/",
+   "urls": [
+    "/education-center/investing-in-student-housing/",
+    "/how-to-know-if-student-housing-investments-are-for-you/",
+    "/six-benefits-to-furnishing-student-housing/",
+    "/student-housing-success-stories/",
+    "/parental-guarantors-secure-student-housing/",
+    "/apartments-and-student-housing-attracting-investors/"
+   ],
+   "kw": "student housing investing",
+   "vol": 210,
+   "note": "Six student-housing posts; most legacy pieces already redirect into the hub."
+  },
+  {
+   "topic": "Cap rate / valuation-tool comparisons",
+   "cat": "Real Estate Investment",
+   "keep": "/comparing-cap-rates-vs-cash-on-cash-returns/",
+   "urls": [
+    "/comparing-cap-rates-vs-cash-on-cash-returns/",
+    "/comparing-cap-rates-cash-on-cash-returns/",
+    "/comparing-investment-valuation-tools-part-1/",
+    "/comparing-investment-valuation-tools-part-2/",
+    "/comparing-investment-valuation-tools-part-3/",
+    "/comparing-gross-rent-multiplier-return-on-investment/",
+    "/what-cap-rate-is-right-for-you/",
+    "/compressing-cap-rates-shift-buyers-market/"
+   ],
+   "kw": "cap rate vs cash on cash",
+   "vol": 170,
+   "note": "A three-part series and near-duplicate slugs covering the same valuation metrics."
+  },
+  {
+   "topic": "Present value vs NPV",
+   "cat": "Real Estate Investment",
+   "keep": "/comparing-present-value-and-net-present-value/",
+   "urls": [
+    "/comparing-present-value-and-net-present-value/",
+    "/present-value-vs-net-present-value-whats-the-difference/"
+   ],
+   "kw": "npv vs pv",
+   "vol": 260,
+   "note": "Two pages on the identical topic. The first ranks 6; the second ranks nowhere. Straight merge and 301."
+  },
+  {
+   "topic": "QOZ state conformity",
+   "cat": "Opportunity Zones",
+   "keep": "/what-states-do-not-conform-with-qoz-tax-benefits/",
+   "urls": [
+    "/what-states-do-not-conform-with-qoz-tax-benefits/",
+    "/what-states-do-not-conform-with-qoz-tax-benefits-2/"
+   ],
+   "kw": "qoz state conformity",
+   "vol": 0,
+   "note": "Literal duplicate pair \u2014 resolved by 301."
+  },
+  {
+   "topic": "1031 exchange backup plan",
+   "cat": "1031 Exchange",
+   "keep": "/establishing-a-replacement-property-backup-plan/",
+   "urls": [
+    "/establishing-a-replacement-property-backup-plan/",
+    "/1031-exchange-backup-plan/"
+   ],
+   "kw": "1031 exchange backup plan",
+   "vol": 0,
+   "note": "Two pages on the same concept, neither ranking. Merge into one."
+  },
+  {
+   "topic": "Improvement / construction exchange",
+   "cat": "1031 Exchange",
+   "keep": "/improvement-1031-exchange/",
+   "urls": [
+    "/improvement-1031-exchange/",
+    "/1031-improvement-exchange-property-already-owned/",
+    "/1031-construction-exchange/",
+    "/can-you-use-1031-exchanges-for-renovations/"
+   ],
+   "kw": "1031 improvement exchange",
+   "vol": 90,
+   "note": "Four pages on build-to-suit/improvement exchanges. Only the \"property already owned\" page ranks well, on a long-tail term."
+  },
+  {
+   "topic": "Brand reviews / press mentions",
+   "cat": "Press Mentions",
+   "keep": "/testimonials/",
+   "urls": [
+    "/testimonials/",
+    "/1031-crowdfunding-review-yield-talk-gives-1031-crowdfunding-an-excellent-4-stars/",
+    "/1031-crowdfunding-receives-accolade-in-benzingas-latest-review/",
+    "/1031-crowdfunding-moves-up-rankings-to-4-among-top-real-estate-crowdfunding-sites/",
+    "/education-center/blog/",
+    "/ebook/",
+    "/investment-platform/"
+   ],
+   "kw": "1031 crowdfunding reviews",
+   "vol": 70,
+   "note": "Many URLs rank for \"1031 crowdfunding reviews\". Homepage is #1 so revenue risk is low, but review intent should consolidate onto /testimonials/."
+  },
+  {
+   "topic": "IRA basics",
+   "cat": "Retirement & IRA",
+   "keep": "/what-is-an-ira-and-why-should-you-invest/",
+   "urls": [
+    "/what-is-an-ira-and-why-should-you-invest/",
+    "/iras-as-retirement-plans/",
+    "/types-of-ira-investments/",
+    "/how-to-invest-ira/",
+    "/ira-when-to-invest/"
+   ],
+   "kw": "ira account meaning",
+   "vol": 2900,
+   "note": "Five overlapping IRA primers, all ranking 41\u201390. No hub. IRA/401k content may be off-strategy for an accredited-investor platform \u2014 keep/kill decision before consolidating."
+  },
+  {
+   "topic": "401k \u2192 real estate",
+   "cat": "Retirement & IRA",
+   "keep": "/how-to-use-401k-to-invest-in-real-estate/",
+   "urls": [
+    "/use-401k-for-real-estate-investing/",
+    "/how-to-use-401k-to-invest-in-real-estate/"
+   ],
+   "kw": "convert 401k to real estate investment",
+   "vol": 90,
+   "note": "Resolved \u2014 the old URL now 301s to the new one (verified this crawl)."
+  },
+  {
+   "topic": "One Big Beautiful Bill",
+   "cat": "Tax & Capital Gains",
+   "keep": "/how-the-one-big-beautiful-bill-affects-real-estate-investors/",
+   "urls": [
+    "/how-the-one-big-beautiful-bill-affects-real-estate-investors/",
+    "/how-trumps-one-big-beautiful-bill-will-affect-us-housing-market/"
+   ],
+   "kw": "one big beautiful bill real estate",
+   "vol": 0,
+   "note": "Two near-simultaneous takes on the same legislation. Merge into one evergreen explainer."
+  },
+  {
+   "topic": "Personal property exchanges",
+   "cat": "1031 Exchange",
+   "keep": "/exchanging-personal-property-part-1/",
+   "urls": [
+    "/exchanging-personal-property-part-1/",
+    "/exchanging-personal-property-part-2/"
+   ],
+   "kw": "exchanging personal property",
+   "vol": 0,
+   "note": "Two-part series, neither ranking. Post-2017 the TCJA removed personal property from Section 1031 \u2014 verify accuracy before keeping live."
+  },
+  {
+   "topic": "Biden budget / 1031 policy news",
+   "cat": "1031 Exchange",
+   "keep": "/the-future-of-1031-exchanges-under-trump-looks-bright/",
+   "urls": [
+    "/bidens-proposed-2024-budget-1031-exchanges/",
+    "/bidens-proposed-2025-budget-1031-exchanges/",
+    "/the-future-of-1031-exchanges-under-trump-looks-bright/",
+    "/1031-exchangers-through-jobs-act/",
+    "/real-estate-is-gearing-up-to-defend-1031-exchanges-yet-again/",
+    "/what-bidens-proposed-limits-to-1031-exchanges-mean-for-investors-and-the-economy/"
+   ],
+   "kw": "1031 exchange news",
+   "vol": 480,
+   "note": "Dated policy commentary. Both Biden budget posts now 301 to the education-center guide. Consider one evergreen \"1031 legislative outlook\" page refreshed in place."
+  }
+ ],
+ "slug_fixes": [
+  {
+   "url": "/everything-you-need-to-know-about-reits/",
+   "kw": "reit",
+   "vol": 40500,
+   "suggest": "/what-is-a-reit/",
+   "reason": "Non-descriptive slug ranks for \"reit\" (40,500). Merge with /what-is-a-reit-and-how-does-it-work/ and serve one canonical /what-is-a-reit/."
+  },
+  {
+   "url": "/exploring-wealth-strategies-what-is-a-disregarded-entity/",
+   "kw": "disregarded entity",
+   "vol": 6600,
+   "suggest": "/disregarded-entity/",
+   "reason": "Slug buried under an \"exploring wealth strategies\" prefix that matches no query. Exact-match term is 6,600/mo."
+  },
+  {
+   "url": "/new-ira-and-401k-contribution-limits-for-2025-what-you-need-to-know/",
+   "kw": "maximum roth ira contribution 2025",
+   "vol": 6600,
+   "suggest": "/ira-401k-contribution-limits/",
+   "reason": "11-word slug with a hardcoded year plus filler. An evergreen slug keeps equity every year instead of decaying."
+  },
+  {
+   "url": "/education-center/nnn-property-investments-what-you-should-know/",
+   "kw": "nnn lease",
+   "vol": 5400,
+   "suggest": "/education-center/nnn-lease/",
+   "reason": "Top keyword \"nnn lease\" (5,400) is absent from the slug."
+  },
+  {
+   "url": "/what-is-an-ira-and-why-should-you-invest/",
+   "kw": "ira account meaning",
+   "vol": 2900,
+   "suggest": "/what-is-an-ira/",
+   "reason": "Question-phrase slug with a second clause no query contains."
+  },
+  {
+   "url": "/can-you-avoid-capital-gains-tax-by-buying-another-property/",
+   "kw": "capital gains on primary residence",
+   "vol": 2400,
+   "suggest": "/capital-gains-tax-primary-residence/",
+   "reason": "Nine-word question slug; the page ranks for primary-residence exclusion queries which are nowhere in the slug."
+  },
+  {
+   "url": "/what-are-self-directed-iras-2/",
+   "kw": "what is a self directed ira",
+   "vol": 1300,
+   "suggest": "/self-directed-ira/",
+   "reason": "WordPress duplicate suffix \"-2\". Low-risk, high-upside cleanup."
+  },
+  {
+   "url": "/education-center/multifamily-properties/",
+   "kw": "multifamily investing",
+   "vol": 1000,
+   "suggest": "/education-center/multifamily-investing/",
+   "reason": "Primary keyword is \"multifamily investing\"; slug says \"properties\"."
+  },
+  {
+   "url": "/how-much-money-can-you-inherit-tax-free/",
+   "kw": "how much inheritance is tax free",
+   "vol": 720,
+   "suggest": "/how-much-inheritance-is-tax-free/",
+   "reason": "Slug says \"money-can-you-inherit\"; the ranking query uses \"inheritance\"."
+  },
+  {
+   "url": "/education-center/self-storage-investments/",
+   "kw": "investing in mini storage",
+   "vol": 590,
+   "suggest": "/education-center/self-storage-investing/",
+   "reason": "Slug uses the noun \"investments\" while ranking queries use \"investing in\"."
+  },
+  {
+   "url": "/1031-deadlines-extensions/",
+   "kw": "1031 exchange time limit",
+   "vol": 480,
+   "suggest": "/1031-exchange-time-limits/",
+   "reason": "Slug omits \"exchange\" and the actual query pattern."
+  },
+  {
+   "url": "/replacement-property-identification/",
+   "kw": "1031 exchange identification rules",
+   "vol": 320,
+   "suggest": "/1031-exchange-identification-rules/",
+   "reason": "Slug lacks \"1031 exchange\" and \"rules\"; loses its own head term to a DST page."
+  },
+  {
+   "url": "/drop-and-swap-the-basics/",
+   "kw": "drop and swap 1031 exchange",
+   "vol": 320,
+   "suggest": "/drop-and-swap-1031-exchange/",
+   "reason": "\"the-basics\" filler replaces the \"1031 exchange\" qualifier every ranking query includes."
+  },
+  {
+   "url": "/what-is-equal-or-greater/",
+   "kw": "1031 exchange replacement property",
+   "vol": 170,
+   "suggest": "/1031-exchange-equal-or-greater-value/",
+   "reason": "Slug shares zero words with its own primary keyword, yet the page ranks 3. Adding \"1031 exchange\" makes the URL self-describing."
+  },
+  {
+   "url": "/what-happens-when-you-sell-a-1031-exchange-property/",
+   "kw": "selling a 1031 exchange property",
+   "vol": 170,
+   "suggest": "/selling-a-1031-exchange-property/",
+   "reason": "Long question-phrase slug; the query form is the gerund."
+  },
+  {
+   "url": "/partnering-for-success-the-benefits-of-real-estate-joint-ventures/",
+   "kw": "what is a jv in real estate",
+   "vol": 170,
+   "suggest": "/real-estate-joint-ventures/",
+   "reason": "Ten-word slug led by a marketing phrase; missing \"jv\"."
+  },
+  {
+   "url": "/1031-exchange-title-company-2/",
+   "kw": "1031 tax exchange companies",
+   "vol": 140,
+   "suggest": "/1031-exchange-title-company/",
+   "reason": "Trailing \"-2\" duplicate suffix."
+  },
+  {
+   "url": "/benefits-risks-fees-of-delaware-statutory-trusts-2/",
+   "kw": "dst trusts",
+   "vol": 110,
+   "suggest": "/dst-benefits-and-risks/",
+   "reason": "Trailing \"-2\" suffix; four-noun stacked slug. Merge target for the DST pros-and-cons cluster."
+  },
+  {
+   "url": "/education-center/calculator/",
+   "kw": "1031 exchange date calculator",
+   "vol": 90,
+   "suggest": "/education-center/1031-exchange-calculator/",
+   "reason": "Generic one-word slug gives no topical signal."
+  },
+  {
+   "url": "/an-investors-guide-to-mixed-use-properties-and-tax-rules/",
+   "kw": "what is mixed use property",
+   "vol": 70,
+   "suggest": "/mixed-use-property/",
+   "reason": "Long \"an-investors-guide-to\" slug; the exact-match term is what ranks."
+  },
+  {
+   "url": "/fulfilling-debt-requirements-with-dsts-1031-exchange-requirements-fulfillment/",
+   "kw": "1031 debt replacement",
+   "vol": 70,
+   "suggest": "/1031-exchange-debt-replacement/",
+   "reason": "Nine-word slug repeating \"requirements\" twice; \"replacement\" absent."
+  },
+  {
+   "url": "/leaving-your-heirs-with-assets-not-liabilities/",
+   "kw": "1031 exchange death of owner",
+   "vol": 70,
+   "suggest": "/1031-exchange-death-of-owner/",
+   "reason": "Editorial headline slug with no keyword overlap; ranks 27 for death-of-owner and 9 for \"1031 inherited property\"."
+  },
+  {
+   "url": "/the-5-dos-and-donts-of-dsts-2/",
+   "kw": "dst options",
+   "vol": 50,
+   "suggest": "/dst-dos-and-donts/",
+   "reason": "Trailing \"-2\" suffix and a numeral prefix matching no query."
+  },
+  {
+   "url": "/non-traded-reits-2/",
+   "kw": "public vs private reits",
+   "vol": 40,
+   "suggest": "/non-traded-reits/",
+   "reason": "Trailing \"-2\" duplicate suffix."
+  },
+  {
+   "url": "/what-to-do-tired-being-landlord/",
+   "kw": "tired of being a landlord",
+   "vol": 0,
+   "suggest": "/tired-of-being-a-landlord/",
+   "reason": "Slug drops the stopwords that make the phrase readable and searchable."
+  },
+  {
+   "url": "/reit-market-2/",
+   "kw": "reit market",
+   "vol": 0,
+   "suggest": "/reit-market-outlook/",
+   "reason": "Trailing \"-2\" suffix plus a two-word slug with no intent signal."
+  },
+  {
+   "url": "/tips-for-selecting-1031-investment-properties-2/",
+   "kw": "selecting 1031 replacement property",
+   "vol": 0,
+   "suggest": "/choosing-1031-replacement-property/",
+   "reason": "Trailing \"-2\" suffix; \"tips-for-selecting\" weaker than \"how to choose\"."
+  },
+  {
+   "url": "/10-reasons-to-consider-a-dst-1031-exchange-part-2/",
+   "kw": "dst 1031 exchange",
+   "vol": 0,
+   "suggest": "(merge into DST hub \u2014 part 1 already 301s)",
+   "reason": "\"part-2\" slug; part 1 already redirects to the hub, this one is still live."
+  },
+  {
+   "url": "/what-is-a-1031-exchange-holding-period-part-2/",
+   "kw": "1031 exchange holding period",
+   "vol": 0,
+   "suggest": "/1031-exchange-holding-period/",
+   "reason": "\"part-2\" slug on a question phrase. NOTE: this URL now 301s to /what-is-a-holding-period/ (verified this crawl)."
+  },
+  {
+   "url": "/understanding-dst-1031-exchanges-part-2/",
+   "kw": "dst 1031 exchange",
+   "vol": 0,
+   "suggest": "(merge into part 1)",
+   "reason": "\"part-2\" slug \u2014 NOTE: now 301s to the DST hub (verified this crawl)."
+  },
+  {
+   "url": "/comparing-investment-valuation-tools-part-2/",
+   "kw": "investment valuation tools",
+   "vol": 0,
+   "suggest": "/real-estate-valuation-metrics/",
+   "reason": "Series remnant: part 1 301s to the blog listing, parts 2\u20133 still live. Merge into a single metrics explainer."
+  },
+  {
+   "url": "/comparing-investment-valuation-tools-part-3/",
+   "kw": "investment valuation tools",
+   "vol": 0,
+   "suggest": "(merge with part 2)",
+   "reason": "Series remnant \u2014 see part 2."
+  },
+  {
+   "url": "/exchanging-personal-property-part-1/",
+   "kw": "exchanging personal property",
+   "vol": 0,
+   "suggest": "/personal-property-exchanges/",
+   "reason": "\"part-1\" slug; verify content accuracy post-TCJA before investing in the URL."
+  },
+  {
+   "url": "/13-benefits-of-dsts-in-1031-exchanges-real-estate-1031-exchanges-made-easy/",
+   "kw": "dst benefits",
+   "vol": 0,
+   "suggest": "(already 301s to DST hub)",
+   "reason": "Fourteen-word slug. Resolved by redirect."
+  },
+  {
+   "url": "/chasing-quick-wins-can-sabotage-your-businesss-long-term-success-heres-what-to-focus-on-instead/",
+   "kw": "(none)",
+   "vol": 0,
+   "suggest": "(retire or move off-domain)",
+   "reason": "Fourteen-word slug on general-business content unrelated to any investor topic."
+  },
+  {
+   "url": "/how-to-stay-humble-amidst-success-actionable-advice-for-self-made-entrepreneurs/",
+   "kw": "(none)",
+   "vol": 0,
+   "suggest": "(retire or move off-domain)",
+   "reason": "Off-topic entrepreneurship content; dilutes topical authority."
+  },
+  {
+   "url": "/what-makes-a-great-leader-vs-a-great-manager/",
+   "kw": "(none)",
+   "vol": 0,
+   "suggest": "(retire or move off-domain)",
+   "reason": "Off-topic leadership content; no rankings, no investor relevance."
+  },
+  {
+   "url": "/marketwatch-pros-say-rate-cuts-loom-heres-exactly-what-to-do-with-your-money-now/",
+   "kw": "(none)",
+   "vol": 0,
+   "suggest": "(retire \u2014 syndicated press)",
+   "reason": "Syndicated press headline as a slug. Press mentions are better as a linked media list than as indexable pages."
+  },
+  {
+   "url": "/how-do-i-break-even/",
+   "kw": "(none)",
+   "vol": 0,
+   "suggest": "/1031-exchange-break-even-analysis/",
+   "reason": "First-person slug with no topical signal; ambiguous out of context."
+  },
+  {
+   "url": "/will-brexit-impact-u-s-real-estate/",
+   "kw": "(none)",
+   "vol": 0,
+   "suggest": "(retire \u2014 stale)",
+   "reason": "Brexit-era commentary. Stale news content with no rankings."
+  },
+  {
+   "url": "/https-www-youtube-com-1031crowdfunding/",
+   "kw": "(none)",
+   "vol": 0,
+   "suggest": "(fix or retire)",
+   "reason": "NEW this crawl: a raw YouTube URL turned into a slug \u2014 almost certainly a publishing mistake. It is live, indexable and in the sitemap."
+  }
+ ]
+}

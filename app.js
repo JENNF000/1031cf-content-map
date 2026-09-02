@@ -262,6 +262,42 @@ const Sync = {
   },
 };
 function setSyncChip(t) { $('#chip-sync').textContent = 'Sync: ' + (t || (SYNC.token ? 'on' : 'off')); }
+/* --- on-demand site crawl via the repo's GitHub Action (v2.9) --- */
+let CRAWL = { polling: false, hinted: false };
+async function dispatchCrawl() {
+  if (!SYNC.token) return 'no-token';
+  try {
+    const r = await fetch('https://api.github.com/repos/' + SYNC.owner + '/' + SYNC.repo + '/actions/workflows/crawl.yml/dispatches', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + SYNC.token, Accept: 'application/vnd.github+json' },
+      body: JSON.stringify({ ref: 'main' }),
+    });
+    if (r.status === 204) return 'started';
+    if (r.status === 404) return 'no-workflow';
+    if (r.status === 403 || r.status === 401) return 'no-scope';
+    return 'error ' + r.status;
+  } catch (e) { return 'offline'; }
+}
+async function pollForBuild(sinceStamp) {
+  if (CRAWL.polling) return;
+  CRAWL.polling = true;
+  for (let i = 0; i < 12; i++) {                    // up to ~5 minutes
+    await new Promise(res => setTimeout(res, 25000));
+    try {
+      const r = await fetch('data.json?ts=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) continue;
+      const fresh = await r.json();
+      if (fresh.stats.generated !== sinceStamp) {
+        DATA = fresh; PAGE = {}; for (const p of DATA.pages) PAGE[p.path] = p;
+        Store.set('data', fresh);
+        updateChips(); redraw();
+        toast('Fresh site crawl landed (' + fresh.stats.generated + ') — board updated.');
+        break;
+      }
+    } catch (e) {}
+  }
+  CRAWL.polling = false;
+}
 
 /* ============================== boot ============================== */
 let TAB = 'map';
@@ -338,6 +374,11 @@ async function doRefresh() {
       msg += ' GSC refreshed.';
     } catch (e) { msg += ' (GSC pull skipped: ' + e.message + ')'; }
   }
+  // kick a fresh SITE CRAWL via the repo's GitHub Action; the new build lands in ~2-3 min
+  const d = await dispatchCrawl();
+  if (d === 'started') { msg += ' Site crawl started — new build lands here in ~2–3 min.'; pollForBuild(DATA.stats.generated); }
+  else if (d === 'no-workflow' && !CRAWL.hinted) { CRAWL.hinted = true; msg += ' (On-demand crawl not set up: crawl.yml missing from the repo.)'; }
+  else if (d === 'no-scope' && !CRAWL.hinted) { CRAWL.hinted = true; msg += ' (To crawl on Refresh, give your GitHub token Actions read/write — see ACTIONS-SETUP.md.)'; }
   updateChips(); redraw(); toast(msg);
   b.classList.remove('spin'); b.disabled = false;
 }
@@ -623,6 +664,12 @@ function viewInsights() {
   let html = '<p class="intro">Findings from the ' + esc(DATA.stats.vintages.crawl) + '. Regenerated on every crawl; your labels and statuses live on top and survive refreshes.</p>';
   html += ins.map(i => '<div class="insight ' + i.sev + '"><span class="sev">' + i.sev + '</span><h3>' + esc(i.title) + '</h3><p>' + esc(i.body) + '</p>' +
     (i.items ? '<ul>' + i.items.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '') + '</div>').join('');
+  {
+    const calPub = calEntries().filter(e => !isIdea(e) && e.status === 'published' && e.url)
+      .map(e => { try { return { e, path: e.url.startsWith('/') ? e.url : new URL(e.url).pathname }; } catch (x) { return null; } })
+      .filter(x => x && !PAGE[x.path]);
+    if (calPub.length) html += '<div class="insight info"><span class="sev">info</span><h3>' + calPub.length + ' published calendar piece' + (calPub.length > 1 ? 's are' : ' is') + ' not on the map yet</h3><p>New slugs join the inventory at the next weekly crawl (Mondays) — Refresh alone cannot re-crawl the site. Until then they are tracked here and, once Google indexes them, in the GSC data.</p><ul>' + calPub.map(x => '<li>' + esc(x.path) + ' — "' + esc(x.e.topic) + '" (' + esc(fmtDate(x.e.date) || 'undated') + ')</li>').join('') + '</ul></div>';
+  }
   if (GSC.cache && GSC.cache.pages) {
     const insp2 = GSC.cache.inspect || {};
     const stillEarning = DATA.pages.filter(p => p.tier === 'redirect' && gm(p.path) && gm(p.path).imps > 0)
@@ -736,6 +783,7 @@ function viewRedirects() {
       '<td class="num">' + (r.kw_new == null ? '—' : fmt(r.kw_new)) + '</td><td>' + esc(r.pkw_new || '—') + '</td>' +
       (GSC.cache && GSC.cache.pages ? '<td class="num">' + (gm(r.old) ? fmt(gm(r.old).imps) : '0') + '</td>' : '') +
       '<td>' + issueBadges(r) +
+      (r.rcode === 302 ? '<span class="badge soft" title="302 = temporary redirect; link equity may not transfer. Retired pages should 301.">302!</span> ' : '') +
       (r.to_listing ? '<span class="badge soft" title="redirects into a listing page — passes no topical relevance (soft-404 pattern)">soft-404</span> ' : '') +
       (r.in_sitemap ? '<span class="badge sm" title="this redirecting URL is still advertised in the sitemap">in sitemap</span> ' : '') +
       (r.manual ? '<span class="badge tier-redirect" title="marked by you, not yet verified by a crawl">yours · ' + esc((r.at || '').slice(0, 10)) + '</span> ' : '') +
@@ -1036,15 +1084,20 @@ async function gscPull() {
    redirects, her manual live-marks, pages labeled needs301, and anything Google
    previously called a redirect. Results <20h old are not re-inspected. */
 function inspTargets() {
-  const t = new Set();
+  // Priority first (marks, build redirects, needs301, previously-Google-reported),
+  // then the ENTIRE inventory — ~443 URLs/day fits well inside the 2,000/day quota,
+  // and the 20h TTL stops repeat Refreshes from re-spending it. This is what catches
+  // a redirect she shipped WITHOUT marking, as soon as Google has processed it.
+  const pri = new Set();
+  for (const path of Object.keys(ANN.live || {})) pri.add(path);
+  for (const [path, i] of Object.entries((GSC.cache && GSC.cache.inspect) || {})) if (i.state === 'redirect') pri.add(path);
   for (const p of DATA.pages) {
-    if (p.tier === 'redirect') t.add(p.path);
+    if (p.tier === 'redirect') pri.add(p.path);
     const e = annOf(p.path);
-    if (e && (e.labels || []).includes('needs301')) t.add(p.path);
+    if (e && (e.labels || []).includes('needs301')) pri.add(p.path);
   }
-  for (const path of Object.keys(ANN.live || {})) t.add(path);
-  for (const [path, i] of Object.entries((GSC.cache && GSC.cache.inspect) || {})) if (i.state === 'redirect') t.add(path);
-  return [...t];
+  const rest = DATA.pages.map(p => p.path).filter(path => !pri.has(path));
+  return [...pri, ...rest];
 }
 function inspState(res) {
   const cov = ((res.inspectionResult || {}).indexStatusResult || {}).coverageState || '';
@@ -1057,7 +1110,7 @@ function inspState(res) {
 async function gscInspect() {
   const insp = GSC.cache.inspect = GSC.cache.inspect || {};
   const cutoff = Date.now() - 20 * 3600e3;
-  const targets = inspTargets().filter(p => !(insp[p] && new Date(insp[p].at).getTime() > cutoff)).slice(0, 300);
+  const targets = inspTargets().filter(p => !(insp[p] && new Date(insp[p].at).getTime() > cutoff)).slice(0, 500);
   let done = 0;
   const worker = async () => {
     while (targets.length) {
@@ -1068,7 +1121,10 @@ async function gscInspect() {
         const s = inspState(res);
         insp[path] = { state: s, cov: ((res.inspectionResult || {}).indexStatusResult || {}).coverageState || '', at: nowISO() };
         done++;
-      } catch (e) { break; }  // quota or auth — keep what we have
+      } catch (e) {
+        if (/429|403|401|quota/i.test(e.message || '')) break;   // quota/auth — stop this worker
+        // transient failure: skip this URL, keep going
+      }
     }
   };
   await Promise.all([worker(), worker(), worker(), worker()]);
@@ -1293,8 +1349,21 @@ function openDrawer(path) {
     ((e.cluster && e.cluster !== p.cat) || (e.tier && e.tier !== p.tier) ? '<p class="mini">Build has this as ' + esc(p.cat) + ' / ' + TIERNAME[p.tier] + '. <a href="#" id="d-resetplace">Reset to build</a></p>' : '') + '</div>' : '') +
   (p ? '<div class="sec"><h5>Live status</h5>' + (() => {
       const lo = liveOverride(path);
-      if (p.tier === 'redirect') return '<p class="mini">Verified redirect → <b>' + esc(p.redirects_to || '') + '</b>' + (lo === 'live' ? ' — <b>you marked it live</b>.' : '') + '</p><button class="btn sub" id="d-live">' + (lo === 'live' ? 'Use build value (redirect)' : 'Mark as live (build is wrong / page restored)') + '</button>';
-      return '<p class="mini">Crawled live (200, index,follow)' + (lo === 'redirect' ? ' — <b>you marked it as redirecting</b>.' : '') + '</p><button class="btn sub" id="d-live">' + (lo === 'redirect' ? 'Use build value (live)' : 'Mark as redirecting (I shipped a 301)') + '</button>';
+      const io = inspOverride(path);
+      const iRec = GSC.cache && GSC.cache.inspect && GSC.cache.inspect[path];
+      const iNote = iRec ? ' Google (' + esc((iRec.at || '').slice(0, 10)) + '): ' + esc(iRec.cov || iRec.state) + '.' : '';
+      if (p.tier === 'redirect') return '<p class="mini">Verified redirect → <b>' + esc(p.redirects_to || '') + '</b>' + (lo === 'live' ? ' — <b>you marked it live</b>.' : '') + iNote + '</p><button class="btn sub" id="d-live">' + (lo === 'live' ? 'Use build value (redirect)' : 'Mark as live (build is wrong / page restored)') + '</button>';
+      let msg = 'Crawled live (200, index,follow) on ' + esc(DATA.stats.crawl_date) + '.';
+      if (lo === 'redirect') {
+        msg = '<b>You marked this as redirecting</b> — it sits in the Redirect band now.' +
+          (io !== 'redirect' ? ' Google has not seen the 301 yet' + (iRec ? ' (inspected ' + esc((iRec.at || '').slice(0, 10)) + ': ' + esc(iRec.cov || 'indexed') + ')' : '') + ' — normal for a fresh redirect; each Refresh re-checks.' : ' Google confirms the redirect.') +
+          ' The next weekly crawl verifies it and records the destination.';
+      } else if (io === 'redirect') {
+        msg = '<b>Google reports this URL as a redirect</b> (URL Inspection ' + esc((iRec.at || '').slice(0, 10)) + ') — moved to the Redirect band; the next weekly crawl records the destination.';
+      } else {
+        msg += iNote;
+      }
+      return '<p class="mini">' + msg + '</p><button class="btn sub" id="d-live">' + (lo === 'redirect' ? 'Un-mark (use crawled value: live)' : 'Mark as redirecting (I shipped a 301)') + '</button>';
     })() + '</div>' : '') +
   '<div class="sec"><h5>Status</h5><div class="pillrow">' + visibleStatuses(true).map(s => '<span class="apill mine ' + (((e.status || 'none') === s.id) ? '' : 'off') + '" data-st="' + s.id + '" style="background:' + colorOf(s.color) + '">' + esc(s.name) + '</span>').join('') + '</div></div>' +
   '<div class="sec"><h5>Labels <a href="#" id="d-libs" style="font-weight:400;font-size:11px">manage</a></h5><div class="pillrow">' +
