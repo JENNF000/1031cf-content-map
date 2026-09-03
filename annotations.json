@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-02T19:35:55.229Z",
+ "updated": "2026-09-03T16:46:56.472Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -510,15 +510,17 @@
   "/converting-1031-exchange-to-principal-residence/": {
    "comments": [
     {
-     "id": "313f8f66-4414-4c1f-b1fa-350b61893e99",
-     "ts": "2026-09-02T19:33:18.786Z",
+     "id": "23e4ac0c-ea3a-4080-938d-9233b8e7f037",
+     "ts": "2026-09-02T19:36:19.581Z",
      "author": "Jennifer",
-     "text": "Consolidate with https://www.1031crowdfunding.com/5-year-holding-rule-1031-exchanges/"
+     "text": "Absorb https://www.1031crowdfunding.com/5-year-holding-rule-1031-exchanges/"
     }
    ],
-   "delc": [],
+   "delc": [
+    "313f8f66-4414-4c1f-b1fa-350b61893e99"
+   ],
    "f": {},
-   "updated": "2026-09-02T19:33:18.786Z",
+   "updated": "2026-09-02T19:36:19.581Z",
    "status": "",
    "labels": [],
    "target": "",
@@ -537,13 +539,27 @@
    ],
    "delc": [],
    "f": {},
+   "updated": "2026-09-02T19:35:55.229Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
+   "offFlags": []
+  },
+  "/dst-properties/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-09-03T16:46:56.472Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
    "offFlags": [],
-   "updated": "2026-09-02T19:35:55.229Z"
+   "updated": "2026-09-03T16:46:56.472Z"
   }
  },
  "live": {
