@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-03T16:46:56.472Z",
+ "updated": "2026-09-03T16:49:00.491Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -553,13 +553,27 @@
    "f": {
     "status": "2026-09-03T16:46:56.472Z"
    },
+   "updated": "2026-09-03T16:46:56.472Z",
    "status": "published",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
+   "offFlags": []
+  },
+  "/senior-housing-investing/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "tier": "2026-09-03T16:49:00.491Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "transactional",
    "offFlags": [],
-   "updated": "2026-09-03T16:46:56.472Z"
+   "updated": "2026-09-03T16:49:00.491Z"
   }
  },
  "live": {
