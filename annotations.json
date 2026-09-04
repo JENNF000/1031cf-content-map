@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-03T22:19:46.641Z",
+ "updated": "2026-09-04T18:42:16.045Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -423,13 +423,20 @@
    "offFlags": []
   },
   "/what-is-a-qualified-intermediary/": {
-   "comments": [],
+   "comments": [
+    {
+     "id": "4fefd0a0-4c57-43bd-a6eb-b57a1efa5412",
+     "ts": "2026-09-03T22:20:15.516Z",
+     "author": "Jennifer",
+     "text": "Originally had 25 keywords, ranked #48.5"
+    }
+   ],
    "delc": [],
    "f": {
     "status": "2026-08-31T18:14:19.306Z",
     "target": "2026-09-03T22:19:46.640Z"
    },
-   "updated": "2026-09-03T22:19:46.640Z",
+   "updated": "2026-09-03T22:20:15.516Z",
    "status": "published",
    "labels": [],
    "target": "1031 exchange qualified intermediary",
@@ -834,7 +841,7 @@
   {
    "id": "4438616e-5e3f-41a6-b9bd-955b526ee75d",
    "created": "2026-08-31T19:44:21.849Z",
-   "u": "2026-08-31T19:44:47.818Z",
+   "u": "2026-09-04T18:42:16.044Z",
    "bucket": "sched",
    "date": "2026-09-14",
    "status": "outline",
@@ -842,12 +849,12 @@
     "new"
    ],
    "topic": "Lazy 1031 exchange",
-   "kw": "",
+   "kw": "lazy 1031 exchange",
    "vol": "",
    "kd": "",
-   "prompts": "",
-   "gdoc": "",
-   "url": "",
+   "prompts": "What is a lazy 1031 exchange?",
+   "gdoc": "https://docs.google.com/document/d/1nBtmT7HKiJowLYgvB6NsRdgD-9044khJB6_-tkm3lso/edit?tab=t.6chp126qrnml",
+   "url": "/lazy-1031-exchange/",
    "oldurl": "",
    "lastpub": ""
   }
