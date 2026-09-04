@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-04T18:45:01.254Z",
+ "updated": "2026-09-04T18:46:11.433Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -720,7 +720,7 @@
   {
    "id": "62cf06ae-d4db-4f64-9bd6-44d15ed411db",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-09-04T18:44:23.699Z",
+   "u": "2026-09-04T18:46:11.433Z",
    "bucket": "sched",
    "date": "2026-08-17",
    "status": "published",
@@ -734,13 +734,13 @@
    "prompts": "What is a drop and swap in real estate?",
    "gdoc": "https://docs.google.com/document/d/1VL9dxOjIRu_ydQIrSVJjsZ0HdybbMxBs4ByzjBgfQek/edit?usp=drive_link",
    "url": "/drop-and-swap-1031-exchange/",
-   "oldurl": "https://www.1031crowdfunding.com/drop-and-swap-the-basics/",
+   "oldurl": "/drop-and-swap-the-basics/",
    "lastpub": "2025-08-04"
   },
   {
    "id": "bd512154-b192-45c9-96a7-3fc2dd8b82a2",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-09-04T18:44:00.308Z",
+   "u": "2026-09-04T18:45:49.953Z",
    "bucket": "sched",
    "date": "2026-08-31",
    "status": "published",
@@ -755,7 +755,7 @@
    "prompts": "What Is a Qualified Intermediary?",
    "gdoc": "https://docs.google.com/document/d/1_nedrF7pYh3qAZ91bum1Tw2EonsJOCM9dizpTNsl9Y8/edit?usp=drive_link",
    "url": "/what-is-a-qualified-intermediary/",
-   "oldurl": "https://www.1031crowdfunding.com/what-is-a-qualified-intermediary/, https://www.1031crowdfunding.com/the-role-of-a-qualified-intermediary-in-1031-exchanges/, https://www.1031crowdfunding.com/choosing-the-right-1031-exchange-qualified-intermediary/",
+   "oldurl": "/what-is-a-qualified-intermediary/, /the-role-of-a-qualified-intermediary-in-1031-exchanges/, /choosing-the-right-1031-exchange-qualified-intermediary/",
    "lastpub": "2025-09-29"
   },
   {
