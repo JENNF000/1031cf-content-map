@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-04T18:44:00.308Z",
+ "updated": "2026-09-04T18:45:01.254Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -599,7 +599,8 @@
   {
    "id": "09976d2b-1682-400c-80d6-c6f1e4e9e427",
    "created": "2026-08-24T20:44:32.808Z",
-   "u": "2026-08-24T20:44:32.808Z",
+   "u": "2026-09-04T18:45:01.254Z",
+   "bucket": "sched",
    "date": "2026-06-15",
    "status": "published",
    "types": [
@@ -611,14 +612,14 @@
    "kd": 19,
    "prompts": "",
    "gdoc": "https://docs.google.com/document/d/1joemWLEJ_tHJSgR6cTxZjkHMg3FVBfP_orKPygN_U1g/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/1031-exchange-california/",
+   "url": "/1031-exchange-california/",
    "oldurl": "https://www.1031crowdfunding.com/a-guide-to-1031-exchanges-in-california/",
    "lastpub": "2024-07-08"
   },
   {
    "id": "b33b9da3-b4a8-41fc-8e45-ad61c502b9e0",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T23:29:27.023Z",
+   "u": "2026-09-04T18:44:55.942Z",
    "bucket": "sched",
    "date": "2026-07-06",
    "status": "published",
@@ -632,14 +633,14 @@
    "kd": 17,
    "prompts": "What are the pros and cons of DST 1031?\nShould I 1031 into a DST?",
    "gdoc": "https://docs.google.com/document/d/17avK3kdHj_pbhLTeIUJzqCDJw8upRknlsSYk1hUbtIo/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/delaware-statutory-trust-pros-and-cons/",
+   "url": "/delaware-statutory-trust-pros-and-cons/",
    "oldurl": "https://www.1031crowdfunding.com/10-reasons-to-consider-a-dst-1031-exchange/, https://www.1031crowdfunding.com/pros-and-cons-of-investing-in-a-delaware-statutory-trust/",
    "lastpub": "2023-09-04"
   },
   {
    "id": "330b8166-7aea-4126-a849-15b2abbf5baa",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T23:29:08.368Z",
+   "u": "2026-09-04T18:44:49.387Z",
    "bucket": "sched",
    "date": "2026-07-13",
    "status": "published",
@@ -652,14 +653,14 @@
    "kd": 7,
    "prompts": "How to choose a DST sponsor?",
    "gdoc": "https://docs.google.com/document/d/1E2aDsdwTBnxhjI8jcD323cfArGKYT3oYHFnGVB6P1GQ/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/how-to-choose-a-dst-sponsor/",
+   "url": "/how-to-choose-a-dst-sponsor/",
    "oldurl": "",
    "lastpub": ""
   },
   {
    "id": "9d602202-c98d-4a32-80bc-c790fe4dd211",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T22:31:50.421Z",
+   "u": "2026-09-04T18:44:43.589Z",
    "bucket": "sched",
    "date": "2026-07-20",
    "status": "published",
@@ -672,14 +673,14 @@
    "kd": 20,
    "prompts": "How to invest in multifamily real estate?",
    "gdoc": "https://docs.google.com/document/d/1QVAAVI7i8_N8O1sfSCn3pu3PiH8IODElAju0iKqsL-k/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/how-to-invest-in-multifamily-real-estate/",
+   "url": "/how-to-invest-in-multifamily-real-estate/",
    "oldurl": "",
    "lastpub": ""
   },
   {
    "id": "c284d7ee-7114-4d2c-9baf-3940a1068647",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T22:31:30.923Z",
+   "u": "2026-09-04T18:44:36.697Z",
    "bucket": "sched",
    "date": "2026-07-27",
    "status": "published",
@@ -692,14 +693,14 @@
    "kd": 10,
    "prompts": "How to use 401(k) to invest in real estate?",
    "gdoc": "https://docs.google.com/document/d/1lW9VjYMwhbl4RtoVKzPnsdx-9JJcGUgVBUAbiLssWkk/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/how-to-use-401k-to-invest-in-real-estate/",
+   "url": "/how-to-use-401k-to-invest-in-real-estate/",
    "oldurl": "https://www.1031crowdfunding.com/use-401k-for-real-estate-investing/",
    "lastpub": "2024-01-29"
   },
   {
    "id": "2ee87663-a99b-40af-855c-e411bcf1592b",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T22:31:05.480Z",
+   "u": "2026-09-04T18:44:30.343Z",
    "bucket": "sched",
    "date": "2026-08-03",
    "status": "published",
@@ -712,14 +713,14 @@
    "kd": 10,
    "prompts": "What is a 731 exchange?",
    "gdoc": "https://docs.google.com/document/d/1yXEGr9A9OjJZcyL-nBh8x4U1aGd7sFFOdehuo9nTt7o/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/731-exchange/",
+   "url": "/731-exchange/",
    "oldurl": "",
    "lastpub": ""
   },
   {
    "id": "62cf06ae-d4db-4f64-9bd6-44d15ed411db",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T22:30:33.035Z",
+   "u": "2026-09-04T18:44:23.699Z",
    "bucket": "sched",
    "date": "2026-08-17",
    "status": "published",
@@ -732,7 +733,7 @@
    "kd": 5,
    "prompts": "What is a drop and swap in real estate?",
    "gdoc": "https://docs.google.com/document/d/1VL9dxOjIRu_ydQIrSVJjsZ0HdybbMxBs4ByzjBgfQek/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/drop-and-swap-1031-exchange/",
+   "url": "/drop-and-swap-1031-exchange/",
    "oldurl": "https://www.1031crowdfunding.com/drop-and-swap-the-basics/",
    "lastpub": "2025-08-04"
   },
