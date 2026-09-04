@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-04T18:42:16.045Z",
+ "updated": "2026-09-04T18:44:00.308Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -739,7 +739,7 @@
   {
    "id": "bd512154-b192-45c9-96a7-3fc2dd8b82a2",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-31T18:01:33.093Z",
+   "u": "2026-09-04T18:44:00.308Z",
    "bucket": "sched",
    "date": "2026-08-31",
    "status": "published",
@@ -753,7 +753,7 @@
    "kd": 22,
    "prompts": "What Is a Qualified Intermediary?",
    "gdoc": "https://docs.google.com/document/d/1_nedrF7pYh3qAZ91bum1Tw2EonsJOCM9dizpTNsl9Y8/edit?usp=drive_link",
-   "url": "https://www.1031crowdfunding.com/what-is-a-qualified-intermediary/",
+   "url": "/what-is-a-qualified-intermediary/",
    "oldurl": "https://www.1031crowdfunding.com/what-is-a-qualified-intermediary/, https://www.1031crowdfunding.com/the-role-of-a-qualified-intermediary-in-1031-exchanges/, https://www.1031crowdfunding.com/choosing-the-right-1031-exchange-qualified-intermediary/",
    "lastpub": "2025-09-29"
   },
@@ -841,7 +841,7 @@
   {
    "id": "4438616e-5e3f-41a6-b9bd-955b526ee75d",
    "created": "2026-08-31T19:44:21.849Z",
-   "u": "2026-09-04T18:42:16.044Z",
+   "u": "2026-09-04T18:43:09.323Z",
    "bucket": "sched",
    "date": "2026-09-14",
    "status": "outline",
@@ -850,8 +850,8 @@
    ],
    "topic": "Lazy 1031 exchange",
    "kw": "lazy 1031 exchange",
-   "vol": "",
-   "kd": "",
+   "vol": 140,
+   "kd": 8,
    "prompts": "What is a lazy 1031 exchange?",
    "gdoc": "https://docs.google.com/document/d/1nBtmT7HKiJowLYgvB6NsRdgD-9044khJB6_-tkm3lso/edit?tab=t.6chp126qrnml",
    "url": "/lazy-1031-exchange/",
