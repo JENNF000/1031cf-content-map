@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-04T18:46:11.433Z",
+ "updated": "2026-09-04T21:21:36.929Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -583,6 +583,20 @@
    "cluster": "",
    "tier": "transactional",
    "offFlags": []
+  },
+  "/why-partnering-with-a-cpa-is-essential-for-real-estate-investments/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "cluster": "2026-09-04T21:21:36.929Z"
+   },
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "Real Estate Investment",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-09-04T21:21:36.929Z"
   }
  },
  "live": {
@@ -599,7 +613,7 @@
   {
    "id": "09976d2b-1682-400c-80d6-c6f1e4e9e427",
    "created": "2026-08-24T20:44:32.808Z",
-   "u": "2026-09-04T18:45:01.254Z",
+   "u": "2026-09-04T18:46:47.162Z",
    "bucket": "sched",
    "date": "2026-06-15",
    "status": "published",
@@ -613,13 +627,13 @@
    "prompts": "",
    "gdoc": "https://docs.google.com/document/d/1joemWLEJ_tHJSgR6cTxZjkHMg3FVBfP_orKPygN_U1g/edit?usp=drive_link",
    "url": "/1031-exchange-california/",
-   "oldurl": "https://www.1031crowdfunding.com/a-guide-to-1031-exchanges-in-california/",
+   "oldurl": "/a-guide-to-1031-exchanges-in-california/",
    "lastpub": "2024-07-08"
   },
   {
    "id": "b33b9da3-b4a8-41fc-8e45-ad61c502b9e0",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-09-04T18:44:55.942Z",
+   "u": "2026-09-04T18:46:37.930Z",
    "bucket": "sched",
    "date": "2026-07-06",
    "status": "published",
@@ -634,7 +648,7 @@
    "prompts": "What are the pros and cons of DST 1031?\nShould I 1031 into a DST?",
    "gdoc": "https://docs.google.com/document/d/17avK3kdHj_pbhLTeIUJzqCDJw8upRknlsSYk1hUbtIo/edit?usp=drive_link",
    "url": "/delaware-statutory-trust-pros-and-cons/",
-   "oldurl": "https://www.1031crowdfunding.com/10-reasons-to-consider-a-dst-1031-exchange/, https://www.1031crowdfunding.com/pros-and-cons-of-investing-in-a-delaware-statutory-trust/",
+   "oldurl": "/10-reasons-to-consider-a-dst-1031-exchange/, /pros-and-cons-of-investing-in-a-delaware-statutory-trust/",
    "lastpub": "2023-09-04"
   },
   {
@@ -680,7 +694,7 @@
   {
    "id": "c284d7ee-7114-4d2c-9baf-3940a1068647",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-09-04T18:44:36.697Z",
+   "u": "2026-09-04T18:46:20.778Z",
    "bucket": "sched",
    "date": "2026-07-27",
    "status": "published",
@@ -694,7 +708,7 @@
    "prompts": "How to use 401(k) to invest in real estate?",
    "gdoc": "https://docs.google.com/document/d/1lW9VjYMwhbl4RtoVKzPnsdx-9JJcGUgVBUAbiLssWkk/edit?usp=drive_link",
    "url": "/how-to-use-401k-to-invest-in-real-estate/",
-   "oldurl": "https://www.1031crowdfunding.com/use-401k-for-real-estate-investing/",
+   "oldurl": "/use-401k-for-real-estate-investing/",
    "lastpub": "2024-01-29"
   },
   {
