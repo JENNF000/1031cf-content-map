@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-04T21:21:36.929Z",
+ "updated": "2026-09-10T16:15:45.368Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -590,13 +590,13 @@
    "f": {
     "cluster": "2026-09-04T21:21:36.929Z"
    },
+   "updated": "2026-09-04T21:21:36.929Z",
    "status": "",
    "labels": [],
    "target": "",
    "cluster": "Real Estate Investment",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-09-04T21:21:36.929Z"
+   "offFlags": []
   }
  },
  "live": {
@@ -793,27 +793,6 @@
    "lastpub": "2022-10-31"
   },
   {
-   "id": "ca5b742a-dfbb-45e2-997e-d5e2492890cd",
-   "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
-   "bucket": "idea",
-   "date": "",
-   "status": "",
-   "types": [
-    "rewrite",
-    "consolidate"
-   ],
-   "topic": "Do's & Don'ts of DSTs",
-   "kw": "dst guide",
-   "vol": 170,
-   "kd": 20,
-   "prompts": "",
-   "gdoc": "",
-   "url": "",
-   "oldurl": "https://www.1031crowdfunding.com/the-5-dos-and-donts-of-dsts-2/, https://www.1031crowdfunding.com/5-dos-of-dsts/, https://www.1031crowdfunding.com/5-donts-of-dsts/",
-   "lastpub": ""
-  },
-  {
    "id": "76cacef5-bc9e-41a6-857f-756f0df12d57",
    "created": "2026-08-24T21:30:00.000Z",
    "u": "2026-08-24T21:30:00.000Z",
@@ -874,5 +853,7 @@
    "lastpub": ""
   }
  ],
- "calDel": []
+ "calDel": [
+  "ca5b742a-dfbb-45e2-997e-d5e2492890cd"
+ ]
 }
