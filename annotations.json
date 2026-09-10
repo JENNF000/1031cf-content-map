@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-10T17:07:10.397Z",
+ "updated": "2026-09-10T20:06:23.606Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -611,6 +611,14 @@
   "/the-5-dos-and-donts-of-dsts-2/": {
    "s": "redirect",
    "at": "2026-09-10T17:06:11.448Z"
+  },
+  "/5-dos-of-dsts/": {
+   "s": "redirect",
+   "at": "2026-09-10T17:07:23.131Z"
+  },
+  "/5-donts-of-dsts/": {
+   "s": "redirect",
+   "at": "2026-09-10T17:07:35.999Z"
   }
  },
  "cal": [
@@ -779,21 +787,22 @@
   {
    "id": "853e0589-858e-41d8-aaec-036a05ac4aca",
    "created": "2026-08-24T21:30:00.000Z",
-   "u": "2026-08-24T21:30:00.000Z",
-   "bucket": "idea",
-   "date": "",
-   "status": "",
+   "u": "2026-09-10T20:06:23.605Z",
+   "bucket": "sched",
+   "date": "2026-09-28",
+   "status": "outline",
    "types": [
-    "rewrite"
+    "rewrite",
+    "consolidate"
    ],
    "topic": "Depreciation recapture",
-   "kw": "how to calculate depreciation recapture",
-   "vol": 140,
-   "kd": 31,
+   "kw": "depreciation recapture",
+   "vol": 3600,
+   "kd": 39,
    "prompts": "How to calculate depreciation recapture?",
-   "gdoc": "",
-   "url": "",
-   "oldurl": "https://www.1031crowdfunding.com/depreciation-recapture-when-selling-property/",
+   "gdoc": "https://docs.google.com/document/d/12_eE5rfItgwYN8dZROhmJ21R3VbvllUrhNxRQ6ClMw8/edit?tab=t.eygrg8igw3xv",
+   "url": "/depreciation-recapture-when-selling-property/",
+   "oldurl": "/depreciation-recapture-when-selling-property/, /calculating-depreciation/",
    "lastpub": "2022-10-31"
   },
   {
