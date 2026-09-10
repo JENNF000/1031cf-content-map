@@ -1,6 +1,6 @@
 {
  "note": "Machine-written by the app after each GSC pull. Read by the weekly Claude report. Public like the rest of the repo.",
- "fetched": "2026-09-10T16:31:26.496Z",
+ "fetched": "2026-09-10T17:05:39.738Z",
  "range": "2026-06-10 → 2026-09-08",
  "property": "sc-domain:1031crowdfunding.com",
  "totalRows": 36426,
@@ -138,7 +138,7 @@
      "clicks": 0,
      "pos": 3.4,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/education-center/guide-to-1031-exchanges/",
@@ -437,7 +437,7 @@
      "clicks": 0,
      "pos": 7.2,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/bridge-financing-funds/",
@@ -880,7 +880,7 @@
      "clicks": 0,
      "pos": 55,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/author/edward-e-fernandez/",
@@ -2777,7 +2777,7 @@
      "clicks": 0,
      "pos": 54.5,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/1031cf-portfolio-4-dst/",
@@ -3980,7 +3980,7 @@
      "clicks": 0,
      "pos": 28,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/bridge-financing-funds/",
@@ -5451,7 +5451,7 @@
      "clicks": 0,
      "pos": 54,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/1031cf-portfolio-4-dst/",
@@ -6452,7 +6452,7 @@
      "clicks": 0,
      "pos": 1,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/bridge-financing-funds/",
@@ -7721,7 +7721,7 @@
      "clicks": 0,
      "pos": 97,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/featured-video-1031-exchanges-rules-and-timelines/",
@@ -9201,7 +9201,7 @@
      "clicks": 0,
      "pos": 2,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/author/edward-e-fernandez/",
@@ -13142,7 +13142,7 @@
      "clicks": 0,
      "pos": 84,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/calculating-equity-and-capital-gains/",
@@ -22113,7 +22113,7 @@
      "clicks": 0,
      "pos": 28,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/721-exchange-real-estate-investing/",
@@ -26680,7 +26680,7 @@
      "clicks": 0,
      "pos": 5.1,
      "cat": "Bridge Fund / Loan",
-     "tier": "fanout"
+     "tier": "redirect"
     },
     {
      "path": "/marketplace-for-1031-exchange-investments/",
@@ -36207,7 +36207,7 @@
   "/1031-crowdfunding-review-yield-talk-gives-1031-crowdfunding-an-excellent-4-stars/": {
    "state": "live",
    "cov": "Submitted and indexed",
-   "at": "2026-09-08T16:39:39.906Z"
+   "at": "2026-09-10T17:05:46.230Z"
   },
   "/1031-crowdfunding-receives-accolade-in-benzingas-latest-review/": {
    "state": "live",
