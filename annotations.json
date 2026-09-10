@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-10T16:15:45.368Z",
+ "updated": "2026-09-10T17:06:11.448Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -607,6 +607,10 @@
   "/choosing-the-right-1031-exchange-qualified-intermediary/": {
    "s": "redirect",
    "at": "2026-08-31T18:13:07.124Z"
+  },
+  "/the-5-dos-and-donts-of-dsts-2/": {
+   "s": "redirect",
+   "at": "2026-09-10T17:06:11.448Z"
   }
  },
  "cal": [
