@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-10T20:06:23.606Z",
+ "updated": "2026-09-11T16:53:44.928Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -862,6 +862,24 @@
    "prompts": "What is a lazy 1031 exchange?",
    "gdoc": "https://docs.google.com/document/d/1nBtmT7HKiJowLYgvB6NsRdgD-9044khJB6_-tkm3lso/edit?tab=t.6chp126qrnml",
    "url": "/lazy-1031-exchange/",
+   "oldurl": "",
+   "lastpub": ""
+  },
+  {
+   "id": "91970798-0625-4e79-ab46-9480b1549fb3",
+   "created": "2026-09-11T16:53:44.928Z",
+   "u": "2026-09-11T16:53:44.928Z",
+   "bucket": "idea",
+   "date": "",
+   "status": "",
+   "types": [],
+   "topic": "DST fees",
+   "kw": "",
+   "vol": "",
+   "kd": "",
+   "prompts": "",
+   "gdoc": "",
+   "url": "",
    "oldurl": "",
    "lastpub": ""
   }
