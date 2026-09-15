@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-11T16:53:44.928Z",
+ "updated": "2026-09-15T20:44:48.455Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -848,10 +848,10 @@
   {
    "id": "4438616e-5e3f-41a6-b9bd-955b526ee75d",
    "created": "2026-08-31T19:44:21.849Z",
-   "u": "2026-09-04T18:43:09.323Z",
+   "u": "2026-09-15T20:44:48.454Z",
    "bucket": "sched",
    "date": "2026-09-14",
-   "status": "outline",
+   "status": "published",
    "types": [
     "new"
    ],
@@ -868,7 +868,7 @@
   {
    "id": "91970798-0625-4e79-ab46-9480b1549fb3",
    "created": "2026-09-11T16:53:44.928Z",
-   "u": "2026-09-11T16:53:44.928Z",
+   "u": "2026-09-11T16:54:13.340Z",
    "bucket": "idea",
    "date": "",
    "status": "",
@@ -880,8 +880,8 @@
    "prompts": "",
    "gdoc": "",
    "url": "",
-   "oldurl": "",
-   "lastpub": ""
+   "oldurl": "/benefits-risks-fees-of-delaware-statutory-trusts-2/",
+   "lastpub": "2021-04-26"
   }
  ],
  "calDel": [
