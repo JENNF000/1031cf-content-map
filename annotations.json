@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-17T15:36:06.417Z",
+ "updated": "2026-09-18T20:00:12.415Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -597,6 +597,20 @@
    "cluster": "Real Estate Investment",
    "tier": "",
    "offFlags": []
+  },
+  "/education-center/guide-to-1031-exchanges/": {
+   "comments": [],
+   "delc": [],
+   "f": {
+    "status": "2026-09-18T20:00:12.415Z"
+   },
+   "status": "published",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-09-18T20:00:12.415Z"
   }
  },
  "live": {
