@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-09-28T18:54:42.444Z",
+ "updated": "2026-10-01T18:55:21.549Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -619,6 +619,25 @@
    "cluster": "",
    "tier": "",
    "offFlags": []
+  },
+  "/exchange-alternatives-with-upreits-and-721-exchanges/": {
+   "comments": [
+    {
+     "id": "c9f5041f-a74e-4122-9e9e-1666368622ed",
+     "ts": "2026-10-01T18:55:21.549Z",
+     "author": "Jennifer",
+     "text": "Rewrite into 1031 vs. 721 exchange"
+    }
+   ],
+   "delc": [],
+   "f": {},
+   "status": "",
+   "labels": [],
+   "target": "",
+   "cluster": "",
+   "tier": "",
+   "offFlags": [],
+   "updated": "2026-10-01T18:55:21.549Z"
   }
  },
  "live": {
