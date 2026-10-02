@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-10-02T19:20:47.755Z",
+ "updated": "2026-10-02T19:22:09.281Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -927,8 +927,8 @@
   {
    "id": "e776a00d-6c28-496e-b0e7-f2dfd6748f95",
    "created": "2026-10-02T19:19:47.213Z",
-   "u": "2026-10-02T19:20:47.755Z",
-   "bucket": "idea",
+   "u": "2026-10-02T19:22:09.281Z",
+   "bucket": "sched",
    "date": "2026-10-12",
    "status": "draft",
    "types": [
@@ -936,10 +936,10 @@
    ],
    "topic": "UPREIT vs DownREIT",
    "kw": "upreit vs downreit",
-   "vol": "",
-   "kd": "",
-   "prompts": "",
-   "gdoc": "",
+   "vol": 30,
+   "kd": 10,
+   "prompts": "What is a DownREIT?\nWhich Is Better, an UPREIT or a DownREIT?",
+   "gdoc": "https://docs.google.com/document/d/1bjwsBxmn6R6t_w0xpRrLDQxSTtBbXCuIXYBlT4CyUGg/edit?tab=t.nnboipwysoeu",
    "url": "",
    "oldurl": "/upreit-vs-downreit/",
    "lastpub": "2023-12-25"
