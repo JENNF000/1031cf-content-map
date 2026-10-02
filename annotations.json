@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-10-02T19:19:47.213Z",
+ "updated": "2026-10-02T19:20:47.755Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -927,20 +927,22 @@
   {
    "id": "e776a00d-6c28-496e-b0e7-f2dfd6748f95",
    "created": "2026-10-02T19:19:47.213Z",
-   "u": "2026-10-02T19:19:47.213Z",
+   "u": "2026-10-02T19:20:47.755Z",
    "bucket": "idea",
-   "date": "",
-   "status": "",
-   "types": [],
+   "date": "2026-10-12",
+   "status": "draft",
+   "types": [
+    "rewrite"
+   ],
    "topic": "UPREIT vs DownREIT",
-   "kw": "",
+   "kw": "upreit vs downreit",
    "vol": "",
    "kd": "",
    "prompts": "",
    "gdoc": "",
    "url": "",
-   "oldurl": "",
-   "lastpub": ""
+   "oldurl": "/upreit-vs-downreit/",
+   "lastpub": "2023-12-25"
   }
  ],
  "calDel": [
