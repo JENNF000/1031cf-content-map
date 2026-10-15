@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-10-13T19:47:44.968Z",
+ "updated": "2026-10-15T21:27:29.706Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -645,13 +645,13 @@
    "f": {
     "status": "2026-10-13T19:47:44.968Z"
    },
+   "updated": "2026-10-13T19:47:44.968Z",
    "status": "published",
    "labels": [],
    "target": "",
    "cluster": "",
    "tier": "",
-   "offFlags": [],
-   "updated": "2026-10-13T19:47:44.968Z"
+   "offFlags": []
   }
  },
  "live": {
@@ -941,9 +941,9 @@
   {
    "id": "e776a00d-6c28-496e-b0e7-f2dfd6748f95",
    "created": "2026-10-02T19:19:47.213Z",
-   "u": "2026-10-02T19:22:09.281Z",
+   "u": "2026-10-15T21:27:29.706Z",
    "bucket": "sched",
-   "date": "2026-10-12",
+   "date": "2026-10-19",
    "status": "draft",
    "types": [
     "rewrite"
