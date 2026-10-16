@@ -1,6 +1,6 @@
 {
  "version": 2,
- "updated": "2026-10-15T21:27:29.706Z",
+ "updated": "2026-10-16T16:20:53.380Z",
  "author": "Jennifer",
  "statuses": [
   {
@@ -941,10 +941,10 @@
   {
    "id": "e776a00d-6c28-496e-b0e7-f2dfd6748f95",
    "created": "2026-10-02T19:19:47.213Z",
-   "u": "2026-10-15T21:27:29.706Z",
+   "u": "2026-10-16T16:20:53.380Z",
    "bucket": "sched",
    "date": "2026-10-19",
-   "status": "draft",
+   "status": "published",
    "types": [
     "rewrite"
    ],
